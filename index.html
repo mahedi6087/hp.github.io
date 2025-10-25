@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VVV Data Cleaning Tool</title>
+    <title>Starweave Tailors - Data Cleaning Tool</title>
     <style>
         * {
             margin: 0;
@@ -13,62 +13,68 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 20px;
+            min-height: 100vh;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
             overflow: hidden;
         }
         
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4a148c 0%, #6a1b9a 100%);
             color: white;
-            padding: 20px 30px;
+            padding: 30px;
+            text-align: center;
         }
         
         .header h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         
         .header p {
-            opacity: 0.9;
-            font-size: 14px;
+            opacity: 0.95;
+            font-size: 16px;
         }
         
         .tabs {
             display: flex;
-            background: #f8f9fa;
-            border-bottom: 2px solid #dee2e6;
+            background: #f5f5f5;
+            border-bottom: 3px solid #4a148c;
         }
         
         .tab {
-            padding: 15px 30px;
+            flex: 1;
+            padding: 18px;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 600;
+            text-align: center;
             transition: all 0.3s;
-            border-bottom: 3px solid transparent;
+            border-bottom: 4px solid transparent;
+            font-size: 15px;
         }
         
         .tab:hover {
-            background: #e9ecef;
+            background: #eeeeee;
         }
         
         .tab.active {
             background: white;
-            border-bottom-color: #667eea;
-            color: #667eea;
+            border-bottom-color: #6a1b9a;
+            color: #6a1b9a;
         }
         
         .tab-content {
             display: none;
-            padding: 20px;
+            padding: 25px;
         }
         
         .tab-content.active {
@@ -77,40 +83,55 @@
         
         .controls {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 25px;
             flex-wrap: wrap;
+            align-items: center;
         }
         
         button {
-            padding: 10px 20px;
-            background: #667eea;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.3s;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(106, 27, 154, 0.3);
         }
         
         button:hover {
-            background: #5568d3;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(106, 27, 154, 0.5);
         }
         
         button.secondary {
-            background: #6c757d;
+            background: linear-gradient(135deg, #757575 0%, #616161 100%);
         }
         
-        button.secondary:hover {
-            background: #5a6268;
+        button.export {
+            background: linear-gradient(135deg, #00897b 0%, #00695c 100%);
+        }
+        
+        .status {
+            flex: 1;
+            text-align: right;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
         }
         
         .table-container {
             overflow-x: auto;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            max-height: 600px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .table-wrapper {
+            max-height: 650px;
             overflow-y: auto;
         }
         
@@ -121,258 +142,422 @@
         }
         
         th {
-            background: #f8f9fa;
-            padding: 12px 8px;
+            background: linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%);
+            color: white;
+            padding: 14px 10px;
             text-align: left;
             font-weight: 600;
             position: sticky;
             top: 0;
             z-index: 10;
-            border-bottom: 2px solid #dee2e6;
+            border-bottom: 3px solid #4a148c;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         td {
-            padding: 10px 8px;
+            padding: 12px 10px;
             border-bottom: 1px solid #f0f0f0;
         }
         
         tr:hover {
-            background: #f8f9fa;
+            background: #f8f4ff;
         }
         
         .cell-wrapper {
             cursor: pointer;
-            position: relative;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            display: inline-block;
+            min-width: 60px;
         }
         
         .cell-wrapper:hover {
-            background: #e7f3ff;
+            background: #e1bee7;
+            transform: scale(1.02);
+        }
+        
+        .formula-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #6a1b9a;
+            border-radius: 50%;
+            margin-left: 4px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
         }
         
         .formula-display {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background: white;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            padding: 15px;
-            max-width: 400px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 3px solid #6a1b9a;
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             z-index: 1000;
         }
         
         .formula-display h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 16px;
+            color: #6a1b9a;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        .formula-display .formula {
-            background: #f8f9fa;
-            padding: 10px;
+        .cell-ref {
+            background: #e1bee7;
+            padding: 4px 10px;
             border-radius: 4px;
             font-family: 'Courier New', monospace;
-            font-size: 12px;
-            word-break: break-all;
-            margin-bottom: 10px;
+            font-size: 14px;
         }
         
-        .formula-display .explanation {
+        .formula {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
             font-size: 13px;
-            color: #666;
+            word-break: break-all;
+            margin-bottom: 15px;
+            border-left: 4px solid #6a1b9a;
+            line-height: 1.6;
         }
         
-        .flag {
-            background: #fff3cd;
-            color: #856404;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 11px;
+        .explanation {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+            background: #fff3e0;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #ff6f00;
+        }
+        
+        .original-value {
+            color: #c62828;
             font-weight: 600;
         }
         
+        .cleaned-value {
+            color: #2e7d32;
+            font-weight: 600;
+        }
+        
+        .flag {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .flag-corrected {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+        
+        .flag-duplicate {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+        
+        .flag-warning {
+            background: #fff9c4;
+            color: #f57f17;
+        }
+        
         .duplicate {
-            background: #f8d7da;
+            background: #ffebee !important;
         }
         
         .corrected {
-            background: #d4edda;
+            background: #e8f5e9 !important;
         }
         
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-bottom: 25px;
         }
         
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%);
             color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 24px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(106, 27, 154, 0.3);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
         }
         
         .stat-card h3 {
-            font-size: 14px;
+            font-size: 13px;
             opacity: 0.9;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .stat-card .value {
-            font-size: 28px;
+            font-size: 36px;
             font-weight: 700;
         }
         
-        .issues-list {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
+        .issues-section {
+            background: #fff3e0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #ff6f00;
         }
         
-        .issues-list h3 {
-            margin-bottom: 10px;
-            color: #333;
+        .issues-section h3 {
+            margin-bottom: 15px;
+            color: #e65100;
+            font-size: 18px;
         }
         
         .issue-item {
-            padding: 8px 12px;
+            padding: 12px 16px;
             background: white;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #ff6f00;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .issue-icon {
+            font-size: 20px;
+        }
+        
+        .formulas-section {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .formula-group {
+            background: white;
+            padding: 18px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #6a1b9a;
+        }
+        
+        .formula-group h4 {
+            color: #6a1b9a;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .formula-code {
+            background: #f5f5f5;
+            padding: 12px;
             border-radius: 4px;
-            border-left: 4px solid #dc3545;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-bottom: 8px;
+            white-space: pre-wrap;
+            border: 1px solid #e0e0e0;
         }
         
         .close-btn {
-            float: right;
+            position: absolute;
+            top: 15px;
+            right: 15px;
             cursor: pointer;
-            font-size: 20px;
+            font-size: 28px;
             color: #999;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
         }
         
         .close-btn:hover {
+            background: #f5f5f5;
             color: #333;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        .overlay.active {
+            display: block;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🧹 VVV Financial Data Cleaning Tool</h1>
-            <p>Interactive data cleaning with visible formulas - Click any cleaned cell to see the formula</p>
+            <h1>✨ Starweave Tailors - Financial Data Cleaning</h1>
+            <p>Interactive Formula-Based Data Cleaning Tool | Click any cleaned cell to view its formula</p>
         </div>
         
         <div class="tabs">
-            <div class="tab active" onclick="showTab('raw')">Raw Data</div>
-            <div class="tab" onclick="showTab('cleaned')">Cleaned Data (With Formulas)</div>
-            <div class="tab" onclick="showTab('analysis')">Data Quality Analysis</div>
+            <div class="tab active" onclick="showTab('raw')">📋 Raw Data</div>
+            <div class="tab" onclick="showTab('cleaned')">✅ Cleaned Data (Formula View)</div>
+            <div class="tab" onclick="showTab('analysis')">📊 Data Quality Analysis</div>
+            <div class="tab" onclick="showTab('formulas')">📐 All Formulas Reference</div>
         </div>
         
         <div id="raw" class="tab-content active">
             <div class="controls">
-                <button onclick="loadRawData()">Load Raw Data</button>
-                <button class="secondary" onclick="exportData('raw')">Export Raw CSV</button>
+                <button onclick="loadRawData()">🔄 Load Raw Data</button>
+                <button class="export" onclick="exportData('raw')">💾 Export Raw CSV</button>
+                <div class="status" id="rawStatus"></div>
             </div>
             <div class="table-container">
-                <table id="rawTable">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Trans_ID</th>
-                            <th>Description</th>
-                            <th>Amount</th>
-                            <th>Account</th>
-                            <th>Payment_Method</th>
-                            <th>Vendor_Customer</th>
-                            <th>Notes</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rawTableBody"></tbody>
-                </table>
+                <div class="table-wrapper">
+                    <table id="rawTable">
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Account Affected</th>
+                                <th>Payment Method</th>
+                                <th>Vendor/Customer</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rawTableBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
         
         <div id="cleaned" class="tab-content">
             <div class="controls">
-                <button onclick="applyCleaning()">Apply Cleaning Formulas</button>
-                <button class="secondary" onclick="exportData('cleaned')">Export Cleaned CSV</button>
-                <button class="secondary" onclick="showAllFormulas()">Show All Formulas</button>
+                <button onclick="applyCleaning()">🧹 Apply Cleaning Formulas</button>
+                <button class="export" onclick="exportData('cleaned')">💾 Export Cleaned CSV</button>
+                <button class="secondary" onclick="copyFormulasToClipboard()">📋 Copy All Formulas</button>
+                <div class="status" id="cleanedStatus"></div>
             </div>
             <div class="table-container">
-                <table id="cleanedTable">
-                    <thead>
-                        <tr>
-                            <th>Cleaned_Date</th>
-                            <th>Cleaned_Trans_ID</th>
-                            <th>Description</th>
-                            <th>Cleaned_Amount</th>
-                            <th>Cleaned_Account</th>
-                            <th>Cleaned_Payment_Method</th>
-                            <th>Vendor_Customer</th>
-                            <th>Notes</th>
-                            <th>Quality_Flag</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cleanedTableBody"></tbody>
-                </table>
+                <div class="table-wrapper">
+                    <table id="cleanedTable">
+                        <thead>
+                            <tr>
+                                <th>Trans_ID</th>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Account</th>
+                                <th>Payment_Method</th>
+                                <th>Vendor_Customer</th>
+                                <th>Notes</th>
+                                <th>Quality_Flag</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cleanedTableBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
         
         <div id="analysis" class="tab-content">
             <div class="stats" id="statsContainer"></div>
-            <div class="issues-list" id="issuesList"></div>
+            <div class="issues-section" id="issuesSection"></div>
+        </div>
+        
+        <div id="formulas" class="tab-content">
+            <div class="formulas-section" id="formulasSection"></div>
         </div>
     </div>
     
+    <div class="overlay" id="overlay" onclick="hideFormula()"></div>
     <div id="formulaDisplay" class="formula-display" style="display: none;">
         <span class="close-btn" onclick="hideFormula()">×</span>
-        <h3>📐 Formula Details</h3>
+        <h3>
+            📐 Formula for Cell <span class="cell-ref" id="cellRef"></span>
+        </h3>
         <div class="formula" id="formulaText"></div>
         <div class="explanation" id="formulaExplanation"></div>
     </div>
 
     <script>
-        const rawData = `Date,Trans_ID,Description,Amount,Account,Payment_Method,Vendor_Customer,Notes
-01/02/2024,1001,Initial Capital Investment,50000,Owner's Equity,Wire Transfer,J. Harrison,
-1-3-24,1002,Business License & Permits,1250.00,License Expense,Check #101,County Clerk,
-Jan 3 2024,,Insurance Premium (Annual),3600,Prepaid Insurance,TRANSFER,Mountain Mutual Ins,
-01/04/2024,1004,Lease Deposit,2000,,Check #102,Valley Properties,Security deposit
-01/04/24,1005,January Rent,2500,Rent Expense,Check #103,Valley Properties,
-1/5/24,1006,Initial Inventory Purchase,8500,Inventory,Wire,Outdoor Wholesale Co,
-01/07/2024,1007,Office Setup,1247.50,Office Supplies,Check,Office Depot,
-7-Jan,,Marketing Materials,890,Marketing Expense,Check,Vista Print,
-01/10/2024,1009,POS System Setup,2400,Equipment,Credit Card,Square Systems,
-1/10/24,1010,Computer Equipment,3200.00,Equipment,Check #105,Best Buy,
-01/15/24,1011,Bike Fleet Purchase (10 bikes),12000,Equipment,Wire Transfer,Specialized Dealer,
-01/18/2024,1012,Kayak Purchase (6 kayaks),7200,,Check #106,Whitewater Supply,
-01/22/24,1013,First Payroll,1200,Salary Expense,Direct Deposit,M. Thompson,
-,1014,Utilities Setup,345,Utilities Expense,Online,Mountain Electric,
-02/01/2024,1015,February Rent,2500.00,Rent Expense,Check #107,Valley Properties,
-02/03/2024,1016,Insurance Monthly,,Insurance Expense,Auto Pay,Mountain Mutual,
-2-5-24,1017,Advertising Campaign,450,Advertising,Check,Valley Times,
-02/08/2024,1018,Payroll,2400,Salary Expense,Direct Deposit,Various,2 employees
-02/10/24,1019,First Rental Revenue,125,Rental Revenue,Cash,T. Anderson,
-Feb 12,1020,Store Supplies Purchase,287.43,Supplies,CASH,Walmart,Cleaning items
-02/15/2024,1021,Equipment Maintenance,280,,Check #109,Joe's Bike Shop,
-02/18/24,1022,Rental Revenue Weekend,350.00,Rental Revenue,Credit Card,Smith Family,
-02/22/2024,1023,Payroll,2400,Wages Expense,Direct Deposit,Various,
-2/26/24,1024,Store Supplies,412.18,Supplies,CASH,Walmart,Mixed items?
-02/28/24,1025,Utilities,387,Utilities,Check #110,Mountain Electric,`;
+        const rawCSV = `Transaction ID,Date,Description,Amount,Account Affected,Payment Method,Vendor/Customer,Notes
+T001,10/1/2025,Sale of Enchanted Evening Cloak,$450,sales revenue,Crystal Card,Lady Thornwick,Custom embroidery requested
+T002,10/3/2025,Glamour service - Autumn Ball,275,Service Revenue,,Lord Bramblestone,3-hour duration
+T003,10/5/2025,Purchase of moonsilk fabric,$681,supplies expense,Gold Coins,Celestial Weavers Ltd.,
+T004,10/7/2025,Sale of Self-Mending Tunic (x3),,SALES REVENUE,Dragon Bank Transfer,The Adventurer's Guild,Bulk discount applied
+T005,Oct 8 2025,Rent payment for shop space,"$1,200.00",Rent Expense,Crystal Card,Mystmoor Property Management,Monthly rent - October
+T002,10/3/2025,Glamour service - Autumn Ball,275,Service Revenue,Crystal Card,Lord Bramblestone,3-hour duration
+T007,10/10/2025,Purchase of thread and needles,$146,supplies expense,gold coins,celestial weavers,Various colors
+,10/12/2025,Owner withdrew funds for personal use,$500,Owner Withdrawal,Cash,Moonwhisper Starweave (Owner),Personal expenses
+T009,10/14/2025,Glamour consultation service,125,Service Revenue,Gold Coins,Baroness Silverpetal,Trial session before wedding
+T010,October 16 2025,,$890.00,Sales Revenue,Dragon Bank Transfer,Captain Ironhelm,Rush order - completed in 2 days
+T011,10/18/2025,Utility payment - Enchanted Lighting,$95.00,utilities expense,crystal card,Luminos Magical Services,
+T011,10/20/2025,Sale of Temperature-Regulating Scarf,$180.00,Sales revenue,Cash,Merchant Thistledown,
+T013,10/22/2025,Purchase of enchanted buttons & clasps,$235,Supplies Expense,Gold Coins,Arcane Notions Supply,Rare phoenix-feather buttons included
+T014,10/24/2025,Glamour service - Business meeting,$200.00,Service Revenue,Crystal Card,,Executive glamour - confidence enhancement
+T015,10/26/2025,Initial investment by owner,5000,Owner Investment,CASH,Moonwhisper Starweave,Starting capital for business`;
 
+        let rawData = [];
         let cleanedData = [];
         let formulas = {};
 
         function parseCSV(csv) {
             const lines = csv.trim().split('\n');
-            const headers = lines[0].split(',');
+            const headers = lines[0].split(',').map(h => h.trim());
             return lines.slice(1).map((line, idx) => {
-                const values = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || [];
+                const matches = [];
+                let inQuotes = false;
+                let current = '';
+                
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        matches.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                matches.push(current.trim());
+                
                 const row = {};
                 headers.forEach((header, i) => {
-                    row[header.trim()] = values[i] ? values[i].replace(/^"|"$/g, '').trim() : '';
+                    row[header] = matches[i] || '';
                 });
                 row._rowNum = idx + 2;
                 return row;
@@ -382,44 +567,39 @@ Feb 12,1020,Store Supplies Purchase,287.43,Supplies,CASH,Walmart,Cleaning items
         function standardizeDate(dateStr) {
             if (!dateStr) return '';
             
-            // Handle various date formats
-            const formats = [
-                /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/,  // 01/02/2024
-                /^(\d{1,2})-(\d{1,2})-(\d{2,4})$/,   // 1-3-24
-                /^(\d{1,2})\/(\d{1,2})\/(\d{2})$/    // 1/5/24
-            ];
-            
-            for (let format of formats) {
-                const match = dateStr.match(format);
-                if (match) {
-                    let month = match[1].padStart(2, '0');
-                    let day = match[2].padStart(2, '0');
-                    let year = match[3].length === 2 ? '20' + match[3] : match[3];
-                    return `${month}/${day}/${year}`;
-                }
-            }
-            
-            // Handle text dates like "Jan 3 2024" or "7-Jan"
+            // Handle "Oct 8 2025" or "October 16 2025"
             const months = {
                 'jan': '01', 'feb': '02', 'mar': '03', 'apr': '04',
                 'may': '05', 'jun': '06', 'jul': '07', 'aug': '08',
-                'sep': '09', 'oct': '10', 'nov': '11', 'dec': '12'
+                'sep': '09', 'oct': '10', 'nov': '11', 'dec': '12',
+                'january': '01', 'february': '02', 'march': '03', 'april': '04',
+                'june': '06', 'july': '07', 'august': '08', 'september': '09',
+                'october': '10', 'november': '11', 'december': '12'
             };
             
-            const textMatch = dateStr.toLowerCase().match(/(\d{1,2})?-?([a-z]+)-?(\d{1,2})?\s*(\d{4})?/);
+            const textMatch = dateStr.toLowerCase().match(/([a-z]+)\s+(\d{1,2})\s+(\d{4})/);
             if (textMatch) {
-                const month = months[textMatch[2]] || '01';
-                const day = (textMatch[1] || textMatch[3] || '01').padStart(2, '0');
-                const year = textMatch[4] || '2024';
+                const month = months[textMatch[1]] || '01';
+                const day = textMatch[2].padStart(2, '0');
+                const year = textMatch[3];
                 return `${month}/${day}/${year}`;
+            }
+            
+            // Handle "10/1/2025"
+            const slashMatch = dateStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+            if (slashMatch) {
+                const month = slashMatch[1].padStart(2, '0');
+                const day = slashMatch[2].padStart(2, '0');
+                return `${month}/${day}/${slashMatch[3]}`;
             }
             
             return dateStr;
         }
 
-        function roundUpAmount(amount) {
-            if (!amount) return 0;
-            return Math.ceil(parseFloat(amount));
+        function cleanAmount(amountStr) {
+            if (!amountStr) return 0;
+            const cleaned = amountStr.replace(/[$,]/g, '');
+            return Math.ceil(parseFloat(cleaned));
         }
 
         function standardizeAccount(account) {
@@ -427,12 +607,23 @@ Feb 12,1020,Store Supplies Purchase,287.43,Supplies,CASH,Walmart,Cleaning items
             
             const upper = account.toUpperCase().trim();
             
+            if (upper.includes('SALES') || upper.includes('REVENUE')) {
+                if (upper.includes('SERVICE')) return 'Service Revenue';
+                if (upper.includes('SALES')) return 'Sales Revenue';
+                return 'Revenue';
+            }
+            if (upper.includes('SUPPLIES') && upper.includes('EXPENSE')) return 'Supplies Expense';
             if (upper.includes('RENT')) return 'Rent Expense';
-            if (upper.includes('WAGE') || upper.includes('SALAR')) return 'Salary Expense';
-            if (upper.includes('INS')) return 'Insurance Expense';
-            if (upper === 'SUPPLIES') return 'Supplies';
+            if (upper.includes('UTILITIES')) return 'Utilities Expense';
+            if (upper.includes('OWNER')) {
+                if (upper.includes('INVESTMENT')) return 'Owner Investment';
+                if (upper.includes('WITHDRAWAL')) return 'Owner Withdrawal';
+            }
             
-            return account.trim();
+            // Proper case
+            return account.split(' ').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            ).join(' ');
         }
 
         function standardizePaymentMethod(method) {
@@ -440,247 +631,145 @@ Feb 12,1020,Store Supplies Purchase,287.43,Supplies,CASH,Walmart,Cleaning items
             
             const upper = method.toUpperCase().trim();
             
-            if (upper === 'DD') return 'Direct Deposit';
-            if (upper === 'CC') return 'Credit Card';
-            if (upper.includes('AUTO')) return 'Auto Pay';
-            
-            return method.trim();
+            // Proper case each word
+            return method.split(' ').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            ).join(' ');
         }
 
         function loadRawData() {
-            const data = parseCSV(rawData);
+            rawData = parseCSV(rawCSV);
             const tbody = document.getElementById('rawTableBody');
             tbody.innerHTML = '';
             
-            data.forEach((row, idx) => {
+            let duplicateCount = 0;
+            const seenIDs = {};
+            
+            rawData.forEach((row, idx) => {
                 const tr = document.createElement('tr');
-                if (idx > 0 && (
-                    (row.Trans_ID === '1090' && data[idx-1].Trans_ID === '1090') ||
-                    (row.Trans_ID === '1110' && data[idx-1].Trans_ID === '1110') ||
-                    (row.Trans_ID === '1118' && data[idx-1].Trans_ID === '1118')
-                )) {
+                
+                // Check for duplicates
+                if (row['Transaction ID'] && seenIDs[row['Transaction ID']]) {
                     tr.className = 'duplicate';
+                    duplicateCount++;
                 }
+                seenIDs[row['Transaction ID']] = true;
                 
                 tr.innerHTML = `
-                    <td>${row.Date}</td>
-                    <td>${row.Trans_ID}</td>
-                    <td>${row.Description}</td>
-                    <td>${row.Amount}</td>
-                    <td>${row.Account}</td>
-                    <td>${row.Payment_Method}</td>
-                    <td>${row.Vendor_Customer}</td>
-                    <td>${row.Notes}</td>
+                    <td>${row['Transaction ID']}</td>
+                    <td>${row['Date']}</td>
+                    <td>${row['Description']}</td>
+                    <td>${row['Amount']}</td>
+                    <td>${row['Account Affected']}</td>
+                    <td>${row['Payment Method']}</td>
+                    <td>${row['Vendor/Customer']}</td>
+                    <td>${row['Notes']}</td>
                 `;
                 tbody.appendChild(tr);
             });
+            
+            document.getElementById('rawStatus').textContent = 
+                `Loaded ${rawData.length} transactions (${duplicateCount} duplicates detected)`;
         }
 
         function applyCleaning() {
-            const data = parseCSV(rawData);
             cleanedData = [];
             formulas = {};
             
-            // Remove duplicates first
             const seen = {};
-            const filtered = data.filter(row => {
-                if (!row.Trans_ID) return true;
-                if (seen[row.Trans_ID]) return false;
-                seen[row.Trans_ID] = true;
-                return true;
-            });
+            let transIdCounter = 1;
             
-            filtered.forEach((row, idx) => {
-                const rowNum = idx + 2;
+            rawData.forEach((row, idx) => {
+                const rowNum = row._rowNum;
+                
+                // Skip exact duplicates
+                const key = `${row['Transaction ID']}-${row['Date']}-${row['Amount']}`;
+                if (seen[key]) return;
+                seen[key] = true;
+                
+                // Generate Trans ID if missing
+                let transId = row['Transaction ID'];
+                if (!transId) {
+                    transId = `T${String(transIdCounter).padStart(3, '0')}`;
+                    while (seen[`id-${transId}`]) {
+                        transIdCounter++;
+                        transId = `T${String(transIdCounter).padStart(3, '0')}`;
+                    }
+                }
+                seen[`id-${transId}`] = true;
+                transIdCounter++;
+                
                 const cleaned = {
                     _rowNum: rowNum,
-                    Date: standardizeDate(row.Date),
-                    Trans_ID: row.Trans_ID || `T${String(rowNum).padStart(4, '0')}`,
-                    Description: row.Description,
-                    Amount: roundUpAmount(row.Amount),
-                    Account: standardizeAccount(row.Account),
-                    Payment_Method: standardizePaymentMethod(row.Payment_Method),
-                    Vendor_Customer: row.Vendor_Customer,
-                    Notes: row.Notes,
-                    Flag: ''
+                    _originalRow: idx,
+                    TransID: transId,
+                    Date: standardizeDate(row['Date']),
+                    Description: row['Description'] || 'No description provided',
+                    Amount: cleanAmount(row['Amount']),
+                    Account: standardizeAccount(row['Account Affected']),
+                    PaymentMethod: standardizePaymentMethod(row['Payment Method']),
+                    VendorCustomer: row['Vendor/Customer'] || 'Unknown',
+                    Notes: row['Notes'],
+                    Flag: []
                 };
                 
                 // Store formulas
                 formulas[`A${rowNum}`] = {
-                    formula: `=TEXT(DATEVALUE(Raw_Data!A${rowNum}), "MM/DD/YYYY")`,
-                    explanation: `Converts "${row.Date}" to standardized date format using DATEVALUE and TEXT functions`
+                    formula: row['Transaction ID'] ? 
+                        `=Raw_Data!A${rowNum}` : 
+                        `="T"&TEXT(ROW()-1, "000")`,
+                    explanation: row['Transaction ID'] ? 
+                        `Copies original Transaction ID: ${row['Transaction ID']}` :
+                        `Generates missing Transaction ID as <span class="cleaned-value">T${String(idx+1).padStart(3, '0')}</span> using ROW() function`,
+                    original: row['Transaction ID'],
+                    cleaned: cleaned.TransID
                 };
                 
                 formulas[`B${rowNum}`] = {
-                    formula: row.Trans_ID ? `=Raw_Data!B${rowNum}` : `="T"&TEXT(${rowNum}, "0000")`,
-                    explanation: row.Trans_ID ? 'Copies original Trans_ID' : `Generates missing Trans_ID: T${String(rowNum).padStart(4, '0')}`
+                    formula: `=TEXT(DATEVALUE(Raw_Data!B${rowNum}), "MM/DD/YYYY")`,
+                    explanation: `Converts <span class="original-value">"${row['Date']}"</span> to standardized format <span class="cleaned-value">"${cleaned.Date}"</span> using DATEVALUE and TEXT functions`,
+                    original: row['Date'],
+                    cleaned: cleaned.Date
+                };
+                
+                formulas[`C${rowNum}`] = {
+                    formula: row['Description'] ?
+                        `=Raw_Data!C${rowNum}` :
+                        `="No description provided"`,
+                    explanation: row['Description'] ?
+                        'Copies original description' :
+                        'Fills missing description with default text',
+                    original: row['Description'],
+                    cleaned: cleaned.Description
                 };
                 
                 formulas[`D${rowNum}`] = {
-                    formula: `=ROUNDUP(Raw_Data!D${rowNum}, 0)`,
-                    explanation: `Rounds ${row.Amount} up to ${cleaned.Amount} (next whole dollar)`
+                    formula: `=ROUNDUP(VALUE(SUBSTITUTE(SUBSTITUTE(Raw_Data!D${rowNum}, "$", ""), ",", "")), 0)`,
+                    explanation: `Removes $ and commas from <span class="original-value">"${row['Amount']}"</span>, then rounds up to <span class="cleaned-value">$${cleaned.Amount}</span> using ROUNDUP function`,
+                    original: row['Amount'],
+                    cleaned: cleaned.Amount
                 };
                 
                 formulas[`E${rowNum}`] = {
-                    formula: `=IF(Raw_Data!E${rowNum}="", "Unclassified", IF(ISNUMBER(SEARCH("RENT", UPPER(Raw_Data!E${rowNum}))), "Rent Expense", Raw_Data!E${rowNum}))`,
-                    explanation: `Standardizes account name: "${row.Account}" → "${cleaned.Account}"`
+                    formula: `=IF(ISNUMBER(SEARCH("SALES", UPPER(Raw_Data!E${rowNum}))), "Sales Revenue", IF(ISNUMBER(SEARCH("SERVICE", UPPER(Raw_Data!E${rowNum}))), "Service Revenue", PROPER(Raw_Data!E${rowNum})))`,
+                    explanation: `Standardizes <span class="original-value">"${row['Account Affected']}"</span> to <span class="cleaned-value">"${cleaned.Account}"</span> using SEARCH and IF functions`,
+                    original: row['Account Affected'],
+                    cleaned: cleaned.Account
                 };
                 
                 formulas[`F${rowNum}`] = {
-                    formula: `=IF(Raw_Data!F${rowNum}="", "Unknown", SUBSTITUTE(SUBSTITUTE(Raw_Data!F${rowNum}, "DD", "Direct Deposit"), "CC", "Credit Card"))`,
-                    explanation: `Standardizes payment method: "${row.Payment_Method}" → "${cleaned.Payment_Method}"`
+                    formula: row['Payment Method'] ?
+                        `=PROPER(Raw_Data!F${rowNum})` :
+                        `="Unknown"`,
+                    explanation: row['Payment Method'] ?
+                        `Converts <span class="original-value">"${row['Payment Method']}"</span> to proper case: <span class="cleaned-value">"${cleaned.PaymentMethod}"</span>` :
+                        'Fills missing payment method with "Unknown"',
+                    original: row['Payment Method'],
+                    cleaned: cleaned.PaymentMethod
                 };
                 
-                // Add flag if corrected
-                if (!row.Date || !row.Trans_ID || !row.Amount || !row.Account) {
-                    cleaned.Flag = 'CORRECTED';
-                }
-                
-                cleanedData.push(cleaned);
-            });
-            
-            displayCleanedData();
-        }
-
-        function displayCleanedData() {
-            const tbody = document.getElementById('cleanedTableBody');
-            tbody.innerHTML = '';
-            
-            cleanedData.forEach(row => {
-                const tr = document.createElement('tr');
-                if (row.Flag === 'CORRECTED') {
-                    tr.className = 'corrected';
-                }
-                
-                tr.innerHTML = `
-                    <td><div class="cell-wrapper" onclick="showFormula('A', ${row._rowNum})">${row.Date}</div></td>
-                    <td><div class="cell-wrapper" onclick="showFormula('B', ${row._rowNum})">${row.Trans_ID}</div></td>
-                    <td>${row.Description}</td>
-                    <td><div class="cell-wrapper" onclick="showFormula('D', ${row._rowNum})">${row.Amount}</div></td>
-                    <td><div class="cell-wrapper" onclick="showFormula('E', ${row._rowNum})">${row.Account}</div></td>
-                    <td><div class="cell-wrapper" onclick="showFormula('F', ${row._rowNum})">${row.Payment_Method}</div></td>
-                    <td>${row.Vendor_Customer}</td>
-                    <td>${row.Notes}</td>
-                    <td>${row.Flag ? `<span class="flag">${row.Flag}</span>` : ''}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function showFormula(col, row) {
-            const key = `${col}${row}`;
-            if (formulas[key]) {
-                document.getElementById('formulaText').textContent = formulas[key].formula;
-                document.getElementById('formulaExplanation').textContent = formulas[key].explanation;
-                document.getElementById('formulaDisplay').style.display = 'block';
-            }
-        }
-
-        function hideFormula() {
-            document.getElementById('formulaDisplay').style.display = 'none';
-        }
-
-        function showTab(tabName) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(tabName).classList.add('active');
-            
-            if (tabName === 'analysis') {
-                showAnalysis();
-            }
-        }
-
-        function showAnalysis() {
-            const data = parseCSV(rawData);
-            
-            const stats = {
-                total: data.length,
-                duplicates: 3,
-                missingDates: data.filter(r => !r.Date).length,
-                missingAmounts: data.filter(r => !r.Amount).length,
-                fractional: data.filter(r => r.Amount && r.Amount.includes('.')).length
-            };
-            
-            const statsHTML = `
-                <div class="stat-card">
-                    <h3>Total Transactions</h3>
-                    <div class="value">${stats.total}</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Duplicate Records</h3>
-                    <div class="value">${stats.duplicates}</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Missing Dates</h3>
-                    <div class="value">${stats.missingDates}</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Missing Amounts</h3>
-                    <div class="value">${stats.missingAmounts}</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Fractional Amounts</h3>
-                    <div class="value">${stats.fractional}</div>
-                </div>
-            `;
-            
-            document.getElementById('statsContainer').innerHTML = statsHTML;
-            
-            const issuesHTML = `
-                <h3>🚨 Data Quality Issues Found</h3>
-                <div class="issue-item">❌ 3 duplicate transactions (Trans_IDs: 1090, 1110, 1118)</div>
-                <div class="issue-item">⚠️ ${stats.missingDates} transactions with missing dates</div>
-                <div class="issue-item">⚠️ ${stats.missingAmounts} transactions with missing amounts</div>
-                <div class="issue-item">💰 ${stats.fractional} transactions with fractional dollar amounts</div>
-                <div class="issue-item">📝 8 different date formats detected</div>
-                <div class="issue-item">🔴 9 suspicious manager purchases (~$7,888) flagged for audit</div>
-            `;
-            
-            document.getElementById('issuesList').innerHTML = issuesHTML;
-        }
-
-        function exportData(type) {
-            let csv = '';
-            if (type === 'raw') {
-                csv = rawData;
-            } else {
-                const headers = ['Cleaned_Date', 'Cleaned_Trans_ID', 'Description', 'Cleaned_Amount', 'Cleaned_Account', 'Cleaned_Payment_Method', 'Vendor_Customer', 'Notes', 'Quality_Flag'];
-                csv = headers.join(',') + '\n';
-                cleanedData.forEach(row => {
-                    csv += `${row.Date},${row.Trans_ID},"${row.Description}",${row.Amount},"${row.Account}","${row.Payment_Method}","${row.Vendor_Customer}","${row.Notes}",${row.Flag}\n`;
-                });
-            }
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `vvv_${type}_data.csv`;
-            a.click();
-        }
-
-        function showAllFormulas() {
-            let formulaDoc = 'COMPLETE FORMULA REFERENCE\n\n';
-            formulaDoc += 'Column A (Cleaned_Date):\n';
-            formulaDoc += '=TEXT(DATEVALUE(Raw_Data!A2), "MM/DD/YYYY")\n\n';
-            formulaDoc += 'Column B (Cleaned_Trans_ID):\n';
-            formulaDoc += '=IF(Raw_Data!B2="", "T"&TEXT(ROW(), "0000"), Raw_Data!B2)\n\n';
-            formulaDoc += 'Column D (Cleaned_Amount):\n';
-            formulaDoc += '=ROUNDUP(Raw_Data!D2, 0)\n\n';
-            formulaDoc += 'Column E (Cleaned_Account):\n';
-            formulaDoc += '=IF(Raw_Data!E2="", "Unclassified", IF(ISNUMBER(SEARCH("RENT", UPPER(Raw_Data!E2))), "Rent Expense", IF(ISNUMBER(SEARCH("WAGE", UPPER(Raw_Data!E2))), "Salary Expense", Raw_Data!E2)))\n\n';
-            formulaDoc += 'Column F (Cleaned_Payment_Method):\n';
-            formulaDoc += '=IF(Raw_Data!F2="", "Unknown", SUBSTITUTE(SUBSTITUTE(SUBSTITUTE(Raw_Data!F2, "DD", "Direct Deposit"), "CC", "Credit Card"), "AUTO", "Auto Pay"))\n\n';
-            
-            alert(formulaDoc);
-        }
-
-        // Load raw data on page load
-        window.onload = function() {
-            loadRawData();
-        };
-    </script>
-</body>
-</html>
+                formulas[`G${rowNum}`] = {
+                    formula: row['Vendor/Customer'] ?
+                        `=Raw_Data!G${rowNum}` :
+                        `="Unknown"`,
+                    explanation: row['Vendor/Customer'] ?
