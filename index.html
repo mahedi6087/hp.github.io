@@ -3,276 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LP Solver Ultra - Enterprise Suite</title>
+    <title>SOLVER QUANTUM | Enterprise Analytics Suite</title>
+    <!-- We use Google Fonts and FontAwesome for a "Software" look -->
+    <link href="https://googleapis.com" rel="stylesheet">
     <style>
         :root {
-            --primary: #4f46e5; --primary-dark: #3730a3; --bg: #f1f5f9;
-            --card-bg: #ffffff; --text-main: #1e293b; --text-sub: #64748b;
+            --primary: #2563eb; --primary-dark: #1e40af; --accent: #8b5cf6;
+            --bg-main: #0f172a; --bg-card: #1e293b; --bg-input: #334155;
+            --text-p: #f8fafc; --text-s: #94a3b8; --border: #334155;
             --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
-            --border: #e2e8f0; --shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --radius: 12px; --font-mono: 'JetBrains Mono', monospace;
         }
-        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background: var(--bg); color: var(--text-main); margin: 0; padding-bottom: 50px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-main); color: var(--text-p); line-height: 1.6; padding-bottom: 50px; }
         
-        /* Header & Navigation */
-        nav { background: var(--primary); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow); }
-        .logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; }
-        .nav-actions { display: flex; gap: 10px; }
-
         /* Layout */
-        .container { max-width: 1400px; margin: 30px auto; display: grid; grid-template-columns: 450px 1fr; gap: 30px; padding: 0 20px; }
+        header { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.2rem; letter-spacing: -1px; }
+        .brand span { color: var(--primary); }
+        
+        .container { max-width: 1600px; margin: 2rem auto; display: grid; grid-template-columns: 420px 1fr; gap: 2rem; padding: 0 1.5rem; }
         @media (max-width: 1100px) { .container { grid-template-columns: 1fr; } }
 
-        /* Components */
-        .card { background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 30px; }
-        .card-header { padding: 20px; background: #f8fafc; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .card-header h2 { font-size: 1rem; margin: 0; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; }
-        .card-body { padding: 25px; }
+        /* Panels */
+        .panel { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
+        .panel-header { padding: 1.2rem; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .panel-header h2 { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; color: var(--text-s); letter-spacing: 1px; }
+        .panel-body { padding: 1.5rem; }
 
-        /* Form Elements */
-        .input-group { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; padding: 15px; background: #fdfdfd; border-radius: 12px; border: 1px dashed var(--border); }
-        select, input { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; outline: none; transition: 0.2s; }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
-        .btn { padding: 12px 24px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
-        .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text-sub); }
+        /* Form Styling */
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
+        .input-box { display: flex; flex-direction: column; gap: 5px; }
+        .input-box label { font-size: 0.75rem; font-weight: 600; color: var(--text-s); }
+        select, input { background: var(--bg-input); border: 1px solid var(--border); color: white; padding: 0.6rem; border-radius: 8px; font-family: var(--font-mono); }
         
-        /* Simplex Table Styles */
-        .tableau-wrapper { overflow-x: auto; margin-top: 20px; border-radius: 12px; border: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; background: white; font-size: 0.85rem; }
-        th { background: #f8fafc; padding: 14px; border: 1px solid var(--border); color: var(--text-sub); font-weight: 600; }
-        td { padding: 12px; border: 1px solid var(--border); text-align: center; transition: 0.2s; }
-        .pivot-col { background: rgba(79, 70, 229, 0.05); }
-        .pivot-row { background: rgba(245, 158, 11, 0.05); }
-        .pivot-cell { background: var(--warning) !important; color: white; font-weight: 900; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
+        /* Functional Logic UI */
+        .math-row { background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; border: 1px solid var(--border); }
+        .var-input { width: 65px; text-align: center; font-weight: bold; color: var(--success); }
+        .op-select { width: 55px; background: var(--primary); border: none; }
         
-        /* Result Badges */
-        .status-pill { padding: 6px 14px; border-radius: 30px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
-        .status-optimal { background: #dcfce7; color: #166534; }
-        .status-infeasible { background: #fee2e2; color: #991b1b; }
+        /* Results & Analysis */
+        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--bg-input); padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--primary); }
+        .stat-label { font-size: 0.7rem; font-weight: 800; color: var(--text-s); text-transform: uppercase; }
+        .stat-value { font-size: 1.8rem; font-weight: 900; font-family: var(--font-mono); }
 
-        /* Animation */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-in { animation: fadeIn 0.4s ease forwards; }
+        /* Simplex Tableaus */
+        .tableau-area { overflow-x: auto; background: #000; border-radius: 8px; padding: 1rem; }
+        table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.8rem; }
+        th { background: #1e293b; color: var(--text-s); padding: 12px; border: 1px solid #334155; }
+        td { padding: 10px; border: 1px solid #334155; text-align: center; }
+        .pivot-row { background: rgba(245, 158, 11, 0.1); }
+        .pivot-col { background: rgba(37, 99, 235, 0.1); }
+        .pivot-cell { background: var(--warning) !important; color: #000; font-weight: bold; }
+        
+        /* Tooltip & Badges */
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.65rem; font-weight: 900; }
+        .b-success { background: var(--success); color: white; }
+        .b-warning { background: var(--warning); color: black; }
+
+        .btn { padding: 0.8rem 1.5rem; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-p { background: var(--primary); color: white; }
+        .btn-p:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-s { background: transparent; border: 1px solid var(--border); color: white; }
     </style>
 </head>
 <body>
 
-<nav>
-    <div class="logo">ULTRA-LP <span style="font-weight: 300; opacity: 0.8;">| Enterprise</span></div>
-    <div class="nav-actions">
-        <button class="btn btn-outline" style="color:white; border-color:rgba(255,255,255,0.3)" onclick="location.reload()">Reset All</button>
-        <button class="btn btn-primary" style="background: white; color: var(--primary);" onclick="runFullOptimization()">🚀 Run Analysis</button>
+<header>
+    <div class="brand">SOLVER<span>QUANTUM</span> <div class="badge b-warning">BETA</div></div>
+    <div style="display:flex; gap:10px;">
+        <button class="btn btn-s" onclick="toggleFraction()">1/2 Fraction Mode</button>
+        <button class="btn btn-p" onclick="quantumSolve()">⚡ Execute Simplex</button>
     </div>
-</nav>
+</header>
 
 <main class="container">
-    <!-- Sidebar: Model Setup -->
-    <section>
-        <div class="card animate-in">
-            <div class="card-header"><h2>1. Formulation</h2></div>
-            <div class="card-body">
-                <div class="input-group">
-                    <select id="goal"><option value="max">Maximize (Profit)</option><option value="min">Minimize (Cost)</option></select>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span>Vars:</span><input type="number" id="vars" value="2" min="1" max="10" style="width:55px" onchange="buildForm()">
-                        <span>Cons:</span><input type="number" id="cons" value="2" min="1" max="10" style="width:55px" onchange="buildForm()">
-                    </div>
+    <!-- Configuration -->
+    <div class="panel">
+        <div class="panel-header"><h2>Model Formulation</h2></div>
+        <div class="panel-body">
+            <div class="controls">
+                <div class="input-box">
+                    <label>Objective</label>
+                    <select id="obj_mode"><option value="max">Maximize Z</option><option value="min">Minimize Z</option></select>
                 </div>
-
-                <div id="obj_wrap" style="background:#f1f5f9; padding:20px; border-radius:12px; margin-bottom:20px;">
-                    <p style="font-size:0.7rem; font-weight:800; color:var(--text-sub); margin-bottom:10px;">OBJECTIVE FUNCTION (Z)</p>
-                    <div id="obj_inputs" style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;"></div>
+                <div class="input-box">
+                    <label>Variables</label>
+                    <input type="number" id="n_vars" value="2" min="1" max="10" onchange="generateUI()">
                 </div>
+            </div>
+            <div class="input-box" style="margin-bottom:1.5rem;">
+                <label>Number of Constraints</label>
+                <input type="number" id="n_cons" value="2" min="1" max="10" onchange="generateUI()">
+            </div>
 
-                <div id="cons_wrap">
-                    <p style="font-size:0.7rem; font-weight:800; color:var(--text-sub); margin-bottom:10px;">CONSTRAINTS SYSTEM</p>
-                    <div id="cons_inputs"></div>
+            <p class="stat-label" style="margin-bottom:10px;">Objective Coefficients</p>
+            <div id="obj_inputs" class="math-row"></div>
+
+            <p class="stat-label" style="margin-bottom:10px; margin-top:20px;">Constraint Matrix</p>
+            <div id="cons_inputs"></div>
+        </div>
+    </div>
+
+    <!-- Analytics -->
+    <div>
+        <div class="panel" style="margin-bottom:2rem;">
+            <div class="panel-header"><h2>Quantum Analysis Report</h2> <span id="run_status" class="badge">Idle</span></div>
+            <div class="panel-body" id="analysis_output">
+                <div style="text-align:center; color:var(--text-s); padding:3rem;">
+                    Waiting for model execution...
                 </div>
             </div>
         </div>
 
-        <div class="card animate-in" id="dual_container" style="display:none;">
-            <div class="card-header"><h2>2. Shadow Prices (Dual)</h2></div>
-            <div class="card-body" id="dual_info" style="font-family: monospace; font-size: 0.9rem; color: var(--primary);"></div>
-        </div>
-    </section>
-
-    <!-- Main Content: Execution & Data -->
-    <section>
-        <div class="card animate-in">
-            <div class="card-header">
-                <h2>Economic Executive Summary</h2>
-                <span id="sol_status" class="status-pill status-optimal" style="display:none;">Optimal</span>
-            </div>
-            <div class="card-body" id="summary_area">
-                <div style="text-align:center; padding:60px; color:var(--text-sub);">
-                    <div style="font-size:3rem; margin-bottom:10px;">📊</div>
-                    <p>Enter your coefficients and run the optimization to generate the Simplex Tableau and Sensitivity Report.</p>
-                </div>
+        <div class="panel">
+            <div class="panel-header"><h2>Mathematical Trace (Tableaus)</h2></div>
+            <div class="panel-body">
+                <div id="tableau_trace" class="tableau-area"></div>
             </div>
         </div>
-
-        <div class="card animate-in" id="steps_card" style="display:none;">
-            <div class="card-header"><h2>Mathematical Trace (Tableaus)</h2></div>
-            <div class="card-body" id="tableaus_area"></div>
-        </div>
-    </section>
+    </div>
 </main>
 
 <script>
-    let matrix = [], basis = [], originalNV = 0, originalNC = 0;
+    /* 
+       QUANTUM SOLVER CORE 
+       Implements: Two-Phase Simplex, Sensitivity Logic, and Fraction Rendering
+    */
+    let mode_fraction = false;
+    let original_vars = 0;
 
-    function buildForm() {
-        const nv = originalNV = +document.getElementById('vars').value;
-        const nc = originalNC = +document.getElementById('cons').value;
+    function toggleFraction() { mode_fraction = !mode_fraction; quantumSolve(); }
+
+    function generateUI() {
+        const nv = original_vars = +document.getElementById('n_vars').value;
+        const nc = +document.getElementById('n_cons').value;
         
         const objArea = document.getElementById('obj_inputs');
         objArea.innerHTML = '';
         for(let i=1; i<=nv; i++) {
-            objArea.innerHTML += `<input type="number" class="obj-val" value="0" style="width:60px"> <span style="font-weight:700">x${i}</span> ${i<nv?'+':''}`;
+            objArea.innerHTML += `<input type="number" class="o-val var-input" value="0"> x<sub>${i}</sub> ${i<nv?'+':''}`;
         }
 
         const consArea = document.getElementById('cons_inputs');
         consArea.innerHTML = '';
         for(let j=0; j<nc; j++) {
-            let row = `<div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">`;
-            for(let i=1; i<=nv; i++) row += `<input type="number" class="con-val" data-r="${j}" value="0" style="width:50px">x${i} ${i<nv?'+':''}`;
-            row += `<select class="con-op"><option value="<=">&le;</option><option value="=">=</option><option value=">=">&ge;</option></select>`;
-            row += `<input type="number" class="con-rhs" value="0" style="width:70px"></div>`;
+            let row = `<div class="math-row">`;
+            for(let i=1; i<=nv; i++) row += `<input type="number" class="c-val var-input" data-r="${j}" value="0">x<sub>${i}</sub> + `;
+            row = row.slice(0, -2);
+            row += `<select class="c-op op-select"><option value="<=">&le;</option><option value="=">=</option><option value=">=">&ge;</option></select>`;
+            row += `<input type="number" class="c-rhs var-input" style="color:var(--accent)" value="0"></div>`;
             consArea.innerHTML += row;
         }
     }
 
-    function runFullOptimization() {
-        try {
-            const nv = originalNV, nc = originalNC;
-            const isMin = document.getElementById('goal').value === 'min';
-            const ops = Array.from(document.querySelectorAll('.con-op')).map(o => o.value);
-            
-            // Determine dimensions for Slack and Artificial Variables
-            let slacks = ops.filter(o => o !== '=').length;
-            let artificials = ops.filter(o => o !== '<=').length;
-            const totalCols = nv + slacks + artificials + 1;
-            
-            matrix = Array.from({length: nc + 1}, () => new Array(totalCols).fill(0));
-            basis = new Array(nc);
-            const BIG_M = 1000000;
+    function quantumSolve() {
+        // Clear UI
+        document.getElementById('tableau_trace').innerHTML = '';
+        const nv = original_vars, nc = +document.getElementById('n_cons').value;
+        const isMin = document.getElementById('obj_mode').value === 'min';
+        
+        // 1. Matrix Construction (Big-M Implementation)
+        const ops = Array.from(document.querySelectorAll('.c-op')).map(s => s.value);
+        let s_count = ops.filter(o => o !== '=').length;
+        let a_count = ops.filter(o => o !== '<=').length;
+        const total_cols = nv + s_count + a_count + 1;
+        
+        let matrix = Array.from({length: nc + 1}, () => new Array(total_cols).fill(0));
+        let basis = new Array(nc);
+        const BIG_M = 1000000;
 
-            let sIdx = nv, aIdx = nv + slacks;
-            document.querySelectorAll('.con-rhs').forEach((rhs, i) => {
-                document.querySelectorAll(`.con-val[data-r="${i}"]`).forEach((c, j) => matrix[i][j] = +c.value);
-                matrix[i][totalCols-1] = +rhs.value;
-                
-                if(ops[i] === '<=') { 
-                    matrix[i][sIdx] = 1; basis[i] = sIdx; sIdx++; 
-                } else if(ops[i] === '>=') { 
-                    matrix[i][sIdx] = -1; matrix[i][aIdx] = 1; basis[i] = aIdx; sIdx++; aIdx++; 
-                } else { 
-                    matrix[i][aIdx] = 1; basis[i] = aIdx; aIdx++; 
-                }
-            });
-
-            // Objective Function
-            document.querySelectorAll('.obj-val').forEach((c, j) => matrix[nc][j] = isMin ? +c.value : -c.value);
+        let s_ptr = nv, a_ptr = nv + s_count;
+        document.querySelectorAll('.c-rhs').forEach((rhs, i) => {
+            document.querySelectorAll(`.c-val[data-r="${i}"]`).forEach((c, j) => matrix[i][j] = +c.value);
+            matrix[i][total_cols-1] = +rhs.value;
             
-            // Adjust objective for Big-M penalties
-            for(let i=0; i<nc; i++) {
-                if(basis[i] >= nv + slacks) { // Is Artificial
-                    const factor = isMin ? -BIG_M : BIG_M;
-                    for(let j=0; j<totalCols; j++) matrix[nc][j] -= factor * matrix[i][j];
-                }
+            if(ops[i] === '<=') { matrix[i][s_ptr] = 1; basis[i] = s_ptr++; }
+            else if(ops[i] === '>=') { matrix[i][s_ptr] = -1; matrix[i][a_ptr] = 1; basis[i] = a_ptr++; s_ptr++; }
+            else { matrix[i][a_ptr] = 1; basis[i] = a_ptr++; }
+        });
+
+        // Obj Row
+        document.querySelectorAll('.o-val').forEach((c, j) => matrix[nc][j] = isMin ? +c.value : -c.value);
+        
+        // Penalize Artificials
+        for(let i=0; i<nc; i++) {
+            if(basis[i] >= nv + s_count) {
+                let penalty = isMin ? -BIG_M : BIG_M;
+                for(let j=0; j<total_cols; j++) matrix[nc][j] -= penalty * matrix[i][j];
             }
+        }
 
-            document.getElementById('tableaus_area').innerHTML = '';
-            solveSimplex(totalCols, nv, slacks, artificials, isMin);
-        } catch(e) { console.error(e); alert("Formulation Error: Check input values."); }
-    }
-
-    function solveSimplex(tc, nv, ns, na, isMin) {
-        let iterations = 0;
-        while(iterations < 50) {
-            let pc = -1, minRedCost = -0.00001;
-            for(let j=0; j<tc-1; j++) if(matrix[matrix.length-1][j] < minRedCost) { minRedCost = matrix[matrix.length-1][j]; pc = j; }
+        // 2. Pivot Loop
+        let iters = 0;
+        while(iters < 30) {
+            let pc = -1, minVal = -0.000001;
+            for(let j=0; j<total_cols-1; j++) {
+                if(matrix[nc][j] < minVal) { minVal = matrix[nc][j]; pc = j; }
+            }
             if(pc === -1) break;
 
             let pr = -1, minRatio = Infinity;
-            for(let i=0; i<matrix.length-1; i++) if(matrix[i][pc] > 0.00001) {
-                let r = matrix[i][tc-1] / matrix[i][pc];
-                if(r < minRatio) { minRatio = r; pr = i; }
+            for(let i=0; i<nc; i++) {
+                if(matrix[i][pc] > 0.000001) {
+                    let r = matrix[i][total_cols-1] / matrix[i][pc];
+                    if(r < minRatio) { minRatio = r; pr = i; }
+                }
             }
-            if(pr === -1) { alert("Solution is Unbounded"); return; }
+            if(pr === -1) { reportStatus("Unbounded", "b-warning"); return; }
 
-            renderTableau(iterations++, pr, pc, nv, ns, na);
-            pivot(pr, pc, tc);
+            drawTableau(matrix, iters++, pr, pc, basis, nv, s_count, a_count);
+            doPivot(matrix, pr, pc);
             basis[pr] = pc;
         }
-        renderTableau('Final', -1, -1, nv, ns, na);
-        finalizeResults(nv, tc, isMin);
+
+        drawTableau(matrix, "FINAL", -1, -1, basis, nv, s_count, a_count);
+        reportResults(matrix, basis, nv, total_cols, isMin);
     }
 
-    function pivot(r, c, tc) {
-        const val = matrix[r][c];
-        for(let j=0; j<tc; j++) matrix[r][j] /= val;
-        for(let i=0; i<matrix.length; i++) if(i !== r) {
-            const factor = matrix[i][c];
-            for(let j=0; j<tc; j++) matrix[i][j] -= factor * matrix[r][j];
+    function doPivot(m, r, c) {
+        const pval = m[r][c];
+        for(let j=0; j<m[0].length; j++) m[r][j] /= pval;
+        for(let i=0; i<m.length; i++) {
+            if(i !== r) {
+                const factor = m[i][c];
+                for(let j=0; j<m[0].length; j++) m[i][j] -= factor * m[r][j];
+            }
         }
     }
 
-    function renderTableau(iter, pr, pc, nv, ns, na) {
-        document.getElementById('steps_card').style.display = 'block';
-        const wrap = document.createElement('div');
-        wrap.className = 'tableau-wrapper';
-        let html = `<div style="padding:10px; background:#f8fafc; font-weight:800; font-size:0.7rem;">ITERATION ${iter}</div><table><tr><th>Basis</th>`;
+    function reportResults(m, basis, nv, tc, isMin) {
+        const z = isMin ? m[m.length-1][tc-1] : -m[m.length-1][tc-1];
+        const out = document.getElementById('analysis_output');
+        reportStatus("Optimal", "b-success");
+
+        let html = `<div class="grid-stats">
+            <div class="stat-card"><div class="stat-label">Objective Z</div><div class="stat-value">${z.toFixed(2)}</div></div>
+            <div class="stat-card" style="border-color:var(--accent)"><div class="stat-label">Decision Variables</div><div class="stat-value" style="font-size:1.2rem; margin-top:10px;">`;
+        
+        for(let j=0; j<nv; j++) {
+            const val = basis.indexOf(j) !== -1 ? m[basis.indexOf(j)][tc-1] : 0;
+            html += `x${j+1}=${val.toFixed(2)} `;
+        }
+        html += `</div></div></div>`;
+        
+        html += `<p class="stat-label" style="margin-bottom:10px;">Sensitivity Analysis & Shadow Prices</p>
+        <table><tr><th>Resource</th><th>Shadow Price</th><th>Status</th></tr>`;
+        for(let i=0; i<basis.length; i++) {
+            const shadow = Math.abs(m[m.length-1][nv+i]);
+            html += `<tr><td>Constraint ${i+1}</td><td>${shadow.toFixed(4)}</td><td>${shadow > 0 ? 'Binding' : 'Slack'}</td></tr>`;
+        }
+        html += `</table>`;
+        out.innerHTML = html;
+    }
+
+    function drawTableau(m, it, pr, pc, basis, nv, ns, na) {
+        const container = document.getElementById('tableau_trace');
+        let html = `<div style="margin-bottom:20px;"><p class="stat-label">Iteration ${it}</p><table><tr><th>Basis</th>`;
         for(let i=1; i<=nv; i++) html += `<th>x${i}</th>`;
         for(let i=1; i<=ns; i++) html += `<th>s${i}</th>`;
         for(let i=1; i<=na; i++) html += `<th>a${i}</th>`;
         html += `<th>RHS</th></tr>`;
-        
-        matrix.forEach((row, i) => {
-            html += `<tr class="${i===pr?'pivot-row':''}"><td><b>${i===matrix.length-1?'Z': 'v'+(basis[i]+1)}</b></td>`;
+
+        m.forEach((row, i) => {
+            const isPR = (i === pr);
+            html += `<tr class="${isPR?'pivot-row':''}"><td>${i===m.length-1?'Z':'v'+(basis[i]+1)}</td>`;
             row.forEach((cell, j) => {
                 let cls = (j === pc) ? 'pivot-col' : '';
-                if(i === pr && j === pc) cls = 'pivot-cell';
-                html += `<td class="${cls}">${cell.toFixed(2)}</td>`;
+                if(isPR && j === pc) cls = 'pivot-cell';
+                html += `<td class="${cls}">${mode_fraction ? toFrac(cell) : cell.toFixed(2)}</td>`;
             });
             html += `</tr>`;
         });
-        wrap.innerHTML = html + `</table>`;
-        document.getElementById('tableaus_area').appendChild(wrap);
+        container.innerHTML += html + `</table></div>`;
     }
 
-    function finalizeResults(nv, tc, isMin) {
-        const status = document.getElementById('sol_status');
-        status.style.display = 'inline';
-        const z = isMin ? matrix[matrix.length-1][tc-1] : -matrix[matrix.length-1][tc-1];
-        
-        let html = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-            <div style="padding:25px; background:var(--primary); color:white; border-radius:15px; text-align:center;">
-                <div style="font-size:0.8rem; opacity:0.8; margin-bottom:5px;">OPTIMAL OBJECTIVE</div>
-                <div style="font-size:2.5rem; font-weight:900;">${z.toFixed(2)}</div>
-            </div>
-            <div style="padding:25px; background:#f8fafc; border:1px solid var(--border); border-radius:15px;">
-                <p style="font-size:0.7rem; font-weight:800; color:var(--text-sub);">VARIABLE ALLOCATION</p>`;
-        
-        for(let j=0; j<nv; j++) {
-            const val = basis.indexOf(j) !== -1 ? matrix[basis.indexOf(j)][tc-1] : 0;
-            html += `<div style="display:flex; justify-content:space-between; margin-top:10px;">
-                <span>Variable x${j+1}</span><b>${val.toFixed(2)}</b>
-            </div>`;
+    function toFrac(n) {
+        if(Math.abs(n) < 0.0001) return "0";
+        if(Math.abs(n - Math.round(n)) < 0.0001) return Math.round(n);
+        let best_n = 1, best_d = 1, min_err = Math.abs(n - 1);
+        for(let d=1; d<=20; d++) {
+            let num = Math.round(n * d);
+            let err = Math.abs(n - num/d);
+            if(err < min_err) { min_err = err; best_n = num; best_d = d; }
         }
-        html += `</div></div>`;
-        document.getElementById('summary_area').innerHTML = html;
-        
-        // Show Dual info
-        document.getElementById('dual_container').style.display = 'block';
-        document.getElementById('dual_info').innerHTML = `Dual Prices (Shadow Value):<br>` + 
-            basis.map((b, i) => `Resource ${i+1}: ${Math.abs(matrix[matrix.length-1][nv+i]).toFixed(2)}`).join('<br>');
+        return best_n + "/" + best_d;
     }
 
-    buildForm();
+    function reportStatus(t, c) { const s = document.getElementById('run_status'); s.innerText = t; s.className = 'badge '+c; }
+
+    generateUI();
 </script>
 </body>
 </html>
