@@ -3,187 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LP Solver Pro - Educational Suite</title>
+    <title>LP Solver Ultra - Enterprise Suite</title>
     <style>
         :root {
-            --bg: #f3f4f6; --bg2: #ffffff; --text: #111827; --accent: #4f46e5;
-            --border: #d1d5db; --radius: 12px; --success: #10b981; --danger: #ef4444;
+            --primary: #4f46e5; --primary-dark: #3730a3; --bg: #f1f5f9;
+            --card-bg: #ffffff; --text-main: #1e293b; --text-sub: #64748b;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+            --border: #e2e8f0; --shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
         }
-        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; }
-        header { background: var(--accent); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-        main { max-width: 1400px; margin: 20px auto; padding: 0 20px; display: grid; grid-template-columns: 400px 1fr; gap: 20px; }
-        .card { background: var(--bg2); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; overflow: hidden; }
-        .card-header { padding: 15px 20px; background: #f9fafb; border-bottom: 1px solid var(--border); font-weight: 700; display: flex; justify-content: space-between; }
-        .card-body { padding: 20px; }
-        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .btn-p { background: var(--accent); color: white; }
-        .btn-s { background: #e5e7eb; color: var(--text); }
-        .tableau-wrap { overflow-x: auto; margin-top: 15px; border: 1px solid var(--border); border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th, td { border: 1px solid var(--border); padding: 10px; text-align: center; }
-        .pivot-opt { cursor: pointer; background: #fef3c7; }
-        .pivot-opt:hover { background: #fbbf24; }
-        .pivot-cell { background: #f59e0b !important; color: white; font-weight: 900; }
-        .dual-box { background: #eff6ff; border: 1px solid #bfdbfe; padding: 15px; border-radius: 8px; font-family: monospace; }
-        .badge { padding: 2px 8px; border-radius: 12px; font-size: 11px; }
-        .b-opt { background: #d1fae5; color: #065f46; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text-main); margin: 0; padding-bottom: 50px; }
+        
+        /* Header & Navigation */
+        nav { background: var(--primary); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow); }
+        .logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; }
+        .nav-actions { display: flex; gap: 10px; }
+
+        /* Layout */
+        .container { max-width: 1400px; margin: 30px auto; display: grid; grid-template-columns: 450px 1fr; gap: 30px; padding: 0 20px; }
+        @media (max-width: 1100px) { .container { grid-template-columns: 1fr; } }
+
+        /* Components */
+        .card { background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 30px; }
+        .card-header { padding: 20px; background: #f8fafc; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .card-header h2 { font-size: 1rem; margin: 0; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; }
+        .card-body { padding: 25px; }
+
+        /* Form Elements */
+        .input-group { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; padding: 15px; background: #fdfdfd; border-radius: 12px; border: 1px dashed var(--border); }
+        select, input { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; outline: none; transition: 0.2s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        .btn { padding: 12px 24px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text-sub); }
+        
+        /* Simplex Table Styles */
+        .tableau-wrapper { overflow-x: auto; margin-top: 20px; border-radius: 12px; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; background: white; font-size: 0.85rem; }
+        th { background: #f8fafc; padding: 14px; border: 1px solid var(--border); color: var(--text-sub); font-weight: 600; }
+        td { padding: 12px; border: 1px solid var(--border); text-align: center; transition: 0.2s; }
+        .pivot-col { background: rgba(79, 70, 229, 0.05); }
+        .pivot-row { background: rgba(245, 158, 11, 0.05); }
+        .pivot-cell { background: var(--warning) !important; color: white; font-weight: 900; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
+        
+        /* Result Badges */
+        .status-pill { padding: 6px 14px; border-radius: 30px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
+        .status-optimal { background: #dcfce7; color: #166534; }
+        .status-infeasible { background: #fee2e2; color: #991b1b; }
+
+        /* Animation */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-in { animation: fadeIn 0.4s ease forwards; }
     </style>
 </head>
 <body>
 
-<header>
-    <div style="font-size: 1.5rem; font-weight: 800;">LP ANALYTICS PRO v2.0</div>
-    <div style="display:flex; gap:10px;">
-        <button class="btn btn-s" onclick="generateDual()">🌗 Show Dual</button>
-        <button class="btn btn-p" onclick="autoSolve()">⚡ Auto-Solve</button>
+<nav>
+    <div class="logo">ULTRA-LP <span style="font-weight: 300; opacity: 0.8;">| Enterprise</span></div>
+    <div class="nav-actions">
+        <button class="btn btn-outline" style="color:white; border-color:rgba(255,255,255,0.3)" onclick="location.reload()">Reset All</button>
+        <button class="btn btn-primary" style="background: white; color: var(--primary);" onclick="runFullOptimization()">🚀 Run Analysis</button>
     </div>
-</header>
+</nav>
 
-<main>
-    <aside>
-        <div class="card">
-            <div class="card-header">Model Construction</div>
-            <div class="card-body">
-                <div style="margin-bottom:15px;">
-                    Type: <select id="type"><option value="max">Maximize</option><option value="min">Minimize</option></select>
-                    Vars: <input type="number" id="nv" value="2" min="1" max="5" style="width:40px" onchange="init()">
-                    Cons: <input type="number" id="nc" value="2" min="1" max="5" style="width:40px" onchange="init()">
-                </div>
-                <div id="obj-cont" style="background:#f9fafb; padding:10px; border-radius:8px; margin-bottom:15px;"></div>
-                <div id="con-cont"></div>
-            </div>
-        </div>
-        <div id="dual-card" class="card" style="display:none">
-            <div class="card-header">Dual Formulation</div>
-            <div class="card-body dual-box" id="dual-out"></div>
-        </div>
-    </aside>
-
+<main class="container">
+    <!-- Sidebar: Model Setup -->
     <section>
-        <div class="card">
-            <div class="card-header">Solution Analysis <span id="status" class="badge b-opt">Ready</span></div>
-            <div class="card-body" id="res-area">
-                <p style="color:#666">Results and sensitivity analysis will appear here after solving.</p>
+        <div class="card animate-in">
+            <div class="card-header"><h2>1. Formulation</h2></div>
+            <div class="card-body">
+                <div class="input-group">
+                    <select id="goal"><option value="max">Maximize (Profit)</option><option value="min">Minimize (Cost)</option></select>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span>Vars:</span><input type="number" id="vars" value="2" min="1" max="10" style="width:55px" onchange="buildForm()">
+                        <span>Cons:</span><input type="number" id="cons" value="2" min="1" max="10" style="width:55px" onchange="buildForm()">
+                    </div>
+                </div>
+
+                <div id="obj_wrap" style="background:#f1f5f9; padding:20px; border-radius:12px; margin-bottom:20px;">
+                    <p style="font-size:0.7rem; font-weight:800; color:var(--text-sub); margin-bottom:10px;">OBJECTIVE FUNCTION (Z)</p>
+                    <div id="obj_inputs" style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;"></div>
+                </div>
+
+                <div id="cons_wrap">
+                    <p style="font-size:0.7rem; font-weight:800; color:var(--text-sub); margin-bottom:10px;">CONSTRAINTS SYSTEM</p>
+                    <div id="cons_inputs"></div>
+                </div>
             </div>
         </div>
-        <div class="card">
-            <div class="card-header">Interactive Tableaus <span style="font-size:11px; font-weight:normal;">Click a yellow cell to pivot manually</span></div>
-            <div id="tableau-area" class="card-body"></div>
+
+        <div class="card animate-in" id="dual_container" style="display:none;">
+            <div class="card-header"><h2>2. Shadow Prices (Dual)</h2></div>
+            <div class="card-body" id="dual_info" style="font-family: monospace; font-size: 0.9rem; color: var(--primary);"></div>
+        </div>
+    </section>
+
+    <!-- Main Content: Execution & Data -->
+    <section>
+        <div class="card animate-in">
+            <div class="card-header">
+                <h2>Economic Executive Summary</h2>
+                <span id="sol_status" class="status-pill status-optimal" style="display:none;">Optimal</span>
+            </div>
+            <div class="card-body" id="summary_area">
+                <div style="text-align:center; padding:60px; color:var(--text-sub);">
+                    <div style="font-size:3rem; margin-bottom:10px;">📊</div>
+                    <p>Enter your coefficients and run the optimization to generate the Simplex Tableau and Sensitivity Report.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card animate-in" id="steps_card" style="display:none;">
+            <div class="card-header"><h2>Mathematical Trace (Tableaus)</h2></div>
+            <div class="card-body" id="tableaus_area"></div>
         </div>
     </section>
 </main>
 
 <script>
-    let globalT = [], globalB = [], varMeta = {};
+    let matrix = [], basis = [], originalNV = 0, originalNC = 0;
 
-    function init() {
-        const nv = +document.getElementById('nv').value, nc = +document.getElementById('nc').value;
-        const oC = document.getElementById('obj-cont'); oC.innerHTML = 'Z = ';
-        for(let i=0; i<nv; i++) oC.innerHTML += `<input type="number" class="oc" value="0" style="width:45px"> x${i+1} ${i<nv-1?'+':''}`;
-        const cC = document.getElementById('con-cont'); cC.innerHTML = '';
-        for(let j=0; j<nc; j++) {
-            let r = `<div style="margin-bottom:8px">`;
-            for(let i=0; i<nv; i++) r += `<input type="number" class="cc" data-r="${j}" value="0" style="width:40px"> x${i+1} + `;
-            r = r.slice(0,-2) + `<select class="cop"><option value="<=">&le;</option><option value="=">=</option><option value=">=">&ge;</option></select>`;
-            r += `<input type="number" class="crhs" value="0" style="width:50px"></div>`;
-            cC.innerHTML += r;
-        }
-    }
-
-    function autoSolve() {
-        prepareSimplex();
-        let safety = 0;
-        while(safety++ < 20) {
-            let pc = -1, min = -0.0001;
-            for(let j=0; j<globalT[0].length-1; j++) if(globalT[globalT.length-1][j] < min) { min = globalT[globalT.length-1][j]; pc = j; }
-            if(pc === -1) break;
-            let pr = -1, minR = Infinity;
-            for(let i=0; i<globalT.length-1; i++) if(globalT[i][pc] > 0.0001) {
-                let r = globalT[i][globalT[i].length-1] / globalT[i][pc];
-                if(r < minR) { minR = r; pr = i; }
-            }
-            if(pr === -1) { alert("Unbounded!"); return; }
-            pivot(pr, pc);
-        }
-        renderFinal();
-    }
-
-    function prepareSimplex() {
-        const nv = +document.getElementById('nv').value, nc = +document.getElementById('nc').value;
-        const isMin = document.getElementById('type').value === 'min';
-        const ops = Array.from(document.querySelectorAll('.cop')).map(s => s.value);
-        let sCount = ops.filter(o => o !== '=').length;
-        let t = Array.from({length: nc+1}, () => new Array(nv + sCount + 1).fill(0));
-        let b = new Array(nc);
+    function buildForm() {
+        const nv = originalNV = +document.getElementById('vars').value;
+        const nc = originalNC = +document.getElementById('cons').value;
         
-        let sIdx = nv;
-        document.querySelectorAll('.crhs').forEach((rhs, i) => {
-            document.querySelectorAll(`.cc[data-r="${i}"]`).forEach((c, j) => t[i][j] = +c.value);
-            t[i][t[0].length-1] = +rhs.value;
-            if(ops[i] === '<=') { t[i][sIdx] = 1; b[i] = sIdx++; }
-            else if(ops[i] === '>=') { t[i][sIdx] = -1; b[i] = -1; sIdx++; } // Needs Phase 1 for full robustness
-        });
-        document.querySelectorAll('.oc').forEach((c, j) => t[nc][j] = isMin ? +c.value : -c.value);
-        globalT = t; globalB = b;
-        renderTableau();
-    }
-
-    function pivot(r, c) {
-        const pVal = globalT[r][c];
-        for(let j=0; j<globalT[0].length; j++) globalT[r][j] /= pVal;
-        for(let i=0; i<globalT.length; i++) {
-            if(i !== r) {
-                const f = globalT[i][c];
-                for(let j=0; j<globalT[0].length; j++) globalT[i][j] -= f * globalT[r][j];
-            }
+        const objArea = document.getElementById('obj_inputs');
+        objArea.innerHTML = '';
+        for(let i=1; i<=nv; i++) {
+            objArea.innerHTML += `<input type="number" class="obj-val" value="0" style="width:60px"> <span style="font-weight:700">x${i}</span> ${i<nv?'+':''}`;
         }
-        globalB[r] = c;
-        renderTableau();
+
+        const consArea = document.getElementById('cons_inputs');
+        consArea.innerHTML = '';
+        for(let j=0; j<nc; j++) {
+            let row = `<div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">`;
+            for(let i=1; i<=nv; i++) row += `<input type="number" class="con-val" data-r="${j}" value="0" style="width:50px">x${i} ${i<nv?'+':''}`;
+            row += `<select class="con-op"><option value="<=">&le;</option><option value="=">=</option><option value=">=">&ge;</option></select>`;
+            row += `<input type="number" class="con-rhs" value="0" style="width:70px"></div>`;
+            consArea.innerHTML += row;
+        }
     }
 
-    function renderTableau() {
-        const area = document.getElementById('tableau-area');
-        let h = `<table><tr><th>Basis</th>`;
-        for(let j=0; j<globalT[0].length-1; j++) h += `<th>x${j+1}</th>`;
-        h += `<th>RHS</th></tr>`;
-        globalT.forEach((row, i) => {
-            h += `<tr><td>${i===globalT.length-1?'Z':'x'+(globalB[i]+1)}</td>`;
-            row.forEach((v, j) => {
-                const isOpt = i < globalT.length-1 && j < globalT[0].length-1 && v > 0 && globalT[globalT.length-1][j] < 0;
-                h += `<td class="${isOpt?'pivot-opt':''}" onclick="${isOpt?`pivot(${i},${j})`:''}">${v.toFixed(2)}</td>`;
+    function runFullOptimization() {
+        try {
+            const nv = originalNV, nc = originalNC;
+            const isMin = document.getElementById('goal').value === 'min';
+            const ops = Array.from(document.querySelectorAll('.con-op')).map(o => o.value);
+            
+            // Determine dimensions for Slack and Artificial Variables
+            let slacks = ops.filter(o => o !== '=').length;
+            let artificials = ops.filter(o => o !== '<=').length;
+            const totalCols = nv + slacks + artificials + 1;
+            
+            matrix = Array.from({length: nc + 1}, () => new Array(totalCols).fill(0));
+            basis = new Array(nc);
+            const BIG_M = 1000000;
+
+            let sIdx = nv, aIdx = nv + slacks;
+            document.querySelectorAll('.con-rhs').forEach((rhs, i) => {
+                document.querySelectorAll(`.con-val[data-r="${i}"]`).forEach((c, j) => matrix[i][j] = +c.value);
+                matrix[i][totalCols-1] = +rhs.value;
+                
+                if(ops[i] === '<=') { 
+                    matrix[i][sIdx] = 1; basis[i] = sIdx; sIdx++; 
+                } else if(ops[i] === '>=') { 
+                    matrix[i][sIdx] = -1; matrix[i][aIdx] = 1; basis[i] = aIdx; sIdx++; aIdx++; 
+                } else { 
+                    matrix[i][aIdx] = 1; basis[i] = aIdx; aIdx++; 
+                }
             });
-            h += `</tr>`;
+
+            // Objective Function
+            document.querySelectorAll('.obj-val').forEach((c, j) => matrix[nc][j] = isMin ? +c.value : -c.value);
+            
+            // Adjust objective for Big-M penalties
+            for(let i=0; i<nc; i++) {
+                if(basis[i] >= nv + slacks) { // Is Artificial
+                    const factor = isMin ? -BIG_M : BIG_M;
+                    for(let j=0; j<totalCols; j++) matrix[nc][j] -= factor * matrix[i][j];
+                }
+            }
+
+            document.getElementById('tableaus_area').innerHTML = '';
+            solveSimplex(totalCols, nv, slacks, artificials, isMin);
+        } catch(e) { console.error(e); alert("Formulation Error: Check input values."); }
+    }
+
+    function solveSimplex(tc, nv, ns, na, isMin) {
+        let iterations = 0;
+        while(iterations < 50) {
+            let pc = -1, minRedCost = -0.00001;
+            for(let j=0; j<tc-1; j++) if(matrix[matrix.length-1][j] < minRedCost) { minRedCost = matrix[matrix.length-1][j]; pc = j; }
+            if(pc === -1) break;
+
+            let pr = -1, minRatio = Infinity;
+            for(let i=0; i<matrix.length-1; i++) if(matrix[i][pc] > 0.00001) {
+                let r = matrix[i][tc-1] / matrix[i][pc];
+                if(r < minRatio) { minRatio = r; pr = i; }
+            }
+            if(pr === -1) { alert("Solution is Unbounded"); return; }
+
+            renderTableau(iterations++, pr, pc, nv, ns, na);
+            pivot(pr, pc, tc);
+            basis[pr] = pc;
+        }
+        renderTableau('Final', -1, -1, nv, ns, na);
+        finalizeResults(nv, tc, isMin);
+    }
+
+    function pivot(r, c, tc) {
+        const val = matrix[r][c];
+        for(let j=0; j<tc; j++) matrix[r][j] /= val;
+        for(let i=0; i<matrix.length; i++) if(i !== r) {
+            const factor = matrix[i][c];
+            for(let j=0; j<tc; j++) matrix[i][j] -= factor * matrix[r][j];
+        }
+    }
+
+    function renderTableau(iter, pr, pc, nv, ns, na) {
+        document.getElementById('steps_card').style.display = 'block';
+        const wrap = document.createElement('div');
+        wrap.className = 'tableau-wrapper';
+        let html = `<div style="padding:10px; background:#f8fafc; font-weight:800; font-size:0.7rem;">ITERATION ${iter}</div><table><tr><th>Basis</th>`;
+        for(let i=1; i<=nv; i++) html += `<th>x${i}</th>`;
+        for(let i=1; i<=ns; i++) html += `<th>s${i}</th>`;
+        for(let i=1; i<=na; i++) html += `<th>a${i}</th>`;
+        html += `<th>RHS</th></tr>`;
+        
+        matrix.forEach((row, i) => {
+            html += `<tr class="${i===pr?'pivot-row':''}"><td><b>${i===matrix.length-1?'Z': 'v'+(basis[i]+1)}</b></td>`;
+            row.forEach((cell, j) => {
+                let cls = (j === pc) ? 'pivot-col' : '';
+                if(i === pr && j === pc) cls = 'pivot-cell';
+                html += `<td class="${cls}">${cell.toFixed(2)}</td>`;
+            });
+            html += `</tr>`;
         });
-        area.innerHTML = h + `</table>`;
+        wrap.innerHTML = html + `</table>`;
+        document.getElementById('tableaus_area').appendChild(wrap);
     }
 
-    function renderFinal() {
-        const nv = +document.getElementById('nv').value, isMin = document.getElementById('type').value === 'min';
-        const z = isMin ? globalT[globalT.length-1][globalT[0].length-1] : -globalT[globalT.length-1][globalT[0].length-1];
-        let h = `<div style="font-size:20px; font-weight:800; color:var(--accent)">Final Z = ${z.toFixed(2)}</div>`;
-        h += `<table style="margin-top:15px"><tr><th>Variable</th><th>Value</th><th>Status</th></tr>`;
+    function finalizeResults(nv, tc, isMin) {
+        const status = document.getElementById('sol_status');
+        status.style.display = 'inline';
+        const z = isMin ? matrix[matrix.length-1][tc-1] : -matrix[matrix.length-1][tc-1];
+        
+        let html = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+            <div style="padding:25px; background:var(--primary); color:white; border-radius:15px; text-align:center;">
+                <div style="font-size:0.8rem; opacity:0.8; margin-bottom:5px;">OPTIMAL OBJECTIVE</div>
+                <div style="font-size:2.5rem; font-weight:900;">${z.toFixed(2)}</div>
+            </div>
+            <div style="padding:25px; background:#f8fafc; border:1px solid var(--border); border-radius:15px;">
+                <p style="font-size:0.7rem; font-weight:800; color:var(--text-sub);">VARIABLE ALLOCATION</p>`;
+        
         for(let j=0; j<nv; j++) {
-            const val = globalB.indexOf(j) !== -1 ? globalT[globalB.indexOf(j)][globalT[0].length-1] : 0;
-            h += `<tr><td>x${j+1}</td><td>${val.toFixed(2)}</td><td>${val > 0 ? 'Binding' : 'Non-Binding'}</td></tr>`;
+            const val = basis.indexOf(j) !== -1 ? matrix[basis.indexOf(j)][tc-1] : 0;
+            html += `<div style="display:flex; justify-content:space-between; margin-top:10px;">
+                <span>Variable x${j+1}</span><b>${val.toFixed(2)}</b>
+            </div>`;
         }
-        document.getElementById('res-area').innerHTML = h + `</table>`;
+        html += `</div></div>`;
+        document.getElementById('summary_area').innerHTML = html;
+        
+        // Show Dual info
+        document.getElementById('dual_container').style.display = 'block';
+        document.getElementById('dual_info').innerHTML = `Dual Prices (Shadow Value):<br>` + 
+            basis.map((b, i) => `Resource ${i+1}: ${Math.abs(matrix[matrix.length-1][nv+i]).toFixed(2)}`).join('<br>');
     }
 
-    function generateDual() {
-        const nv = +document.getElementById('nv').value, nc = +document.getElementById('nc').value;
-        const isMax = document.getElementById('type').value === 'max';
-        document.getElementById('dual-card').style.display = 'block';
-        let h = `${isMax ? 'Minimize' : 'Maximize'} W = <br>`;
-        document.querySelectorAll('.crhs').forEach((r, i) => h += `${r.value}y${i+1} + `);
-        h = h.slice(0,-2) + `<br><br>Subject to:<br>`;
-        for(let i=0; i<nv; i++) {
-            document.querySelectorAll(`.cc[data-r]`).forEach(c => { /* logic to flip matrix */ });
-            h += `(Dual Constraints mapped from Primal Columns)<br>`; break;
-        }
-        document.getElementById('dual-out').innerHTML = h;
-    }
-
-    init();
+    buildForm();
 </script>
 </body>
 </html>
