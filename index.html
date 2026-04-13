@@ -35,7 +35,6 @@
         .pivot-row { background: var(--pivot-bg); }
         .pivot-col { background: rgba(79, 70, 229, 0.1); }
         .pivot-cell { background: var(--pivot-cell) !important; font-weight: bold; color: #000; }
-        .hidden { display: none; }
         .result-box { padding: 15px; border-radius: 8px; margin-top: 10px; }
         .opt-box { background: #d1fae5; color: #065f46; border: 1px solid #34d399; }
         .multi-tag { display: inline-block; background: var(--warning); color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-left: 10px; }
@@ -69,12 +68,12 @@
     <div class="card">
         <div class="card-header">Solution & Analysis</div>
         <div class="card-body" id="results-area">
-            <p style="color: var(--text2); text-align: center;">Results will appear here...</p>
+            <p style="color: var(--text2); text-align: center;">Enter values and click "Solve Problem" to see analysis.</p>
         </div>
     </div>
 
     <div class="card" style="grid-column: 1 / -1;">
-        <div class="card-header">Simplex Tableaus (Steps)</div>
+        <div class="card-header">Simplex Tableaus (Iteration Steps)</div>
         <div id="steps-area" class="card-body"></div>
     </div>
 </main>
@@ -83,18 +82,16 @@
     function initModel() {
         const nv = +document.getElementById('num-vars').value;
         const nc = +document.getElementById('num-cons').value;
-        
         const objArea = document.getElementById('obj-fn');
         objArea.innerHTML = 'Z = ';
         for(let i=0; i<nv; i++) {
             objArea.innerHTML += `<input type="number" class="coeff-input obj-c" value="0"> x<sub>${i+1}</sub> ${i < nv-1 ? '+' : ''}`;
         }
-
         const consArea = document.getElementById('cons-list');
         consArea.innerHTML = '';
         for(let j=0; j<nc; j++) {
             let row = `<div class="form-row">`;
-            for(let i=0; i<nv; i++) row += `<input type="number" class="coeff-input con-c" data-row="${j}"> x<sub>${i+1}</sub> ${i < nv-1 ? '+' : ''}`;
+            for(let i=0; i<nv; i++) row += `<input type="number" class="coeff-input con-c" data-row="${j}" value="0"> x<sub>${i+1}</sub> ${i < nv-1 ? '+' : ''}`;
             row += `<select class="con-op"><option value="<=">&le;</option><option value="=">=</option><option value=">=">&ge;</option></select>`;
             row += `<input type="number" class="rhs-input con-rhs" value="0"></div>`;
             consArea.innerHTML += row;
@@ -102,112 +99,102 @@
     }
 
     function solveLP() {
-        const nv = +document.getElementById('num-vars').value;
-        const nc = +document.getElementById('num-cons').value;
-        const isMin = document.getElementById('obj-type').value === 'min';
-        const steps = document.getElementById('steps-area');
-        steps.innerHTML = '';
+        try {
+            const nv = +document.getElementById('num-vars').value;
+            const nc = +document.getElementById('num-cons').value;
+            const isMin = document.getElementById('obj-type').value === 'min';
+            const steps = document.getElementById('steps-area');
+            steps.innerHTML = '';
 
-        // 1. Build Initial Matrix (handling Big-M for simplicity in a single phase logic)
-        // Table columns: x1...xn, s1...sm (slack/surplus), a1...ak (artificial), RHS
-        let slackCount = 0, artifCount = 0;
-        const ops = Array.from(document.querySelectorAll('.con-op')).map(s => s.value);
-        ops.forEach(op => {
-            if(op === '<=') slackCount++;
-            else if(op === '>=') { slackCount++; artifCount++; }
-            else artifCount++;
-        });
+            let slackCount = 0, artifCount = 0;
+            const ops = Array.from(document.querySelectorAll('.con-op')).map(s => s.value);
+            ops.forEach(op => {
+                if(op === '<=') slackCount++;
+                else if(op === '>=') { slackCount++; artifCount++; }
+                else artifCount++;
+            });
 
-        const totalCols = nv + slackCount + artifCount + 1;
-        let tableau = Array.from({length: nc + 1}, () => new Array(totalCols).fill(0));
-        let basis = new Array(nc);
-        const M = 1000000;
+            const totalCols = nv + slackCount + artifCount + 1;
+            let tableau = Array.from({length: nc + 1}, () => new Array(totalCols).fill(0));
+            let basis = new Array(nc);
+            const M = 1000000;
 
-        // Fill constraints
-        let sIdx = nv, aIdx = nv + slackCount;
-        document.querySelectorAll('.con-rhs').forEach((rhsElem, i) => {
-            const rowCoeffs = document.querySelectorAll(`.con-c[data-row="${i}"]`);
-            rowCoeffs.forEach((c, j) => tableau[i][j] = +c.value);
-            tableau[i][totalCols-1] = +rhsElem.value;
-            
-            const op = ops[i];
-            if(op === '<=') {
-                tableau[i][sIdx] = 1; basis[i] = sIdx; sIdx++;
-            } else if(op === '>=') {
-                tableau[i][sIdx] = -1; tableau[i][aIdx] = 1; basis[i] = aIdx; sIdx++; aIdx++;
-            } else {
-                tableau[i][aIdx] = 1; basis[i] = aIdx; aIdx++;
-            }
-        });
+            let sIdx = nv, aIdx = nv + slackCount;
+            document.querySelectorAll('.con-rhs').forEach((rhsElem, i) => {
+                const rowCoeffs = document.querySelectorAll(`.con-c[data-row="${i}"]`);
+                rowCoeffs.forEach((c, j) => tableau[i][j] = +c.value);
+                tableau[i][totalCols-1] = +rhsElem.value;
+                const op = ops[i];
+                if(op === '<=') { tableau[i][sIdx] = 1; basis[i] = sIdx; sIdx++; }
+                else if(op === '>=') { tableau[i][sIdx] = -1; tableau[i][aIdx] = 1; basis[i] = aIdx; sIdx++; aIdx++; }
+                else { tableau[i][aIdx] = 1; basis[i] = aIdx; aIdx++; }
+            });
 
-        // Objective Row
-        document.querySelectorAll('.obj-c').forEach((c, j) => {
-            tableau[nc][j] = isMin ? +c.value : -c.value;
-        });
+            document.querySelectorAll('.obj-c').forEach((c, j) => {
+                tableau[nc][j] = isMin ? +c.value : -c.value;
+            });
 
-        // Apply Big-M penalties to Obj Row
-        for(let i=0; i<nc; i++) {
-            if(basis[i] >= nv + slackCount) { // Artificial
-                const penalty = isMin ? -M : M;
-                for(let j=0; j<totalCols; j++) tableau[nc][j] -= penalty * tableau[i][j];
-            }
-        }
-
-        // 2. Simplex Iterations
-        let iter = 0;
-        while(iter < 20) {
-            let pivotCol = -1, minRedCost = -0.00001;
-            for(let j=0; j<totalCols-1; j++) {
-                if(tableau[nc][j] < minRedCost) { minRedCost = tableau[nc][j]; pivotCol = j; }
-            }
-            if(pivotCol === -1) break;
-
-            let pivotRow = -1, minRatio = Infinity;
             for(let i=0; i<nc; i++) {
-                if(tableau[i][pivotCol] > 0.00001) {
-                    const ratio = tableau[i][totalCols-1] / tableau[i][pivotCol];
-                    if(ratio < minRatio) { minRatio = ratio; pivotRow = i; }
+                if(basis[i] >= nv + slackCount) {
+                    const penalty = isMin ? -M : M;
+                    for(let j=0; j<totalCols; j++) tableau[nc][j] -= penalty * tableau[i][j];
                 }
             }
-            if(pivotRow === -1) { alert("Unbounded!"); return; }
 
-            renderTableau(tableau, basis, iter++, pivotRow, pivotCol, nv, slackCount, artifCount);
-            
-            const pVal = tableau[pivotRow][pivotCol];
-            for(let j=0; j<totalCols; j++) tableau[pivotRow][j] /= pVal;
-            for(let i=0; i<=nc; i++) {
-                if(i !== pivotRow) {
-                    const factor = tableau[i][pivotCol];
-                    for(let j=0; j<totalCols; j++) tableau[i][j] -= factor * tableau[pivotRow][j];
+            let iter = 0;
+            while(iter < 20) {
+                let pivotCol = -1, minRedCost = -0.00001;
+                for(let j=0; j<totalCols-1; j++) {
+                    if(tableau[nc][j] < minRedCost) { minRedCost = tableau[nc][j]; pivotCol = j; }
                 }
+                if(pivotCol === -1) break;
+
+                let pivotRow = -1, minRatio = Infinity;
+                for(let i=0; i<nc; i++) {
+                    if(tableau[i][pivotCol] > 0.00001) {
+                        const ratio = tableau[i][totalCols-1] / tableau[i][pivotCol];
+                        if(ratio < minRatio) { minRatio = ratio; pivotRow = i; }
+                    }
+                }
+                if(pivotRow === -1) { alert("Unbounded Problem Detected!"); return; }
+
+                renderTableau(tableau, basis, iter++, pivotRow, pivotCol, nv, slackCount, artifCount);
+                const pVal = tableau[pivotRow][pivotCol];
+                for(let j=0; j<totalCols; j++) tableau[pivotRow][j] /= pVal;
+                for(let i=0; i<=nc; i++) {
+                    if(i !== pivotRow) {
+                        const factor = tableau[i][pivotCol];
+                        for(let j=0; j<totalCols; j++) tableau[i][j] -= factor * tableau[pivotRow][j];
+                    }
+                }
+                basis[pivotRow] = pivotCol;
             }
-            basis[pivotRow] = pivotCol;
+
+            renderTableau(tableau, basis, 'Final', -1, -1, nv, slackCount, artifCount);
+            displayResults(tableau, basis, nv, nc, isMin, totalCols, slackCount);
+        } catch(e) {
+            console.error(e);
+            alert("Calculation error. Check values and console.");
         }
-
-        renderTableau(tableau, basis, 'Final', -1, -1, nv, slackCount, artifCount);
-        displayResults(tableau, basis, nv, nc, isMin);
     }
 
-    function displayResults(m, basis, nv, nc, isMin) {
+    function displayResults(m, basis, nv, nc, isMin, totalCols, ns) {
         const resArea = document.getElementById('results-area');
-        const z = m[nc][nv + (m[0].length - nv - 1)]; // simplified RHS access
-        const finalZ = isMin ? m[nc][m[0].length-1] : -m[nc][m[0].length-1];
-
-        // Multi-solution check: Is there a non-basic var with 0 reduced cost?
+        const finalZ = isMin ? m[nc][totalCols-1] : -m[nc][totalCols-1];
         let multi = false;
         for(let j=0; j<nv; j++) {
             if(!basis.includes(j) && Math.abs(m[nc][j]) < 0.0001) multi = true;
         }
 
         let html = `<div class="result-box opt-box">
-            <strong>Optimal Solution Found</strong> ${multi ? '<span class="multi-tag">Alternative Optima Exist</span>' : ''}
+            <strong>Solution Found</strong> ${multi ? '<span class="multi-tag">Alt Optima Exist</span>' : ''}
             <div style="font-size: 24px; margin-top:5px;">Z = ${finalZ.toFixed(2)}</div>
         </div>`;
 
         html += `<table style="margin-top:15px;"><tr><th>Variable</th><th>Value</th><th>Reduced Cost</th></tr>`;
         for(let j=0; j<nv; j++) {
             const bIdx = basis.indexOf(j);
-            const val = bIdx !== -1 ? m[bIdx][m[0].length-1] : 0;
+            const val = bIdx !== -1 ? m[bIdx][totalCols-1] : 0;
             html += `<tr><td>x${j+1}</td><td>${val.toFixed(2)}</td><td>${m[nc][j].toFixed(2)}</td></tr>`;
         }
         html += `</table>`;
@@ -222,10 +209,16 @@
         for(let i=1; i<=ns; i++) h += `<th>s${i}</th>`;
         for(let i=1; i<=na; i++) h += `<th>a${i}</th>`;
         h += `<th>RHS</th></tr>`;
-        
         m.forEach((row, i) => {
             const isPR = (i === pr);
-            h += `<tr class="${isPR ? 'pivot-row' : ''}"><td>${i === m.length-1 ? 'Z' : 'Row '+(i+1)}</td>`;
+            let bLabel = "Z";
+            if(i < m.length-1) {
+                const bVar = basis[i];
+                if(bVar < nv) bLabel = "x" + (bVar+1);
+                else if(bVar < nv + ns) bLabel = "s" + (bVar - nv + 1);
+                else bLabel = "a" + (bVar - nv - ns + 1);
+            }
+            h += `<tr class="${isPR ? 'pivot-row' : ''}"><td>${bLabel}</td>`;
             row.forEach((cell, j) => {
                 let cls = (j === pc) ? 'pivot-col' : '';
                 if(isPR && j === pc) cls = 'pivot-cell';
@@ -236,7 +229,6 @@
         wrap.innerHTML = h + `</table>`;
         document.getElementById('steps-area').appendChild(wrap);
     }
-
     initModel();
 </script>
 </body>
