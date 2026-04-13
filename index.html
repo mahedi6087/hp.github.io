@@ -1,1111 +1,131 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Linear Programming Solver</title>
-<style>
-  :root {
-    --bg: #f8f9fb;
-    --bg2: #ffffff;
-    --bg3: #f1f3f7;
-    --text: #1a1d23;
-    --text2: #4a5568;
-    --text3: #718096;
-    --border: #e2e8f0;
-    --accent: #4f46e5;
-    --accent2: #6366f1;
-    --accent-light: #ede9fe;
-    --success: #059669;
-    --success-light: #d1fae5;
-    --danger: #dc2626;
-    --danger-light: #fee2e2;
-    --warning: #d97706;
-    --warning-light: #fef3c7;
-    --pivot: #f59e0b;
-    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
-    --radius: 10px;
-    --transition: 0.2s ease;
-  }
-  [data-theme="dark"] {
-    --bg: #0f1117;
-    --bg2: #1a1d2e;
-    --bg3: #252837;
-    --text: #e2e8f0;
-    --text2: #a0aec0;
-    --text3: #718096;
-    --border: #2d3748;
-    --accent: #818cf8;
-    --accent2: #a5b4fc;
-    --accent-light: #1e1b4b;
-    --success: #34d399;
-    --success-light: #064e3b;
-    --danger: #f87171;
-    --danger-light: #7f1d1d;
-    --warning: #fbbf24;
-    --warning-light: #78350f;
-    --pivot: #fbbf24;
-    --shadow: 0 1px 3px rgba(0,0,0,0.3);
-    --shadow-md: 0 4px 6px rgba(0,0,0,0.4);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    transition: background var(--transition), color var(--transition);
-    font-size: 14px;
-  }
-  header {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 56px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: var(--shadow);
-  }
-  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; color: var(--accent); }
-  .logo-icon { width: 28px; height: 28px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
-  .logo-icon svg { width: 16px; height: 16px; fill: white; }
-  .header-actions { display: flex; align-items: center; gap: 8px; }
-  .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--bg2); color: var(--text); cursor: pointer;
-    font-size: 13px; font-weight: 500; transition: all var(--transition);
-    white-space: nowrap;
-  }
-  .btn:hover { background: var(--bg3); border-color: var(--accent); }
-  .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
-  .btn-primary:hover { background: var(--accent2); border-color: var(--accent2); }
-  .btn-success { background: var(--success); color: white; border-color: var(--success); }
-  .btn-danger { background: transparent; color: var(--danger); border-color: var(--danger); }
-  .btn-danger:hover { background: var(--danger-light); }
-  .btn-sm { padding: 5px 10px; font-size: 12px; }
-  .btn-icon { padding: 7px; min-width: 36px; justify-content: center; }
-  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; display: flex; flex-direction: column; gap: 20px; }
-  .card {
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: var(--radius); box-shadow: var(--shadow);
-    overflow: hidden; transition: box-shadow var(--transition);
-  }
-  .card-header {
-    padding: 16px 20px; border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--bg3);
-  }
-  .card-title { font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
-  .card-title .badge {
-    background: var(--accent-light); color: var(--accent);
-    font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600;
-  }
-  .card-body { padding: 20px; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
-  .form-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-  .form-group { display: flex; flex-direction: column; gap: 4px; }
-  label { font-size: 12px; font-weight: 500; color: var(--text2); }
-  select, input[type="number"], input[type="text"] {
-    padding: 8px 12px; border: 1px solid var(--border); border-radius: 7px;
-    background: var(--bg); color: var(--text); font-size: 14px;
-    transition: border-color var(--transition), box-shadow var(--transition);
-    outline: none;
-  }
-  select:focus, input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
-  }
-  .coeff-input { width: 72px; text-align: center; }
-  .rhs-input { width: 80px; }
-  .obj-row {
-    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-    background: var(--bg3); padding: 12px 16px; border-radius: 8px;
-    border: 1px solid var(--border);
-  }
-  .obj-term { display: flex; align-items: center; gap: 4px; }
-  .var-label { font-size: 13px; color: var(--text2); font-style: italic; font-weight: 500; }
-  .plus-sign { color: var(--text3); font-size: 16px; }
-  .constraint-row {
-    display: flex; align-items: center; gap: 8px; padding: 10px 12px;
-    border: 1px solid var(--border); border-radius: 8px; background: var(--bg);
-    margin-bottom: 8px; flex-wrap: wrap; transition: border-color var(--transition);
-  }
-  .constraint-row:hover { border-color: var(--accent); }
-  .constraint-num { font-size: 12px; color: var(--text3); min-width: 20px; text-align: center; }
-  .op-select { width: 60px; text-align: center; }
-  .error-msg { color: var(--danger); font-size: 12px; padding: 8px 12px; background: var(--danger-light); border-radius: 6px; border-left: 3px solid var(--danger); }
-  .result-box {
-    padding: 16px; border-radius: 8px; border: 1px solid var(--border);
-    display: flex; flex-direction: column; gap: 8px;
-  }
-  .result-optimal { background: var(--success-light); border-color: var(--success); }
-  .result-infeasible { background: var(--danger-light); border-color: var(--danger); }
-  .result-unbounded { background: var(--warning-light); border-color: var(--warning); }
-  .result-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-  .result-optimal .result-label { color: var(--success); }
-  .result-infeasible .result-label { color: var(--danger); }
-  .result-unbounded .result-label { color: var(--warning); }
-  .result-value { font-size: 26px; font-weight: 700; color: var(--text); }
-  .vars-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
-  .var-chip {
-    padding: 5px 12px; border-radius: 20px; background: var(--accent-light);
-    color: var(--accent); font-size: 13px; font-weight: 500;
-  }
-  .binding-chip {
-    padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500;
-  }
-  .binding { background: var(--success-light); color: var(--success); }
-  .non-binding { background: var(--bg3); color: var(--text3); }
-  .tableau-wrap { overflow-x: auto; }
-  table.simplex-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  table.simplex-table th {
-    background: var(--bg3); color: var(--text2); font-weight: 600;
-    padding: 8px 10px; text-align: center; border: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  table.simplex-table td {
-    padding: 7px 10px; text-align: center; border: 1px solid var(--border);
-    color: var(--text); transition: background 0.3s;
-  }
-  table.simplex-table tr:nth-child(even) td { background: var(--bg3); }
-  table.simplex-table td.pivot-cell { background: var(--pivot) !important; color: #000; font-weight: 700; }
-  table.simplex-table td.pivot-row { background: rgba(245,158,11,0.1) !important; }
-  table.simplex-table td.pivot-col { background: rgba(79,70,229,0.07) !important; }
-  .iteration-header {
-    font-size: 12px; font-weight: 600; color: var(--accent);
-    margin: 14px 0 6px; display: flex; align-items: center; gap: 8px;
-  }
-  .iteration-header::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-  .toggle-row { display: flex; align-items: center; gap: 10px; }
-  .toggle { position: relative; width: 40px; height: 22px; }
-  .toggle input { opacity: 0; width: 0; height: 0; }
-  .toggle-slider {
-    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-    background: var(--border); transition: var(--transition); border-radius: 22px;
-  }
-  .toggle-slider:before {
-    content: ''; position: absolute; width: 16px; height: 16px; left: 3px; bottom: 3px;
-    background: white; transition: var(--transition); border-radius: 50%;
-  }
-  input:checked + .toggle-slider { background: var(--accent); }
-  input:checked + .toggle-slider:before { transform: translateX(18px); }
-  .section-divider { height: 1px; background: var(--border); margin: 16px 0; }
-  .step-info { font-size: 12px; color: var(--text2); padding: 8px 12px; background: var(--bg3); border-radius: 6px; border-left: 3px solid var(--accent); margin-bottom: 10px; }
-  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
-  .empty-state { text-align: center; padding: 40px; color: var(--text3); font-size: 14px; }
-  .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
-  .fade-in { animation: fadeIn 0.3s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  .sensitivity-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .sensitivity-table th, .sensitivity-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-  .sensitivity-table th { font-weight: 600; color: var(--text2); font-size: 12px; }
-  .sensitivity-table tr:last-child td { border-bottom: none; }
-  .tooltip { position: relative; cursor: help; }
-  .tooltip::after {
-    content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
-    background: var(--text); color: var(--bg); font-size: 11px; padding: 4px 8px;
-    border-radius: 5px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.2s;
-    z-index: 99;
-  }
-  .tooltip:hover::after { opacity: 1; }
-  #notifications { position: fixed; top: 68px; right: 16px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
-  .notif {
-    background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
-    padding: 10px 16px; font-size: 13px; box-shadow: var(--shadow-md);
-    animation: slideIn 0.3s ease; max-width: 300px;
-  }
-  .notif-success { border-left: 3px solid var(--success); }
-  .notif-error { border-left: 3px solid var(--danger); }
-  @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-  .progress-bar { height: 3px; background: var(--accent); border-radius: 3px; transition: width 0.3s; }
-  .progress-wrap { height: 3px; background: var(--border); border-radius: 3px; margin-top: 8px; }
-  .dual-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
-  .dual-card { padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg3); }
-  .dual-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
-  .dual-value { font-size: 20px; font-weight: 600; color: var(--text); }
-</style>
+  <title>Pro LP Solver</title>
+  <style>
+    body { background:#0f172a; color:#fff; font-family:sans-serif; }
+    .box { background:#1e293b; padding:15px; margin:10px; border-radius:10px;}
+    input, select { margin:3px; padding:5px;}
+    button { padding:8px; background:#22c55e; border:none; cursor:pointer;}
+    table { border-collapse: collapse; }
+    td { padding:5px; }
+  </style>
 </head>
+
 <body>
 
-<header>
-  <div class="logo">
-    <div class="logo-icon">
-      <svg viewBox="0 0 16 16"><path d="M2 13L6 7l3 4 2-3 3 5H2z"/><circle cx="12" cy="4" r="2"/></svg>
-    </div>
-    LP Solver
-  </div>
-  <div class="header-actions">
-    <button class="btn btn-sm" id="randomBtn" title="Generate random problem">&#9684; Random</button>
-    <button class="btn btn-sm" id="resetBtn">&#8635; Reset</button>
-    <button class="btn btn-sm btn-icon" id="exportBtn" title="Export results">&#8615;</button>
-    <button class="btn btn-sm btn-icon" id="themeBtn" title="Toggle dark/light mode">&#9788;</button>
-  </div>
-</header>
+<h1>🚀 Advanced Linear Programming Solver</h1>
 
-<div id="notifications"></div>
+<div class="box">
+  <h3>Variables</h3>
+  <div id="vars"></div>
+  <button onclick="addVar()">+ Add Variable</button>
+</div>
 
-<main>
-  <!-- Problem Setup -->
-  <div class="card fade-in">
-    <div class="card-header">
-      <span class="card-title">&#9881; Problem Setup</span>
-      <div class="toggle-row">
-        <span style="font-size:12px;color:var(--text3)">Step-by-step</span>
-        <label class="toggle"><input type="checkbox" id="stepByStep" checked><span class="toggle-slider"></span></label>
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Objective</label>
-          <select id="objType">
-            <option value="max">Maximize</option>
-            <option value="min">Minimize</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Number of Variables</label>
-          <select id="numVars">
-            <option value="2">2 variables</option>
-            <option value="3">3 variables</option>
-            <option value="4">4 variables</option>
-            <option value="5">5 variables</option>
-            <option value="6">6 variables</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="box">
+  <h3>Objective Function</h3>
+  <select id="optType">
+    <option value="max">Maximize</option>
+    <option value="min">Minimize</option>
+  </select>
+  <div id="objective"></div>
+</div>
 
-  <!-- Objective Function -->
-  <div class="card fade-in">
-    <div class="card-header">
-      <span class="card-title">&#402; Objective Function <span class="badge" id="objBadge">Maximize Z</span></span>
-    </div>
-    <div class="card-body">
-      <div id="objRow" class="obj-row"></div>
-    </div>
-  </div>
+<div class="box">
+  <h3>Constraints</h3>
+  <div id="constraints"></div>
+  <button onclick="addConstraint()">+ Add Constraint</button>
+</div>
 
-  <!-- Constraints -->
-  <div class="card fade-in">
-    <div class="card-header">
-      <span class="card-title">&#8801; Constraints <span class="badge" id="cntBadge">0 constraints</span></span>
-      <div class="toolbar">
-        <button class="btn btn-sm btn-primary" id="addConstraintBtn">+ Add Constraint</button>
-      </div>
-    </div>
-    <div class="card-body">
-      <div id="constraintsList"></div>
-      <div id="noConstraints" class="empty-state">
-        <div class="empty-icon">&#8803;</div>
-        <div>No constraints added. Click "+ Add Constraint" to begin.</div>
-      </div>
-    </div>
-  </div>
+<div class="box">
+  <button onclick="solve()">⚡ Solve</button>
+</div>
 
-  <!-- Solve Button -->
-  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-    <button class="btn btn-success" id="solveBtn" style="font-size:15px;padding:12px 32px;">&#9654; Solve LP Problem</button>
-    <button class="btn" id="clearResultsBtn" style="display:none">&#10006; Clear Results</button>
-  </div>
-
-  <!-- Results -->
-  <div id="resultsSection" style="display:none">
-    <!-- Solution -->
-    <div class="card fade-in" id="solutionCard">
-      <div class="card-header">
-        <span class="card-title">&#10003; Solution</span>
-      </div>
-      <div class="card-body">
-        <div class="grid-2">
-          <div>
-            <div id="solutionBox"></div>
-            <div class="vars-grid" id="varValues" style="margin-top:12px"></div>
-          </div>
-          <div>
-            <div style="margin-bottom:10px;font-size:13px;font-weight:600;color:var(--text2)">Constraint Status</div>
-            <div id="constraintStatus"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sensitivity Analysis -->
-    <div class="card fade-in" id="sensitivityCard" style="margin-top:16px">
-      <div class="card-header">
-        <span class="card-title">&#9639; Sensitivity Analysis</span>
-      </div>
-      <div class="card-body">
-        <div class="grid-2" style="gap:16px">
-          <div>
-            <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px">Objective Coefficients</div>
-            <table class="sensitivity-table" id="objSensTable"></table>
-          </div>
-          <div>
-            <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px">Dual Variables (Shadow Prices)</div>
-            <div class="dual-grid" id="dualGrid"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Simplex Tableaux -->
-    <div class="card fade-in" id="tableauCard" style="margin-top:16px">
-      <div class="card-header">
-        <span class="card-title">&#8710; Simplex Tableaux</span>
-        <div style="font-size:12px;color:var(--text3)" id="iterCount"></div>
-      </div>
-      <div class="card-body" id="tableauBody"></div>
-    </div>
-  </div>
-</main>
+<div class="box">
+  <h3>Result</h3>
+  <div id="output"></div>
+</div>
 
 <script>
-/* ============================================================
-   STATE
-   ============================================================ */
-let state = {
-  numVars: 2,
-  objType: 'max',
-  objCoeffs: [1, 1],
-  constraints: [],
-  constraintId: 0,
-  theme: 'light',
-  stepByStep: true,
-  solution: null
-};
 
-/* ============================================================
-   INIT
-   ============================================================ */
-document.addEventListener('DOMContentLoaded', () => {
-  bindEvents();
+let varCount = 0;
+let constraintCount = 0;
+
+function addVar(){
+  varCount++;
+  document.getElementById("vars").innerHTML += `
+    x${varCount}
+    <input id="min${varCount}" placeholder="min" value="0">
+    <input id="max${varCount}" placeholder="max" value="100">
+    <br>
+  `;
   renderObjective();
-  renderConstraints();
-  // Default example
-  loadDefault();
-});
-
-function loadDefault() {
-  state.objCoeffs = [5, 4];
-  updateObjInputs();
-  addConstraint([6, 4], '<=', 24);
-  addConstraint([1, 2], '<=', 6);
-  addConstraint([0, 1], '<=', 4);
-  addConstraint([1, 0], '<=', 5);
 }
 
-function bindEvents() {
-  document.getElementById('numVars').addEventListener('change', e => {
-    const n = parseInt(e.target.value);
-    state.numVars = n;
-    state.objCoeffs = Array(n).fill(1);
-    state.constraints.forEach(c => {
-      while(c.coeffs.length < n) c.coeffs.push(0);
-      c.coeffs = c.coeffs.slice(0, n);
-    });
-    renderObjective();
-    renderConstraints();
-  });
-  document.getElementById('objType').addEventListener('change', e => {
-    state.objType = e.target.value;
-    document.getElementById('objBadge').textContent =
-      (e.target.value === 'max' ? 'Maximize' : 'Minimize') + ' Z';
-  });
-  document.getElementById('addConstraintBtn').addEventListener('click', () => {
-    addConstraint(Array(state.numVars).fill(0), '<=', 0);
-  });
-  document.getElementById('solveBtn').addEventListener('click', solve);
-  document.getElementById('resetBtn').addEventListener('click', resetAll);
-  document.getElementById('randomBtn').addEventListener('click', randomProblem);
-  document.getElementById('themeBtn').addEventListener('click', toggleTheme);
-  document.getElementById('exportBtn').addEventListener('click', exportResults);
-  document.getElementById('clearResultsBtn').addEventListener('click', () => {
-    document.getElementById('resultsSection').style.display = 'none';
-    document.getElementById('clearResultsBtn').style.display = 'none';
-    state.solution = null;
-  });
-  document.getElementById('stepByStep').addEventListener('change', e => {
-    state.stepByStep = e.target.checked;
-  });
+function renderObjective(){
+  let html = "";
+  for(let i=1;i<=varCount;i++){
+    html += `<input id="obj${i}" value="0"> x${i} `;
+    if(i<varCount) html += "+ ";
+  }
+  document.getElementById("objective").innerHTML = html;
 }
 
-/* ============================================================
-   RENDER OBJECTIVE
-   ============================================================ */
-function renderObjective() {
-  const row = document.getElementById('objRow');
-  row.innerHTML = '<span style="font-weight:600;color:var(--text2);font-size:14px">Z =</span>';
-  for (let i = 0; i < state.numVars; i++) {
-    if (i > 0) row.insertAdjacentHTML('beforeend', '<span class="plus-sign">+</span>');
-    const term = document.createElement('div');
-    term.className = 'obj-term';
-    term.innerHTML = `
-      <input type="number" class="coeff-input" data-obj="${i}"
-        value="${state.objCoeffs[i] || 0}" step="any" placeholder="0"
-        title="Coefficient for x${sub(i+1)}">
-      <span class="var-label">x${sub(i+1)}</span>`;
-    row.appendChild(term);
-  }
-  row.querySelectorAll('[data-obj]').forEach(inp => {
-    inp.addEventListener('input', e => {
-      state.objCoeffs[parseInt(e.target.dataset.obj)] = parseFloat(e.target.value) || 0;
-    });
-  });
-}
+function addConstraint(){
+  constraintCount++;
+  let row = `<div id="c${constraintCount}">`;
 
-function updateObjInputs() {
-  document.querySelectorAll('[data-obj]').forEach(inp => {
-    const i = parseInt(inp.dataset.obj);
-    if (i < state.objCoeffs.length) inp.value = state.objCoeffs[i];
-  });
-}
-
-/* ============================================================
-   CONSTRAINTS
-   ============================================================ */
-function addConstraint(coeffs, op, rhs) {
-  const id = ++state.constraintId;
-  state.constraints.push({ id, coeffs: [...coeffs], op, rhs });
-  renderConstraints();
-}
-
-function removeConstraint(id) {
-  state.constraints = state.constraints.filter(c => c.id !== id);
-  renderConstraints();
-}
-
-function renderConstraints() {
-  const list = document.getElementById('constraintsList');
-  const noC = document.getElementById('noConstraints');
-  document.getElementById('cntBadge').textContent = state.constraints.length + ' constraint' + (state.constraints.length !== 1 ? 's' : '');
-  if (state.constraints.length === 0) {
-    list.innerHTML = '';
-    noC.style.display = '';
-    return;
-  }
-  noC.style.display = 'none';
-  list.innerHTML = '';
-  state.constraints.forEach((c, idx) => {
-    const row = document.createElement('div');
-    row.className = 'constraint-row';
-    let html = `<span class="constraint-num">${idx+1}</span>`;
-    for (let i = 0; i < state.numVars; i++) {
-      if (i > 0) html += '<span class="plus-sign" style="font-size:13px">+</span>';
-      html += `<div class="obj-term">
-        <input type="number" class="coeff-input" data-cid="${c.id}" data-ci="${i}"
-          value="${c.coeffs[i]||0}" step="any" placeholder="0">
-        <span class="var-label" style="font-size:12px">x${sub(i+1)}</span>
-      </div>`;
-    }
-    html += `<select class="op-select" data-op="${c.id}">
-      <option ${c.op==='<='?'selected':''}>≤</option>
-      <option ${c.op==='>='?'selected':''}>≥</option>
-      <option ${c.op==='='?'selected':''}>= </option>
-    </select>`;
-    html += `<input type="number" class="rhs-input" data-rhs="${c.id}" value="${c.rhs}" step="any" placeholder="RHS">`;
-    html += `<button class="btn btn-sm btn-danger" data-remove="${c.id}">&#10005;</button>`;
-    row.innerHTML = html;
-    list.appendChild(row);
-  });
-  // bind events
-  list.querySelectorAll('[data-cid]').forEach(inp => {
-    inp.addEventListener('input', e => {
-      const cid = parseInt(e.target.dataset.cid), ci = parseInt(e.target.dataset.ci);
-      const c = state.constraints.find(x => x.id === cid);
-      if (c) c.coeffs[ci] = parseFloat(e.target.value) || 0;
-    });
-  });
-  list.querySelectorAll('[data-op]').forEach(sel => {
-    sel.addEventListener('change', e => {
-      const cid = parseInt(e.target.dataset.op);
-      const c = state.constraints.find(x => x.id === cid);
-      if (c) c.op = e.target.value.trim();
-    });
-  });
-  list.querySelectorAll('[data-rhs]').forEach(inp => {
-    inp.addEventListener('input', e => {
-      const cid = parseInt(e.target.dataset.rhs);
-      const c = state.constraints.find(x => x.id === cid);
-      if (c) c.rhs = parseFloat(e.target.value) || 0;
-    });
-  });
-  list.querySelectorAll('[data-remove]').forEach(btn => {
-    btn.addEventListener('click', e => removeConstraint(parseInt(e.target.dataset.remove)));
-  });
-}
-
-/* ============================================================
-   VALIDATION
-   ============================================================ */
-function validate() {
-  if (state.constraints.length === 0) return 'Add at least one constraint.';
-  for (let i = 0; i < state.numVars; i++) {
-    if (isNaN(state.objCoeffs[i])) return `Objective coefficient for x${i+1} is invalid.`;
-  }
-  for (let idx = 0; idx < state.constraints.length; idx++) {
-    const c = state.constraints[idx];
-    for (let i = 0; i < state.numVars; i++) {
-      if (isNaN(c.coeffs[i])) return `Constraint ${idx+1}: coefficient for x${i+1} is invalid.`;
-    }
-    if (isNaN(c.rhs)) return `Constraint ${idx+1}: RHS value is invalid.`;
-  }
-  return null;
-}
-
-/* ============================================================
-   SIMPLEX ENGINE
-   ============================================================ */
-
-/**
- * Build augmented tableau from constraints.
- * Returns { tableau, basis, varNames, numOrigVars, numSlack }
- * We convert everything to standard form:
- *   <= : add slack  si >= 0
- *   >= : subtract surplus si + add artificial ai
- *   =  : add artificial ai
- * Big-M method for artificials.
- */
-function buildTableau() {
-  const n = state.numVars;
-  const m = state.constraints.length;
-  const M = 1e7; // Big-M
-
-  // Count artificials needed
-  let numSlack = 0, numArtificial = 0;
-  const constraintInfo = state.constraints.map(c => {
-    const op = c.op.trim();
-    if (op === '<=') { numSlack++; return { type: 'slack' }; }
-    if (op === '>=') { numSlack++; numArtificial++; return { type: 'surplus_art' }; }
-    if (op === '=')  { numArtificial++; return { type: 'art' }; }
-    return { type: 'slack' };
-  });
-
-  const totalVars = n + numSlack + numArtificial;
-  // Columns: x1..xn | s1..sS | a1..aA | RHS
-  const varNames = [];
-  for (let i = 0; i < n; i++) varNames.push(`x${i+1}`);
-  let sIdx = 0, aIdx = 0;
-  const slackMap = []; // per constraint -> slack var index (or -1)
-  const artMap = [];   // per constraint -> art var index (or -1)
-  constraintInfo.forEach((ci, i) => {
-    if (ci.type === 'slack') {
-      slackMap.push(n + sIdx);
-      artMap.push(-1);
-      varNames.push(`s${sIdx+1}`);
-      sIdx++;
-    } else if (ci.type === 'surplus_art') {
-      slackMap.push(n + sIdx);
-      artMap.push(n + numSlack + aIdx);
-      varNames.push(`s${sIdx+1}`);
-      sIdx++;
-      varNames.push(`a${aIdx+1}`);
-      aIdx++;
-    } else { // art only
-      slackMap.push(-1);
-      artMap.push(n + numSlack + aIdx);
-      varNames.push(`a${aIdx+1}`);
-      aIdx++;
-    }
-  });
-
-  // Build tableau rows (m rows + 1 obj row)
-  // Each row: [coefficients ... , RHS]
-  const tableau = [];
-  const basis = [];
-
-  // Build constraint rows; ensure RHS >= 0
-  for (let i = 0; i < m; i++) {
-    let row = Array(totalVars + 1).fill(0);
-    const c = state.constraints[i];
-    const op = c.op.trim();
-    let rhs = c.rhs;
-    let coeffs = [...c.coeffs];
-
-    // Make RHS non-negative
-    if (rhs < 0) {
-      coeffs = coeffs.map(v => -v);
-      rhs = -rhs;
-      // Flip operator
-      if (op === '<=') constraintInfo[i].flipped = '>=';
-      else if (op === '>=') constraintInfo[i].flipped = '<=';
-    }
-
-    for (let j = 0; j < n; j++) row[j] = coeffs[j];
-    const actualOp = constraintInfo[i].flipped || op;
-
-    if (actualOp === '<=') {
-      row[slackMap[i]] = 1;
-      basis.push(slackMap[i]);
-    } else if (actualOp === '>=') {
-      row[slackMap[i]] = -1; // surplus
-      row[artMap[i]] = 1;
-      basis.push(artMap[i]);
-    } else { // =
-      row[artMap[i]] = 1;
-      basis.push(artMap[i]);
-    }
-    row[totalVars] = rhs;
-    tableau.push(row);
+  for(let i=1;i<=varCount;i++){
+    row += `<input id="c${constraintCount}_${i}" value="0"> x${i} `;
+    if(i<varCount) row += "+ ";
   }
 
-  // Objective row (maximize by default; negate for minimize)
-  let objRow = Array(totalVars + 1).fill(0);
-  for (let j = 0; j < n; j++) {
-    objRow[j] = state.objType === 'max' ? -state.objCoeffs[j] : state.objCoeffs[j];
-  }
-  // Big-M penalty for artificials
-  for (let i = 0; i < m; i++) {
-    if (artMap[i] >= 0) {
-      // obj row for artificial: +M (maximizing, so subtract from objective)
-      objRow[artMap[i]] = M;
-    }
-  }
-  // Eliminate artificials from objective row by subtracting basis rows
-  for (let i = 0; i < m; i++) {
-    if (artMap[i] >= 0) {
-      const mCoeff = objRow[artMap[i]];
-      for (let j = 0; j <= totalVars; j++) {
-        objRow[j] -= mCoeff * tableau[i][j];
-      }
-    }
-  }
-  tableau.push(objRow);
-
-  return { tableau, basis, varNames, numOrigVars: n, numSlack, numArtificial, totalVars };
-}
-
-/**
- * Simplex iteration.
- * Returns { status, iterations, solution }
- * status: 'optimal' | 'unbounded' | 'infeasible'
- */
-function simplex() {
-  const { tableau, basis, varNames, numOrigVars, numSlack, numArtificial, totalVars } = buildTableau();
-  const m = tableau.length - 1; // number of constraint rows
-  const MAX_ITER = 200;
-  const EPSILON = 1e-9;
-  const M = 1e7;
-  const iterations = [];
-
-  // snapshot tableau
-  function snapshot(pivotRow, pivotCol) {
-    return {
-      tableau: tableau.map(r => [...r]),
-      basis: [...basis],
-      varNames: [...varNames],
-      pivotRow, pivotCol,
-      totalVars
-    };
-  }
-
-  iterations.push(snapshot(-1, -1)); // initial
-
-  let iter = 0;
-  while (iter++ < MAX_ITER) {
-    // Find entering variable: most negative obj row coefficient
-    const objRow = tableau[m];
-    let enterCol = -1;
-    let minVal = -EPSILON;
-    for (let j = 0; j < totalVars; j++) {
-      if (objRow[j] < minVal) { minVal = objRow[j]; enterCol = j; }
-    }
-    if (enterCol === -1) break; // optimal
-
-    // Check unbounded: all constraint rows have <= 0 in enterCol
-    let leaveRow = -1;
-    let minRatio = Infinity;
-    for (let i = 0; i < m; i++) {
-      if (tableau[i][enterCol] > EPSILON) {
-        const ratio = tableau[i][totalVars] / tableau[i][enterCol];
-        if (ratio < minRatio - EPSILON) {
-          minRatio = ratio;
-          leaveRow = i;
-        }
-      }
-    }
-    if (leaveRow === -1) return { status: 'unbounded', iterations, varNames };
-
-    // Pivot
-    const pivotVal = tableau[leaveRow][enterCol];
-    for (let j = 0; j <= totalVars; j++) tableau[leaveRow][j] /= pivotVal;
-    for (let i = 0; i <= m; i++) {
-      if (i === leaveRow) continue;
-      const factor = tableau[i][enterCol];
-      for (let j = 0; j <= totalVars; j++) {
-        tableau[i][j] -= factor * tableau[leaveRow][j];
-      }
-    }
-    basis[leaveRow] = enterCol;
-    iterations.push(snapshot(leaveRow, enterCol));
-  }
-
-  // Check for artificials in basis (infeasible)
-  const artStart = numOrigVars + numSlack;
-  for (let i = 0; i < m; i++) {
-    if (basis[i] >= artStart && Math.abs(tableau[i][totalVars]) > 1e-6) {
-      return { status: 'infeasible', iterations, varNames };
-    }
-  }
-
-  // Extract solution
-  const xVals = Array(numOrigVars).fill(0);
-  for (let i = 0; i < m; i++) {
-    if (basis[i] < numOrigVars) {
-      xVals[basis[i]] = tableau[i][totalVars];
-    }
-  }
-
-  // Objective value
-  let zVal = tableau[m][totalVars]; // stored as maximization
-  if (state.objType === 'min') zVal = -zVal; // flip back to original
-  else zVal = zVal; // already correct for max (tableau stored negated obj)
-
-  // Actually the tableau stores negated obj, so the RHS of obj row is -Z for max
-  // Let me correct: for max, obj row RHS after simplex = -Z => Z = -RHS? 
-  // Actually the standard form: obj row starts as c - z = 0 (all on left).
-  // At optimality, the RHS of obj row = Z for min, or we stored -c so RHS = Z for max.
-  // Let's recompute from basis:
-  let z = 0;
-  for (let i = 0; i < numOrigVars; i++) z += state.objCoeffs[i] * xVals[i];
-
-  // Slack values
-  const slackVals = Array(m).fill(0);
-  for (let i = 0; i < m; i++) {
-    if (basis[i] >= numOrigVars && basis[i] < numOrigVars + m) {
-      slackVals[basis[i] - numOrigVars] = tableau[i][totalVars];
-    }
-  }
-
-  // Dual variables (shadow prices): obj row coefficients for slack variables
-  const dualVars = [];
-  const objRow = tableau[m];
-  let slackOffset = numOrigVars;
-  for (let i = 0; i < state.constraints.length; i++) {
-    // The slack/surplus variable for this constraint
-    let si = slackOffset + i; // approximate; may not be exact for >= constraints
-    const dv = state.objType === 'max' ? -objRow[si] : objRow[si];
-    dualVars.push(dv);
-  }
-
-  return {
-    status: 'optimal',
-    iterations,
-    varNames,
-    xVals, z,
-    slackVals,
-    dualVars,
-    numOrigVars, numSlack, numArtificial
-  };
-}
-
-/* ============================================================
-   SOLVE HANDLER
-   ============================================================ */
-function solve() {
-  // Sync all inputs
-  syncAllInputs();
-  const err = validate();
-  if (err) { showNotif(err, 'error'); return; }
-
-  let result;
-  try { result = simplex(); }
-  catch(e) { showNotif('Solver error: ' + e.message, 'error'); return; }
-
-  state.solution = result;
-  document.getElementById('resultsSection').style.display = '';
-  document.getElementById('clearResultsBtn').style.display = '';
-
-  renderSolution(result);
-  renderTableaux(result);
-  if (result.status === 'optimal') renderSensitivity(result);
-
-  document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  showNotif('Solution computed successfully!', 'success');
-}
-
-function syncAllInputs() {
-  // Re-read all visible inputs into state
-  document.querySelectorAll('[data-obj]').forEach(inp => {
-    state.objCoeffs[parseInt(inp.dataset.obj)] = parseFloat(inp.value) || 0;
-  });
-  document.querySelectorAll('[data-cid]').forEach(inp => {
-    const cid = parseInt(inp.dataset.cid), ci = parseInt(inp.dataset.ci);
-    const c = state.constraints.find(x => x.id === cid);
-    if (c) c.coeffs[ci] = parseFloat(inp.value) || 0;
-  });
-  document.querySelectorAll('[data-rhs]').forEach(inp => {
-    const cid = parseInt(inp.dataset.rhs);
-    const c = state.constraints.find(x => x.id === cid);
-    if (c) c.rhs = parseFloat(inp.value) || 0;
-  });
-  document.querySelectorAll('[data-op]').forEach(sel => {
-    const cid = parseInt(sel.dataset.op);
-    const c = state.constraints.find(x => x.id === cid);
-    if (c) c.op = sel.value.trim();
-  });
-  state.objType = document.getElementById('objType').value;
-  state.numVars = parseInt(document.getElementById('numVars').value);
-}
-
-/* ============================================================
-   RENDER SOLUTION
-   ============================================================ */
-function renderSolution(result) {
-  const box = document.getElementById('solutionBox');
-  const varDiv = document.getElementById('varValues');
-  const statusDiv = document.getElementById('constraintStatus');
-  const sensCard = document.getElementById('sensitivityCard');
-
-  if (result.status === 'infeasible') {
-    box.innerHTML = `<div class="result-box result-infeasible">
-      <div class="result-label">&#10006; Infeasible</div>
-      <div style="font-size:14px;color:var(--danger);margin-top:4px">No feasible solution exists. The constraints are contradictory.</div>
-    </div>`;
-    varDiv.innerHTML = '';
-    statusDiv.innerHTML = '';
-    sensCard.style.display = 'none';
-    return;
-  }
-  if (result.status === 'unbounded') {
-    box.innerHTML = `<div class="result-box result-unbounded">
-      <div class="result-label">&#8734; Unbounded</div>
-      <div style="font-size:14px;color:var(--warning);margin-top:4px">The objective function is unbounded in the direction of optimization.</div>
-    </div>`;
-    varDiv.innerHTML = '';
-    statusDiv.innerHTML = '';
-    sensCard.style.display = 'none';
-    return;
-  }
-
-  sensCard.style.display = '';
-  const sign = state.objType === 'max' ? '' : '';
-  box.innerHTML = `<div class="result-box result-optimal">
-    <div class="result-label">&#10003; Optimal Solution Found</div>
-    <div class="result-value">Z = ${fmt(result.z)}</div>
-    <div style="font-size:12px;color:var(--success);margin-top:4px">${state.objType === 'max' ? 'Maximum' : 'Minimum'} value of the objective function</div>
+  row += `
+    <select id="sign${constraintCount}">
+      <option value="<=">≤</option>
+      <option value=">=">≥</option>
+      <option value="=">=</option>
+    </select>
+    <input id="rhs${constraintCount}" value="0">
   </div>`;
 
-  varDiv.innerHTML = result.xVals.map((v, i) =>
-    `<span class="var-chip">x${sub(i+1)} = ${fmt(v)}</span>`
-  ).join('');
-
-  // Constraint status
-  statusDiv.innerHTML = state.constraints.map((c, i) => {
-    const lhs = c.coeffs.reduce((s, coef, j) => s + coef * result.xVals[j], 0);
-    const slack = c.rhs - lhs;
-    const isBinding = Math.abs(slack) < 1e-6;
-    return `<div style="margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <span style="font-size:12px;color:var(--text2);min-width:80px">Constraint ${i+1}</span>
-      <span class="binding-chip ${isBinding ? 'binding' : 'non-binding'}">${isBinding ? 'Binding' : 'Non-binding'}</span>
-      <span style="font-size:12px;color:var(--text3)">LHS = ${fmt(lhs)}, slack = ${fmt(Math.abs(slack))}</span>
-    </div>`;
-  }).join('');
+  document.getElementById("constraints").innerHTML += row;
 }
 
-/* ============================================================
-   RENDER SENSITIVITY
-   ============================================================ */
-function renderSensitivity(result) {
-  const tbl = document.getElementById('objSensTable');
-  tbl.innerHTML = `<thead><tr>
-    <th>Variable</th><th>Coefficient</th><th>Reduced Cost</th>
-  </tr></thead><tbody>` +
-  result.xVals.map((v, i) => {
-    const rc = Math.abs(v) < 1e-6 ? (result.iterations.length > 0
-      ? (() => {
-        const last = result.iterations[result.iterations.length-1];
-        return last.tableau[last.tableau.length-1][i] || 0;
-      })() : 0) : 0;
-    return `<tr>
-      <td>x${sub(i+1)}</td>
-      <td>${state.objCoeffs[i]}</td>
-      <td style="color:${Math.abs(rc)<1e-6?'var(--success)':'var(--danger)'}">${fmt(rc)}</td>
-    </tr>`;
-  }).join('') + '</tbody>';
+function solve(){
+  let output = "<h3>Model:</h3>";
 
-  const dualDiv = document.getElementById('dualGrid');
-  dualDiv.innerHTML = result.dualVars.map((d, i) => `
-    <div class="dual-card">
-      <div class="dual-label">Constraint ${i+1} shadow price</div>
-      <div class="dual-value">${fmt(d)}</div>
-    </div>`).join('');
-}
+  // Objective
+  let obj = [];
+  for(let i=1;i<=varCount;i++){
+    obj.push(Number(document.getElementById("obj"+i).value));
+  }
 
-/* ============================================================
-   RENDER TABLEAUX
-   ============================================================ */
-function renderTableaux(result) {
-  const body = document.getElementById('tableauBody');
-  const countEl = document.getElementById('iterCount');
-  body.innerHTML = '';
+  output += "Objective: " + obj.join(", ") + "<br>";
 
-  const iters = state.stepByStep ? result.iterations : [result.iterations[result.iterations.length-1]];
-  countEl.textContent = `${result.iterations.length - 1} iterations`;
-
-  iters.forEach((snap, idx) => {
-    const isLast = idx === iters.length - 1;
-    const title = idx === 0 ? 'Initial Tableau' : `Iteration ${idx}`;
-    const isOnlyLast = !state.stepByStep;
-    const displayIdx = isOnlyLast ? result.iterations.length - 1 : idx;
-    const displayTitle = isOnlyLast ? `Final Tableau (Iteration ${result.iterations.length - 1})` : title;
-
-    body.insertAdjacentHTML('beforeend', `
-      <div class="iteration-header">${displayTitle}
-        ${snap.pivotRow >= 0 ? `<span style="font-size:11px;color:var(--text3)">Pivot: ${result.varNames[snap.pivotCol]} enters, row ${snap.pivotRow+1} leaves</span>` : ''}
-      </div>`);
-
-    const n = snap.totalVars;
-    const m = snap.tableau.length - 1;
-    const varNames = snap.varNames;
-
-    let html = '<div class="tableau-wrap"><table class="simplex-table"><thead><tr><th>Basis</th>';
-    for (let j = 0; j < n; j++) html += `<th>${varNames[j]}</th>`;
-    html += '<th>RHS</th></tr></thead><tbody>';
-
-    for (let i = 0; i <= m; i++) {
-      const isObjRow = i === m;
-      const basisLabel = isObjRow ? 'Z' : varNames[snap.basis[i]] || '—';
-      html += `<tr>`;
-      const isBasisRow = (snap.pivotRow === i);
-      html += `<th style="background:var(--bg3)">${basisLabel}</th>`;
-      for (let j = 0; j <= n; j++) {
-        let cls = '';
-        if (snap.pivotRow === i && snap.pivotCol === j) cls = 'pivot-cell';
-        else if (snap.pivotRow === i) cls = 'pivot-row';
-        else if (snap.pivotCol === j && !isObjRow) cls = 'pivot-col';
-        const val = snap.tableau[i][j];
-        html += `<td class="${cls}">${fmtT(val)}</td>`;
-      }
-      html += '</tr>';
+  // Constraints
+  output += "<br>Constraints:<br>";
+  for(let c=1;c<=constraintCount;c++){
+    let row = [];
+    for(let i=1;i<=varCount;i++){
+      row.push(Number(document.getElementById(`c${c}_${i}`).value));
     }
-    html += '</tbody></table></div>';
-    body.insertAdjacentHTML('beforeend', html);
-  });
+    let sign = document.getElementById("sign"+c).value;
+    let rhs = document.getElementById("rhs"+c).value;
 
-  if (result.status === 'optimal') {
-    body.insertAdjacentHTML('beforeend', `
-      <div class="step-info" style="margin-top:12px">
-        <strong>Optimality reached:</strong> All reduced costs in the objective row are non-negative (for maximization).
-        The solution is Z = ${fmt(result.z)} with ${result.xVals.map((v,i)=>`x${i+1}=${fmt(v)}`).join(', ')}.
-      </div>`);
+    output += row.join(", ") + " " + sign + " " + rhs + "<br>";
   }
+
+  output += "<br>⚠️ Next step: integrate REAL SIMPLEX ENGINE";
+
+  document.getElementById("output").innerHTML = output;
 }
 
-/* ============================================================
-   UTILITIES
-   ============================================================ */
-function sub(n) {
-  const subs = ['₀','₁','₂','₃','₄','₅','₆','₇','₈','₉'];
-  return String(n).split('').map(d => subs[parseInt(d)] || d).join('');
-}
+addVar();
+addVar();
+addConstraint();
 
-function fmt(v) {
-  if (isNaN(v) || v === null || v === undefined) return '—';
-  if (Math.abs(v) < 1e-9) return '0';
-  if (Number.isInteger(v) || Math.abs(v - Math.round(v)) < 1e-9) return String(Math.round(v));
-  return parseFloat(v.toFixed(4)).toString();
-}
-
-function fmtT(v) {
-  if (isNaN(v)) return '—';
-  if (Math.abs(v) < 1e-9) return '0';
-  return parseFloat(v.toFixed(3)).toString();
-}
-
-function showNotif(msg, type = 'success') {
-  const el = document.createElement('div');
-  el.className = `notif notif-${type}`;
-  el.textContent = msg;
-  document.getElementById('notifications').appendChild(el);
-  setTimeout(() => el.remove(), 3500);
-}
-
-/* ============================================================
-   THEME
-   ============================================================ */
-function toggleTheme() {
-  state.theme = state.theme === 'light' ? 'dark' : 'light';
-  document.documentElement.setAttribute('data-theme', state.theme);
-  document.getElementById('themeBtn').textContent = state.theme === 'dark' ? '☀' : '☾';
-}
-
-/* ============================================================
-   RESET
-   ============================================================ */
-function resetAll() {
-  state.constraints = [];
-  state.constraintId = 0;
-  state.objCoeffs = Array(state.numVars).fill(1);
-  state.solution = null;
-  renderObjective();
-  renderConstraints();
-  document.getElementById('resultsSection').style.display = 'none';
-  document.getElementById('clearResultsBtn').style.display = 'none';
-  showNotif('Problem reset.', 'success');
-}
-
-/* ============================================================
-   RANDOM PROBLEM GENERATOR
-   ============================================================ */
-function randomProblem() {
-  const n = 2 + Math.floor(Math.random() * 3); // 2-4 vars
-  const m = 2 + Math.floor(Math.random() * 3); // 2-4 constraints
-  document.getElementById('numVars').value = n;
-  state.numVars = n;
-  state.objCoeffs = Array.from({length:n}, () => 1 + Math.floor(Math.random() * 9));
-  state.objType = Math.random() > 0.4 ? 'max' : 'min';
-  document.getElementById('objType').value = state.objType;
-  document.getElementById('objBadge').textContent = (state.objType === 'max' ? 'Maximize' : 'Minimize') + ' Z';
-
-  state.constraints = [];
-  state.constraintId = 0;
-  for (let i = 0; i < m; i++) {
-    const coeffs = Array.from({length:n}, () => Math.floor(Math.random() * 8));
-    const rhs = 10 + Math.floor(Math.random() * 40);
-    addConstraint(coeffs, '<=', rhs);
-  }
-  renderObjective();
-  updateObjInputs();
-  state.solution = null;
-  document.getElementById('resultsSection').style.display = 'none';
-  document.getElementById('clearResultsBtn').style.display = 'none';
-  showNotif(`Random ${n}-variable LP problem generated!`, 'success');
-}
-
-/* ============================================================
-   EXPORT
-   ============================================================ */
-function exportResults() {
-  if (!state.solution) { showNotif('No results to export. Solve first.', 'error'); return; }
-  const r = state.solution;
-  let txt = '=== LP SOLVER RESULTS ===\n\n';
-  txt += `Objective: ${state.objType === 'max' ? 'Maximize' : 'Minimize'} Z = ${state.objCoeffs.map((c,i)=>`${c}x${i+1}`).join(' + ')}\n\n`;
-  txt += `Status: ${r.status.toUpperCase()}\n`;
-  if (r.status === 'optimal') {
-    txt += `Optimal Z = ${fmt(r.z)}\n`;
-    r.xVals.forEach((v,i) => { txt += `x${i+1} = ${fmt(v)}\n`; });
-    txt += '\nConstraint Status:\n';
-    state.constraints.forEach((c, i) => {
-      const lhs = c.coeffs.reduce((s,cf,j) => s + cf * r.xVals[j], 0);
-      txt += `  C${i+1}: LHS=${fmt(lhs)}, RHS=${c.rhs}, slack=${fmt(Math.abs(c.rhs - lhs))}\n`;
-    });
-  }
-  const blob = new Blob([txt], {type: 'text/plain'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'lp_results.txt';
-  a.click();
-  showNotif('Results exported!', 'success');
-}
 </script>
+
 </body>
 </html>
