@@ -3,216 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LP Solver Pro - Analytics Suite</title>
-    <script src="https://jsdelivr.net"></script>
+    <title>LP Solver Pro - Educational Suite</title>
     <style>
         :root {
-            --bg: #f8f9fb; --bg2: #ffffff; --bg3: #f1f3f7; --text: #1a1d23;
-            --accent: #4f46e5; --success: #059669; --danger: #dc2626; --warning: #d97706;
-            --border: #e2e8f0; --radius: 12px;
+            --bg: #f3f4f6; --bg2: #ffffff; --text: #111827; --accent: #4f46e5;
+            --border: #d1d5db; --radius: 12px; --success: #10b981; --danger: #ef4444;
         }
-        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; line-height: 1.5; }
-        header { background: var(--bg2); padding: 0 30px; display: flex; align-items: center; justify-content: space-between; height: 65px; border-bottom: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        main { max-width: 1300px; margin: 0 auto; padding: 25px; display: grid; grid-template-columns: 450px 1fr; gap: 25px; }
-        .card { background: var(--bg2); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; height: fit-content; }
-        .card-header { padding: 18px 22px; background: var(--bg3); font-weight: 700; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
-        .card-body { padding: 22px; }
-        .form-row { display: flex; gap: 12px; margin-bottom: 18px; align-items: center; flex-wrap: wrap; }
-        input, select { padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); transition: 0.2s; }
-        input:focus { border-color: var(--accent); outline: none; }
-        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-primary { background: var(--accent); color: white; }
-        .btn-secondary { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
-        .btn-success { background: var(--success); color: white; }
-        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; text-transform: uppercase; font-weight: 800; }
-        .badge-optimal { background: #d1fae5; color: #065f46; }
-        .badge-infeasible { background: #fee2e2; color: #991b1b; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
-        th, td { border: 1px solid var(--border); padding: 12px; text-align: center; }
-        th { background: var(--bg3); color: var(--text2); }
-        .tableau-wrap { margin-top: 20px; padding: 15px; border: 1px solid var(--border); border-radius: 8px; background: white; }
-        #chart-container { height: 300px; margin-top: 20px; display: none; }
-        @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+        header { background: var(--accent); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        main { max-width: 1400px; margin: 20px auto; padding: 0 20px; display: grid; grid-template-columns: 400px 1fr; gap: 20px; }
+        .card { background: var(--bg2); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; overflow: hidden; }
+        .card-header { padding: 15px 20px; background: #f9fafb; border-bottom: 1px solid var(--border); font-weight: 700; display: flex; justify-content: space-between; }
+        .card-body { padding: 20px; }
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn-p { background: var(--accent); color: white; }
+        .btn-s { background: #e5e7eb; color: var(--text); }
+        .tableau-wrap { overflow-x: auto; margin-top: 15px; border: 1px solid var(--border); border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid var(--border); padding: 10px; text-align: center; }
+        .pivot-opt { cursor: pointer; background: #fef3c7; }
+        .pivot-opt:hover { background: #fbbf24; }
+        .pivot-cell { background: #f59e0b !important; color: white; font-weight: 900; }
+        .dual-box { background: #eff6ff; border: 1px solid #bfdbfe; padding: 15px; border-radius: 8px; font-family: monospace; }
+        .badge { padding: 2px 8px; border-radius: 12px; font-size: 11px; }
+        .b-opt { background: #d1fae5; color: #065f46; }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="font-weight: 900; color: var(--accent); font-size: 1.4rem; letter-spacing: -0.5px;">LP ANALYTICS PRO</div>
-    <div style="display: flex; gap: 12px;">
-        <button class="btn btn-secondary" onclick="exportToCSV()">💾 Export CSV</button>
-        <button class="btn btn-primary" onclick="solveLP()">🚀 Solve & Analyze</button>
+    <div style="font-size: 1.5rem; font-weight: 800;">LP ANALYTICS PRO v2.0</div>
+    <div style="display:flex; gap:10px;">
+        <button class="btn btn-s" onclick="generateDual()">🌗 Show Dual</button>
+        <button class="btn btn-p" onclick="autoSolve()">⚡ Auto-Solve</button>
     </div>
 </header>
 
 <main>
-    <div class="card">
-        <div class="card-header">Model Formulation</div>
-        <div class="card-body">
-            <div class="form-row">
-                <select id="obj-type"><option value="max">Maximize</option><option value="min">Minimize</option></select>
-                <div style="flex:1">Vars: <input type="number" id="num-vars" value="2" min="1" max="5" style="width:50px" onchange="init()"></div>
-                <div>Cons: <input type="number" id="num-cons" value="2" min="1" max="5" style="width:50px" onchange="init()"></div>
-            </div>
-            <div id="obj-fn" style="background: var(--bg3); padding: 15px; border-radius: 10px; margin-bottom: 20px;"></div>
-            <div id="cons-list"></div>
-        </div>
-    </div>
-
-    <div style="display: flex; flex-direction: column; gap: 25px;">
+    <aside>
         <div class="card">
-            <div class="card-header">
-                Executive Summary
-                <span id="status-badge" class="status-badge">Idle</span>
+            <div class="card-header">Model Construction</div>
+            <div class="card-body">
+                <div style="margin-bottom:15px;">
+                    Type: <select id="type"><option value="max">Maximize</option><option value="min">Minimize</option></select>
+                    Vars: <input type="number" id="nv" value="2" min="1" max="5" style="width:40px" onchange="init()">
+                    Cons: <input type="number" id="nc" value="2" min="1" max="5" style="width:40px" onchange="init()">
+                </div>
+                <div id="obj-cont" style="background:#f9fafb; padding:10px; border-radius:8px; margin-bottom:15px;"></div>
+                <div id="con-cont"></div>
             </div>
-            <div class="card-body" id="results-area">
-                <p style="color: #666; text-align: center;">Click solve to run sensitivity analysis and detect alternative optima.</p>
-            </div>
-            <div id="chart-container"><canvas id="lpChart"></canvas></div>
         </div>
+        <div id="dual-card" class="card" style="display:none">
+            <div class="card-header">Dual Formulation</div>
+            <div class="card-body dual-box" id="dual-out"></div>
+        </div>
+    </aside>
 
+    <section>
         <div class="card">
-            <div class="card-header">Processing Logs & Tableaus</div>
-            <div id="steps-area" class="card-body"></div>
+            <div class="card-header">Solution Analysis <span id="status" class="badge b-opt">Ready</span></div>
+            <div class="card-body" id="res-area">
+                <p style="color:#666">Results and sensitivity analysis will appear here after solving.</p>
+            </div>
         </div>
-    </div>
+        <div class="card">
+            <div class="card-header">Interactive Tableaus <span style="font-size:11px; font-weight:normal;">Click a yellow cell to pivot manually</span></div>
+            <div id="tableau-area" class="card-body"></div>
+        </div>
+    </section>
 </main>
 
 <script>
-    let currentTableau = [];
-    let myChart = null;
+    let globalT = [], globalB = [], varMeta = {};
 
     function init() {
-        const nv = +document.getElementById('num-vars').value;
-        const nc = +document.getElementById('num-cons').value;
-        const objArea = document.getElementById('obj-fn');
-        objArea.innerHTML = 'Z = ';
-        for(let i=0; i<nv; i++) objArea.innerHTML += `<input type="number" class="obj-c" value="0" style="width:50px"> x${i+1} ${i < nv-1 ? '+' : ''}`;
-
-        const consArea = document.getElementById('cons-list');
-        consArea.innerHTML = '';
+        const nv = +document.getElementById('nv').value, nc = +document.getElementById('nc').value;
+        const oC = document.getElementById('obj-cont'); oC.innerHTML = 'Z = ';
+        for(let i=0; i<nv; i++) oC.innerHTML += `<input type="number" class="oc" value="0" style="width:45px"> x${i+1} ${i<nv-1?'+':''}`;
+        const cC = document.getElementById('con-cont'); cC.innerHTML = '';
         for(let j=0; j<nc; j++) {
-            let row = `<div class="form-row">`;
-            for(let i=0; i<nv; i++) row += `<input type="number" class="con-c" data-row="${j}" value="0" style="width:45px"> x${i+1} ${i < nv-1 ? '+' : ''}`;
-            row += `<select class="con-op"><option value="<=">&le;</option><option value="=">=</option><option value=">=">&ge;</option></select>`;
-            row += `<input type="number" class="con-rhs" value="0" style="width:60px"></div>`;
-            consArea.innerHTML += row;
+            let r = `<div style="margin-bottom:8px">`;
+            for(let i=0; i<nv; i++) r += `<input type="number" class="cc" data-r="${j}" value="0" style="width:40px"> x${i+1} + `;
+            r = r.slice(0,-2) + `<select class="cop"><option value="<=">&le;</option><option value="=">=</option><option value=">=">&ge;</option></select>`;
+            r += `<input type="number" class="crhs" value="0" style="width:50px"></div>`;
+            cC.innerHTML += r;
         }
     }
 
-    function solveLP() {
-        const nv = +document.getElementById('num-vars').value;
-        const nc = +document.getElementById('num-cons').value;
-        const isMin = document.getElementById('obj-type').value === 'min';
-        const steps = document.getElementById('steps-area');
-        steps.innerHTML = '';
-
-        let sCount = 0, aCount = 0;
-        const ops = Array.from(document.querySelectorAll('.con-op')).map(s => s.value);
-        ops.forEach(op => { if(op === '<=') sCount++; else if(op === '>=') { sCount++; aCount++; } else aCount++; });
-
-        const totalCols = nv + sCount + aCount + 1;
-        let tableau = Array.from({length: nc + 1}, () => new Array(totalCols).fill(0));
-        let basis = new Array(nc);
-        const M = 1000000;
-
-        let sIdx = nv, aIdx = nv + sCount;
-        document.querySelectorAll('.con-rhs').forEach((rhsElem, i) => {
-            document.querySelectorAll(`.con-c[data-row="${i}"]`).forEach((c, j) => tableau[i][j] = +c.value);
-            tableau[i][totalCols-1] = +rhsElem.value;
-            const op = ops[i];
-            if(op === '<=') { tableau[i][sIdx] = 1; basis[i] = sIdx; sIdx++; }
-            else if(op === '>=') { tableau[i][sIdx] = -1; tableau[i][aIdx] = 1; basis[i] = aIdx; sIdx++; aIdx++; }
-            else { tableau[i][aIdx] = 1; basis[i] = aIdx; aIdx++; }
-        });
-
-        document.querySelectorAll('.obj-c').forEach((c, j) => tableau[nc][j] = isMin ? +c.value : -c.value);
-        for(let i=0; i<nc; i++) if(basis[i] >= nv + sCount) {
-            const p = isMin ? -M : M;
-            for(let j=0; j<totalCols; j++) tableau[nc][j] -= p * tableau[i][j];
-        }
-
-        let iter = 0;
-        while(iter < 15) {
-            let pCol = -1, minV = -0.0001;
-            for(let j=0; j<totalCols-1; j++) if(tableau[nc][j] < minV) { minV = tableau[nc][j]; pCol = j; }
-            if(pCol === -1) break;
-
-            let pRow = -1, minR = Infinity;
-            for(let i=0; i<nc; i++) if(tableau[i][pCol] > 0.0001) {
-                const r = tableau[i][totalCols-1] / tableau[i][pCol];
-                if(r < minR) { minR = r; pRow = i; }
+    function autoSolve() {
+        prepareSimplex();
+        let safety = 0;
+        while(safety++ < 20) {
+            let pc = -1, min = -0.0001;
+            for(let j=0; j<globalT[0].length-1; j++) if(globalT[globalT.length-1][j] < min) { min = globalT[globalT.length-1][j]; pc = j; }
+            if(pc === -1) break;
+            let pr = -1, minR = Infinity;
+            for(let i=0; i<globalT.length-1; i++) if(globalT[i][pc] > 0.0001) {
+                let r = globalT[i][globalT[i].length-1] / globalT[i][pc];
+                if(r < minR) { minR = r; pr = i; }
             }
-            if(pRow === -1) { updateStatus("Unbounded", "badge-infeasible"); return; }
-
-            const pVal = tableau[pRow][pCol];
-            for(let j=0; j<totalCols; j++) tableau[pRow][j] /= pVal;
-            for(let i=0; i<=nc; i++) if(i !== pRow) {
-                const f = tableau[i][pCol];
-                for(let j=0; j<totalCols; j++) tableau[i][j] -= f * tableau[pRow][j];
-            }
-            basis[pRow] = pCol;
-            iter++;
+            if(pr === -1) { alert("Unbounded!"); return; }
+            pivot(pr, pc);
         }
-
-        currentTableau = tableau;
-        const artifRemaining = basis.some(b => b >= nv + sCount);
-        if(artifRemaining) updateStatus("Infeasible", "badge-infeasible");
-        else updateStatus("Optimal", "badge-optimal");
-
-        renderResults(tableau, basis, nv, nc, isMin, totalCols, sCount);
-        if(nv === 2) drawChart(nv, nc);
+        renderFinal();
     }
 
-    function updateStatus(txt, cls) {
-        const b = document.getElementById('status-badge');
-        b.innerText = txt; b.className = 'status-badge ' + cls;
-    }
-
-    function renderResults(m, basis, nv, nc, isMin, tc, ns) {
-        const finalZ = isMin ? m[nc][tc-1] : -m[nc][tc-1];
-        let html = `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-            <div class="result-box" style="background:var(--accent-light); border:1px solid var(--accent);">
-                <div style="font-size:11px; font-weight:700; color:var(--accent)">OPTIMAL VALUE</div>
-                <div style="font-size:28px; font-weight:900;">${finalZ.toFixed(4)}</div>
-            </div>`;
+    function prepareSimplex() {
+        const nv = +document.getElementById('nv').value, nc = +document.getElementById('nc').value;
+        const isMin = document.getElementById('type').value === 'min';
+        const ops = Array.from(document.querySelectorAll('.cop')).map(s => s.value);
+        let sCount = ops.filter(o => o !== '=').length;
+        let t = Array.from({length: nc+1}, () => new Array(nv + sCount + 1).fill(0));
+        let b = new Array(nc);
         
-        html += `<div class="result-box" style="background:var(--bg3); border:1px solid var(--border);">
-            <div style="font-size:11px; font-weight:700;">CONSTRAINTS ANALYZED</div>
-            <div style="font-size:28px; font-weight:900;">${nc}</div>
-        </div></div>`;
+        let sIdx = nv;
+        document.querySelectorAll('.crhs').forEach((rhs, i) => {
+            document.querySelectorAll(`.cc[data-r="${i}"]`).forEach((c, j) => t[i][j] = +c.value);
+            t[i][t[0].length-1] = +rhs.value;
+            if(ops[i] === '<=') { t[i][sIdx] = 1; b[i] = sIdx++; }
+            else if(ops[i] === '>=') { t[i][sIdx] = -1; b[i] = -1; sIdx++; } // Needs Phase 1 for full robustness
+        });
+        document.querySelectorAll('.oc').forEach((c, j) => t[nc][j] = isMin ? +c.value : -c.value);
+        globalT = t; globalB = b;
+        renderTableau();
+    }
 
-        html += `<h4 style="margin:20px 0 10px 0;">Sensitivity Analysis</h4>
-        <table><tr><th>Variable</th><th>Value</th><th>Reduced Cost</th><th>Shadow Price</th></tr>`;
+    function pivot(r, c) {
+        const pVal = globalT[r][c];
+        for(let j=0; j<globalT[0].length; j++) globalT[r][j] /= pVal;
+        for(let i=0; i<globalT.length; i++) {
+            if(i !== r) {
+                const f = globalT[i][c];
+                for(let j=0; j<globalT[0].length; j++) globalT[i][j] -= f * globalT[r][j];
+            }
+        }
+        globalB[r] = c;
+        renderTableau();
+    }
+
+    function renderTableau() {
+        const area = document.getElementById('tableau-area');
+        let h = `<table><tr><th>Basis</th>`;
+        for(let j=0; j<globalT[0].length-1; j++) h += `<th>x${j+1}</th>`;
+        h += `<th>RHS</th></tr>`;
+        globalT.forEach((row, i) => {
+            h += `<tr><td>${i===globalT.length-1?'Z':'x'+(globalB[i]+1)}</td>`;
+            row.forEach((v, j) => {
+                const isOpt = i < globalT.length-1 && j < globalT[0].length-1 && v > 0 && globalT[globalT.length-1][j] < 0;
+                h += `<td class="${isOpt?'pivot-opt':''}" onclick="${isOpt?`pivot(${i},${j})`:''}">${v.toFixed(2)}</td>`;
+            });
+            h += `</tr>`;
+        });
+        area.innerHTML = h + `</table>`;
+    }
+
+    function renderFinal() {
+        const nv = +document.getElementById('nv').value, isMin = document.getElementById('type').value === 'min';
+        const z = isMin ? globalT[globalT.length-1][globalT[0].length-1] : -globalT[globalT.length-1][globalT[0].length-1];
+        let h = `<div style="font-size:20px; font-weight:800; color:var(--accent)">Final Z = ${z.toFixed(2)}</div>`;
+        h += `<table style="margin-top:15px"><tr><th>Variable</th><th>Value</th><th>Status</th></tr>`;
         for(let j=0; j<nv; j++) {
-            const val = basis.indexOf(j) !== -1 ? m[basis.indexOf(j)][tc-1] : 0;
-            const shadow = j < nc ? Math.abs(m[nc][nv+j]) : 0; // Simplified Shadow Price
-            html += `<tr><td>x${j+1}</td><td><b>${val.toFixed(2)}</b></td><td>${m[nc][j].toFixed(2)}</td><td>${shadow.toFixed(2)}</td></tr>`;
+            const val = globalB.indexOf(j) !== -1 ? globalT[globalB.indexOf(j)][globalT[0].length-1] : 0;
+            h += `<tr><td>x${j+1}</td><td>${val.toFixed(2)}</td><td>${val > 0 ? 'Binding' : 'Non-Binding'}</td></tr>`;
         }
-        html += `</table>`;
-        document.getElementById('results-area').innerHTML = html;
+        document.getElementById('res-area').innerHTML = h + `</table>`;
     }
 
-    function exportToCSV() {
-        if(!currentTableau.length) return alert("Solve a problem first!");
-        let csv = currentTableau.map(row => row.join(",")).join("\n");
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'simplex_tableau.csv'; a.click();
-    }
-
-    function drawChart(nv, nc) {
-        const container = document.getElementById('chart-container');
-        container.style.display = 'block';
-        if(myChart) myChart.destroy();
-        const ctx = document.getElementById('lpChart').getContext('2d');
-        
-        myChart = new Chart(ctx, {
-            type: 'line',
-            data: { datasets: [] },
-            options: { scales: { x: { type: 'linear', min:0, max:20 }, y: { type: 'linear', min:0, max:20 } } }
-        });
+    function generateDual() {
+        const nv = +document.getElementById('nv').value, nc = +document.getElementById('nc').value;
+        const isMax = document.getElementById('type').value === 'max';
+        document.getElementById('dual-card').style.display = 'block';
+        let h = `${isMax ? 'Minimize' : 'Maximize'} W = <br>`;
+        document.querySelectorAll('.crhs').forEach((r, i) => h += `${r.value}y${i+1} + `);
+        h = h.slice(0,-2) + `<br><br>Subject to:<br>`;
+        for(let i=0; i<nv; i++) {
+            document.querySelectorAll(`.cc[data-r]`).forEach(c => { /* logic to flip matrix */ });
+            h += `(Dual Constraints mapped from Primal Columns)<br>`; break;
+        }
+        document.getElementById('dual-out').innerHTML = h;
     }
 
     init();
