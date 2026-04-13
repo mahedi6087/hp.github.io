@@ -3,233 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LP Solver Pro - Enhanced Edition</title>
+    <title>LP Solver Pro - Analytics Suite</title>
+    <script src="https://jsdelivr.net"></script>
     <style>
         :root {
             --bg: #f8f9fb; --bg2: #ffffff; --bg3: #f1f3f7; --text: #1a1d23;
-            --text2: #4a5568; --accent: #4f46e5; --accent-light: #ede9fe;
-            --success: #059669; --danger: #dc2626; --warning: #d97706;
-            --pivot-bg: #fef3c7; --pivot-cell: #f59e0b; --border: #e2e8f0;
-            --radius: 10px; --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --accent: #4f46e5; --success: #059669; --danger: #dc2626; --warning: #d97706;
+            --border: #e2e8f0; --radius: 12px;
         }
-        [data-theme="dark"] {
-            --bg: #0f1117; --bg2: #1a1d2e; --bg3: #252837; --text: #e2e8f0;
-            --text2: #a0aec0; --border: #2d3748; --accent: #818cf8;
-            --pivot-bg: #423b1a; --pivot-cell: #fbbf24;
-        }
-        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 14px; }
-        header { background: var(--bg2); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 60px; border-bottom: 1px solid var(--border); position: sticky; top:0; z-index:10; }
-        main { max-width: 1200px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background: var(--bg2); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
-        .card-header { padding: 15px 20px; background: var(--bg3); font-weight: 700; border-bottom: 1px solid var(--border); }
-        .card-body { padding: 20px; }
-        .form-row { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
-        input, select { padding: 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
-        .coeff-input { width: 60px; } .rhs-input { width: 80px; }
-        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; line-height: 1.5; }
+        header { background: var(--bg2); padding: 0 30px; display: flex; align-items: center; justify-content: space-between; height: 65px; border-bottom: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        main { max-width: 1300px; margin: 0 auto; padding: 25px; display: grid; grid-template-columns: 450px 1fr; gap: 25px; }
+        .card { background: var(--bg2); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; height: fit-content; }
+        .card-header { padding: 18px 22px; background: var(--bg3); font-weight: 700; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+        .card-body { padding: 22px; }
+        .form-row { display: flex; gap: 12px; margin-bottom: 18px; align-items: center; flex-wrap: wrap; }
+        input, select { padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); transition: 0.2s; }
+        input:focus { border-color: var(--accent); outline: none; }
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
         .btn-primary { background: var(--accent); color: white; }
-        .btn-reset { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
-        .tableau-wrap { overflow-x: auto; margin-top: 15px; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th, td { border: 1px solid var(--border); padding: 8px; text-align: center; }
-        .pivot-row { background: var(--pivot-bg); }
-        .pivot-col { background: rgba(79, 70, 229, 0.1); }
-        .pivot-cell { background: var(--pivot-cell) !important; font-weight: bold; color: #000; }
-        .result-box { padding: 15px; border-radius: 8px; margin-top: 10px; }
-        .opt-box { background: #d1fae5; color: #065f46; border: 1px solid #34d399; }
-        .multi-tag { display: inline-block; background: var(--warning); color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-left: 10px; }
-        @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+        .btn-secondary { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+        .btn-success { background: var(--success); color: white; }
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; text-transform: uppercase; font-weight: 800; }
+        .badge-optimal { background: #d1fae5; color: #065f46; }
+        .badge-infeasible { background: #fee2e2; color: #991b1b; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+        th, td { border: 1px solid var(--border); padding: 12px; text-align: center; }
+        th { background: var(--bg3); color: var(--text2); }
+        .tableau-wrap { margin-top: 20px; padding: 15px; border: 1px solid var(--border); border-radius: 8px; background: white; }
+        #chart-container { height: 300px; margin-top: 20px; display: none; }
+        @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="font-weight: 800; color: var(--accent); font-size: 1.2rem;">LP SOLVER PRO</div>
-    <div style="display: flex; gap: 10px;">
-        <button class="btn btn-reset" onclick="location.reload()">Reset</button>
-        <button class="btn btn-primary" onclick="solveLP()">Solve Problem</button>
+    <div style="font-weight: 900; color: var(--accent); font-size: 1.4rem; letter-spacing: -0.5px;">LP ANALYTICS PRO</div>
+    <div style="display: flex; gap: 12px;">
+        <button class="btn btn-secondary" onclick="exportToCSV()">💾 Export CSV</button>
+        <button class="btn btn-primary" onclick="solveLP()">🚀 Solve & Analyze</button>
     </div>
 </header>
 
 <main>
     <div class="card">
-        <div class="card-header">Model Setup</div>
+        <div class="card-header">Model Formulation</div>
         <div class="card-body">
             <div class="form-row">
                 <select id="obj-type"><option value="max">Maximize</option><option value="min">Minimize</option></select>
-                <label>Vars:</label><input type="number" id="num-vars" value="2" min="1" max="6" onchange="initModel()">
-                <label>Cons:</label><input type="number" id="num-cons" value="2" min="1" max="6" onchange="initModel()">
+                <div style="flex:1">Vars: <input type="number" id="num-vars" value="2" min="1" max="5" style="width:50px" onchange="init()"></div>
+                <div>Cons: <input type="number" id="num-cons" value="2" min="1" max="5" style="width:50px" onchange="init()"></div>
             </div>
-            <div id="obj-fn" class="form-row" style="background: var(--bg3); padding: 10px; border-radius: 8px;"></div>
-            <div id="cons-list" style="margin-top: 15px;"></div>
+            <div id="obj-fn" style="background: var(--bg3); padding: 15px; border-radius: 10px; margin-bottom: 20px;"></div>
+            <div id="cons-list"></div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">Solution & Analysis</div>
-        <div class="card-body" id="results-area">
-            <p style="color: var(--text2); text-align: center;">Enter values and click "Solve Problem" to see analysis.</p>
+    <div style="display: flex; flex-direction: column; gap: 25px;">
+        <div class="card">
+            <div class="card-header">
+                Executive Summary
+                <span id="status-badge" class="status-badge">Idle</span>
+            </div>
+            <div class="card-body" id="results-area">
+                <p style="color: #666; text-align: center;">Click solve to run sensitivity analysis and detect alternative optima.</p>
+            </div>
+            <div id="chart-container"><canvas id="lpChart"></canvas></div>
         </div>
-    </div>
 
-    <div class="card" style="grid-column: 1 / -1;">
-        <div class="card-header">Simplex Tableaus (Iteration Steps)</div>
-        <div id="steps-area" class="card-body"></div>
+        <div class="card">
+            <div class="card-header">Processing Logs & Tableaus</div>
+            <div id="steps-area" class="card-body"></div>
+        </div>
     </div>
 </main>
 
 <script>
-    function initModel() {
+    let currentTableau = [];
+    let myChart = null;
+
+    function init() {
         const nv = +document.getElementById('num-vars').value;
         const nc = +document.getElementById('num-cons').value;
         const objArea = document.getElementById('obj-fn');
         objArea.innerHTML = 'Z = ';
-        for(let i=0; i<nv; i++) {
-            objArea.innerHTML += `<input type="number" class="coeff-input obj-c" value="0"> x<sub>${i+1}</sub> ${i < nv-1 ? '+' : ''}`;
-        }
+        for(let i=0; i<nv; i++) objArea.innerHTML += `<input type="number" class="obj-c" value="0" style="width:50px"> x${i+1} ${i < nv-1 ? '+' : ''}`;
+
         const consArea = document.getElementById('cons-list');
         consArea.innerHTML = '';
         for(let j=0; j<nc; j++) {
             let row = `<div class="form-row">`;
-            for(let i=0; i<nv; i++) row += `<input type="number" class="coeff-input con-c" data-row="${j}" value="0"> x<sub>${i+1}</sub> ${i < nv-1 ? '+' : ''}`;
+            for(let i=0; i<nv; i++) row += `<input type="number" class="con-c" data-row="${j}" value="0" style="width:45px"> x${i+1} ${i < nv-1 ? '+' : ''}`;
             row += `<select class="con-op"><option value="<=">&le;</option><option value="=">=</option><option value=">=">&ge;</option></select>`;
-            row += `<input type="number" class="rhs-input con-rhs" value="0"></div>`;
+            row += `<input type="number" class="con-rhs" value="0" style="width:60px"></div>`;
             consArea.innerHTML += row;
         }
     }
 
     function solveLP() {
-        try {
-            const nv = +document.getElementById('num-vars').value;
-            const nc = +document.getElementById('num-cons').value;
-            const isMin = document.getElementById('obj-type').value === 'min';
-            const steps = document.getElementById('steps-area');
-            steps.innerHTML = '';
+        const nv = +document.getElementById('num-vars').value;
+        const nc = +document.getElementById('num-cons').value;
+        const isMin = document.getElementById('obj-type').value === 'min';
+        const steps = document.getElementById('steps-area');
+        steps.innerHTML = '';
 
-            let slackCount = 0, artifCount = 0;
-            const ops = Array.from(document.querySelectorAll('.con-op')).map(s => s.value);
-            ops.forEach(op => {
-                if(op === '<=') slackCount++;
-                else if(op === '>=') { slackCount++; artifCount++; }
-                else artifCount++;
-            });
+        let sCount = 0, aCount = 0;
+        const ops = Array.from(document.querySelectorAll('.con-op')).map(s => s.value);
+        ops.forEach(op => { if(op === '<=') sCount++; else if(op === '>=') { sCount++; aCount++; } else aCount++; });
 
-            const totalCols = nv + slackCount + artifCount + 1;
-            let tableau = Array.from({length: nc + 1}, () => new Array(totalCols).fill(0));
-            let basis = new Array(nc);
-            const M = 1000000;
+        const totalCols = nv + sCount + aCount + 1;
+        let tableau = Array.from({length: nc + 1}, () => new Array(totalCols).fill(0));
+        let basis = new Array(nc);
+        const M = 1000000;
 
-            let sIdx = nv, aIdx = nv + slackCount;
-            document.querySelectorAll('.con-rhs').forEach((rhsElem, i) => {
-                const rowCoeffs = document.querySelectorAll(`.con-c[data-row="${i}"]`);
-                rowCoeffs.forEach((c, j) => tableau[i][j] = +c.value);
-                tableau[i][totalCols-1] = +rhsElem.value;
-                const op = ops[i];
-                if(op === '<=') { tableau[i][sIdx] = 1; basis[i] = sIdx; sIdx++; }
-                else if(op === '>=') { tableau[i][sIdx] = -1; tableau[i][aIdx] = 1; basis[i] = aIdx; sIdx++; aIdx++; }
-                else { tableau[i][aIdx] = 1; basis[i] = aIdx; aIdx++; }
-            });
+        let sIdx = nv, aIdx = nv + sCount;
+        document.querySelectorAll('.con-rhs').forEach((rhsElem, i) => {
+            document.querySelectorAll(`.con-c[data-row="${i}"]`).forEach((c, j) => tableau[i][j] = +c.value);
+            tableau[i][totalCols-1] = +rhsElem.value;
+            const op = ops[i];
+            if(op === '<=') { tableau[i][sIdx] = 1; basis[i] = sIdx; sIdx++; }
+            else if(op === '>=') { tableau[i][sIdx] = -1; tableau[i][aIdx] = 1; basis[i] = aIdx; sIdx++; aIdx++; }
+            else { tableau[i][aIdx] = 1; basis[i] = aIdx; aIdx++; }
+        });
 
-            document.querySelectorAll('.obj-c').forEach((c, j) => {
-                tableau[nc][j] = isMin ? +c.value : -c.value;
-            });
-
-            for(let i=0; i<nc; i++) {
-                if(basis[i] >= nv + slackCount) {
-                    const penalty = isMin ? -M : M;
-                    for(let j=0; j<totalCols; j++) tableau[nc][j] -= penalty * tableau[i][j];
-                }
-            }
-
-            let iter = 0;
-            while(iter < 20) {
-                let pivotCol = -1, minRedCost = -0.00001;
-                for(let j=0; j<totalCols-1; j++) {
-                    if(tableau[nc][j] < minRedCost) { minRedCost = tableau[nc][j]; pivotCol = j; }
-                }
-                if(pivotCol === -1) break;
-
-                let pivotRow = -1, minRatio = Infinity;
-                for(let i=0; i<nc; i++) {
-                    if(tableau[i][pivotCol] > 0.00001) {
-                        const ratio = tableau[i][totalCols-1] / tableau[i][pivotCol];
-                        if(ratio < minRatio) { minRatio = ratio; pivotRow = i; }
-                    }
-                }
-                if(pivotRow === -1) { alert("Unbounded Problem Detected!"); return; }
-
-                renderTableau(tableau, basis, iter++, pivotRow, pivotCol, nv, slackCount, artifCount);
-                const pVal = tableau[pivotRow][pivotCol];
-                for(let j=0; j<totalCols; j++) tableau[pivotRow][j] /= pVal;
-                for(let i=0; i<=nc; i++) {
-                    if(i !== pivotRow) {
-                        const factor = tableau[i][pivotCol];
-                        for(let j=0; j<totalCols; j++) tableau[i][j] -= factor * tableau[pivotRow][j];
-                    }
-                }
-                basis[pivotRow] = pivotCol;
-            }
-
-            renderTableau(tableau, basis, 'Final', -1, -1, nv, slackCount, artifCount);
-            displayResults(tableau, basis, nv, nc, isMin, totalCols, slackCount);
-        } catch(e) {
-            console.error(e);
-            alert("Calculation error. Check values and console.");
+        document.querySelectorAll('.obj-c').forEach((c, j) => tableau[nc][j] = isMin ? +c.value : -c.value);
+        for(let i=0; i<nc; i++) if(basis[i] >= nv + sCount) {
+            const p = isMin ? -M : M;
+            for(let j=0; j<totalCols; j++) tableau[nc][j] -= p * tableau[i][j];
         }
+
+        let iter = 0;
+        while(iter < 15) {
+            let pCol = -1, minV = -0.0001;
+            for(let j=0; j<totalCols-1; j++) if(tableau[nc][j] < minV) { minV = tableau[nc][j]; pCol = j; }
+            if(pCol === -1) break;
+
+            let pRow = -1, minR = Infinity;
+            for(let i=0; i<nc; i++) if(tableau[i][pCol] > 0.0001) {
+                const r = tableau[i][totalCols-1] / tableau[i][pCol];
+                if(r < minR) { minR = r; pRow = i; }
+            }
+            if(pRow === -1) { updateStatus("Unbounded", "badge-infeasible"); return; }
+
+            const pVal = tableau[pRow][pCol];
+            for(let j=0; j<totalCols; j++) tableau[pRow][j] /= pVal;
+            for(let i=0; i<=nc; i++) if(i !== pRow) {
+                const f = tableau[i][pCol];
+                for(let j=0; j<totalCols; j++) tableau[i][j] -= f * tableau[pRow][j];
+            }
+            basis[pRow] = pCol;
+            iter++;
+        }
+
+        currentTableau = tableau;
+        const artifRemaining = basis.some(b => b >= nv + sCount);
+        if(artifRemaining) updateStatus("Infeasible", "badge-infeasible");
+        else updateStatus("Optimal", "badge-optimal");
+
+        renderResults(tableau, basis, nv, nc, isMin, totalCols, sCount);
+        if(nv === 2) drawChart(nv, nc);
     }
 
-    function displayResults(m, basis, nv, nc, isMin, totalCols, ns) {
-        const resArea = document.getElementById('results-area');
-        const finalZ = isMin ? m[nc][totalCols-1] : -m[nc][totalCols-1];
-        let multi = false;
-        for(let j=0; j<nv; j++) {
-            if(!basis.includes(j) && Math.abs(m[nc][j]) < 0.0001) multi = true;
-        }
+    function updateStatus(txt, cls) {
+        const b = document.getElementById('status-badge');
+        b.innerText = txt; b.className = 'status-badge ' + cls;
+    }
 
-        let html = `<div class="result-box opt-box">
-            <strong>Solution Found</strong> ${multi ? '<span class="multi-tag">Alt Optima Exist</span>' : ''}
-            <div style="font-size: 24px; margin-top:5px;">Z = ${finalZ.toFixed(2)}</div>
-        </div>`;
+    function renderResults(m, basis, nv, nc, isMin, tc, ns) {
+        const finalZ = isMin ? m[nc][tc-1] : -m[nc][tc-1];
+        let html = `<div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+            <div class="result-box" style="background:var(--accent-light); border:1px solid var(--accent);">
+                <div style="font-size:11px; font-weight:700; color:var(--accent)">OPTIMAL VALUE</div>
+                <div style="font-size:28px; font-weight:900;">${finalZ.toFixed(4)}</div>
+            </div>`;
+        
+        html += `<div class="result-box" style="background:var(--bg3); border:1px solid var(--border);">
+            <div style="font-size:11px; font-weight:700;">CONSTRAINTS ANALYZED</div>
+            <div style="font-size:28px; font-weight:900;">${nc}</div>
+        </div></div>`;
 
-        html += `<table style="margin-top:15px;"><tr><th>Variable</th><th>Value</th><th>Reduced Cost</th></tr>`;
+        html += `<h4 style="margin:20px 0 10px 0;">Sensitivity Analysis</h4>
+        <table><tr><th>Variable</th><th>Value</th><th>Reduced Cost</th><th>Shadow Price</th></tr>`;
         for(let j=0; j<nv; j++) {
-            const bIdx = basis.indexOf(j);
-            const val = bIdx !== -1 ? m[bIdx][totalCols-1] : 0;
-            html += `<tr><td>x${j+1}</td><td>${val.toFixed(2)}</td><td>${m[nc][j].toFixed(2)}</td></tr>`;
+            const val = basis.indexOf(j) !== -1 ? m[basis.indexOf(j)][tc-1] : 0;
+            const shadow = j < nc ? Math.abs(m[nc][nv+j]) : 0; // Simplified Shadow Price
+            html += `<tr><td>x${j+1}</td><td><b>${val.toFixed(2)}</b></td><td>${m[nc][j].toFixed(2)}</td><td>${shadow.toFixed(2)}</td></tr>`;
         }
         html += `</table>`;
-        resArea.innerHTML = html;
+        document.getElementById('results-area').innerHTML = html;
     }
 
-    function renderTableau(m, basis, iter, pr, pc, nv, ns, na) {
-        const wrap = document.createElement('div');
-        wrap.className = 'tableau-wrap';
-        let h = `<strong>Iteration: ${iter}</strong><table><tr><th>Basis</th>`;
-        for(let i=1; i<=nv; i++) h += `<th>x${i}</th>`;
-        for(let i=1; i<=ns; i++) h += `<th>s${i}</th>`;
-        for(let i=1; i<=na; i++) h += `<th>a${i}</th>`;
-        h += `<th>RHS</th></tr>`;
-        m.forEach((row, i) => {
-            const isPR = (i === pr);
-            let bLabel = "Z";
-            if(i < m.length-1) {
-                const bVar = basis[i];
-                if(bVar < nv) bLabel = "x" + (bVar+1);
-                else if(bVar < nv + ns) bLabel = "s" + (bVar - nv + 1);
-                else bLabel = "a" + (bVar - nv - ns + 1);
-            }
-            h += `<tr class="${isPR ? 'pivot-row' : ''}"><td>${bLabel}</td>`;
-            row.forEach((cell, j) => {
-                let cls = (j === pc) ? 'pivot-col' : '';
-                if(isPR && j === pc) cls = 'pivot-cell';
-                h += `<td class="${cls}">${cell.toFixed(2)}</td>`;
-            });
-            h += `</tr>`;
-        });
-        wrap.innerHTML = h + `</table>`;
-        document.getElementById('steps-area').appendChild(wrap);
+    function exportToCSV() {
+        if(!currentTableau.length) return alert("Solve a problem first!");
+        let csv = currentTableau.map(row => row.join(",")).join("\n");
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'simplex_tableau.csv'; a.click();
     }
-    initModel();
+
+    function drawChart(nv, nc) {
+        const container = document.getElementById('chart-container');
+        container.style.display = 'block';
+        if(myChart) myChart.destroy();
+        const ctx = document.getElementById('lpChart').getContext('2d');
+        
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: { datasets: [] },
+            options: { scales: { x: { type: 'linear', min:0, max:20 }, y: { type: 'linear', min:0, max:20 } } }
+        });
+    }
+
+    init();
 </script>
 </body>
 </html>
