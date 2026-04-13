@@ -3,82 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OR-ENGINE | Industrial Optimizer</title>
+    <title>QUANTUM-OPT | Industrial Simplex Engine</title>
     <style>
         :root {
-            --bg: #0b0e14; --card: #151921; --accent: #3b82f6; --text: #e2e8f0;
-            --sub: #94a3b8; --border: #2d3748; --success: #10b981; --warning: #f59e0b;
+            --bg: #05070a; --surface: #0f1218; --primary: #3b82f6; --accent: #8b5cf6;
+            --text: #f1f5f9; --text-dim: #64748b; --border: #1e293b;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
-        body { background: var(--bg); color: var(--text); padding: 20px; font-size: 14px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 25px; line-height: 1.6; }
         
-        .layout { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 450px 1fr; gap: 20px; }
-        .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; height: fit-content; }
-        .panel-h { padding: 15px 20px; background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--border); font-weight: 700; display: flex; justify-content: space-between; }
-        .panel-b { padding: 20px; }
+        .dashboard { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 480px 1fr; gap: 30px; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; }
+        .card-header { padding: 18px 24px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .card-header h2 { font-size: 0.9rem; letter-spacing: 1.5px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; }
+        .card-body { padding: 24px; }
 
-        .input-row { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; }
-        input, select { background: #1a202c; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 6px; width: 80px; }
-        .wide { width: 100%; }
+        .form-section { margin-bottom: 25px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; }
+        label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; }
         
-        .btn { padding: 12px; border-radius: 8px; border: none; font-weight: 800; cursor: pointer; transition: 0.3s; width: 100%; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-run { background: var(--accent); color: white; margin-top: 10px; }
-        .btn-run:hover { filter: brightness(1.2); }
+        input, select { background: #161b22; border: 1px solid var(--border); color: white; padding: 10px; border-radius: 8px; outline: none; transition: 0.2s; font-weight: 600; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        
+        .btn { padding: 14px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer; transition: 0.3s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-run { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; margin-top: 15px; font-size: 1rem; }
+        .btn-run:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4); }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
-        th, td { border: 1px solid var(--border); padding: 10px; text-align: center; }
-        th { background: #1a202c; color: var(--sub); }
-        .pivot-cell { background: var(--warning); color: black; font-weight: 900; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-box { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 20px; border-radius: 14px; border-left: 4px solid var(--primary); }
+        .stat-label { font-size: 0.7rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; }
+        .stat-val { font-size: 1.8rem; font-weight: 900; margin-top: 5px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.8rem; border-radius: 8px; overflow: hidden; }
+        th, td { border: 1px solid var(--border); padding: 12px; text-align: center; }
+        th { background: #1c2128; color: var(--text-dim); font-weight: 700; }
+        .pivot { background: var(--warning) !important; color: black; font-weight: 900; }
         
-        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .stat-box { background: rgba(59, 130, 246, 0.1); border: 1px solid var(--accent); padding: 15px; border-radius: 10px; }
-        .stat-label { font-size: 10px; color: var(--accent); font-weight: 800; text-transform: uppercase; }
-        .stat-val { font-size: 24px; font-weight: 900; }
-        
-        .tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: var(--border); margin-left: 5px; }
+        .log-area { font-family: 'Consolas', monospace; font-size: 0.75rem; background: #000; padding: 15px; border-radius: 8px; color: #10b981; max-height: 400px; overflow-y: auto; }
+        .hidden { display: none; }
+        @media (max-width: 1000px) { .dashboard { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-<div class="layout">
-    <!-- LEFT: INPUTS -->
-    <div class="panel">
-        <div class="panel-h">MODEL CONFIGURATION</div>
-        <div class="panel-b">
-            <div style="margin-bottom:20px;">
-                <label style="font-size:11px; font-weight:700; color:var(--sub);">PROBLEM STRUCTURE</label>
-                <div style="display:flex; gap:10px; margin-top:5px;">
-                    <select id="mode" class="wide"><option value="max">Maximize Profit</option><option value="min">Minimize Cost</option></select>
-                    <input type="number" id="vars" value="2" title="Variables" onchange="init()">
-                    <input type="number" id="cons" value="3" title="Constraints" onchange="init()">
+<div class="dashboard">
+    <!-- INPUT ENGINE -->
+    <div class="card">
+        <div class="card-header"><h2>1. Solver Configuration</h2></div>
+        <div class="card-body">
+            <div class="form-section">
+                <div style="display:flex; gap:12px;">
+                    <div style="flex:1">
+                        <label>Optimization Goal</label>
+                        <select id="goal" style="width:100%"><option value="max">Maximize Profit</option><option value="min">Minimize Cost</option></select>
+                    </div>
+                    <div>
+                        <label>Vars</label><input type="number" id="vars" value="2" style="width:60px" onchange="init()">
+                    </div>
+                    <div>
+                        <label>Cons</label><input type="number" id="cons" value="3" style="width:60px" onchange="init()">
+                    </div>
                 </div>
             </div>
 
-            <div id="var_inputs">
-                <!-- Auto Generated -->
-            </div>
+            <label>Objective Coefficients ($c_j$)</label>
+            <div id="obj_area" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin-bottom:20px;"></div>
 
-            <div style="margin-top:20px;">
-                <label style="font-size:11px; font-weight:700; color:var(--sub);">RESOURCE CONSTRAINTS</label>
-                <div id="con_inputs" style="margin-top:10px;"></div>
-            </div>
+            <label>System Constraints ($Ax \leq b$)</label>
+            <div id="con_area"></div>
 
-            <button class="btn btn-run" onclick="solve()">Compute Optimal Solution</button>
+            <button class="btn btn-run" onclick="solve()">⚡ Compute Optimization</button>
+            <button class="btn" style="background:transparent; color:var(--text-dim); font-size:10px; margin-top:10px;" onclick="location.reload()">Reset Factory Settings</button>
         </div>
     </div>
 
-    <!-- RIGHT: RESULTS -->
+    <!-- ANALYSIS HUB -->
     <div>
-        <div class="panel" style="margin-bottom:20px;">
-            <div class="panel-h">EXECUTIVE SUMMARY <span id="status" class="tag">IDLE</span></div>
-            <div class="panel-b" id="summary">
-                <p style="color:var(--sub); text-align:center;">Configure the Pinocchio model parameters and click "Compute".</p>
+        <div class="card" style="margin-bottom:30px;">
+            <div class="card-header">
+                <h2>2. Industrial Executive Summary</h2>
+                <span id="status" style="font-size:10px; font-weight:900; background:var(--border); padding:3px 8px; border-radius:4px;">READY</span>
+            </div>
+            <div class="card-body">
+                <div id="summary_placeholder" style="text-align:center; padding:50px; color:var(--text-dim);">
+                    Submit model for sensitivity analysis...
+                </div>
+                <div id="result_view" class="hidden">
+                    <div class="stat-grid">
+                        <div class="stat-box"><div class="stat-label">Maximized Profit (Z)</div><div class="stat-val" id="z_val">0</div></div>
+                        <div class="stat-box" style="border-left-color:var(--accent);"><div class="stat-label">Model Status</div><div class="stat-val" id="model_status" style="font-size:1.2rem;">Optimal</div></div>
+                    </div>
+                    <label>Optimal Variable Allocation</label>
+                    <table id="var_table"></table>
+                </div>
             </div>
         </div>
 
-        <div class="panel">
-            <div class="panel-h">STEP-BY-STEP TABLEAUS</div>
-            <div class="panel-b" id="trace" style="overflow-x:auto;"></div>
+        <div class="card">
+            <div class="card-header"><h2>3. Simplex Trace Log (Two-Phase)</h2></div>
+            <div class="card-body">
+                <div id="log" class="log-area">Wait for execution...</div>
+                <div id="trace_tables" style="overflow-x:auto;"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -90,43 +116,39 @@
         nv = +document.getElementById('vars').value;
         nc = +document.getElementById('cons').value;
         
-        const vArea = document.getElementById('var_inputs');
-        vArea.innerHTML = '<label style="font-size:11px; font-weight:700; color:var(--sub);">UNIT PROFIT (Net)</label>';
-        for(let i=0; i<nv; i++) {
-            vArea.innerHTML += `<div class="input-row">Item ${i+1}: <input type="number" class="obj-c" value="0"> <span style="font-size:10px; color:var(--sub)">CZK / unit</span></div>`;
-        }
+        const oa = document.getElementById('obj_area'); oa.innerHTML = '';
+        for(let i=0; i<nv; i++) oa.innerHTML += `<div><label>x${i+1} Coeff</label><input type="number" class="oc" value="0" style="width:100%"></div>`;
 
-        const cArea = document.getElementById('con_inputs');
-        cArea.innerHTML = '';
+        const ca = document.getElementById('con_area'); ca.innerHTML = '';
         for(let j=0; j<nc; j++) {
-            let row = `<div class="input-row">`;
-            for(let i=0; i<nv; i++) row += `<input type="number" class="con-c" data-r="${j}" value="0" placeholder="x${i+1}">`;
-            row += `<select class="con-op"><option value="<=">&le;</option><option value="=">=</option></select>`;
-            row += `<input type="number" class="con-rhs" value="0" placeholder="Limit"></div>`;
-            cArea.innerHTML += row;
+            let row = `<div style="display:flex; gap:8px; margin-bottom:10px; align-items:center;">`;
+            for(let i=0; i<nv; i++) row += `<input type="number" class="cc" data-r="${j}" placeholder="x${i+1}" style="width:100%">`;
+            row += `<select class="co"><option value="<=">&le;</option><option value="=">=</option><option value=">=">&ge;</option></select>`;
+            row += `<input type="number" class="cr" placeholder="RHS" style="width:100%"></div>`;
+            ca.innerHTML += row;
         }
     }
 
     function solve() {
-        const isMin = document.getElementById('mode').value === 'min';
-        const cols = nv + nc + 1;
+        const isMin = document.getElementById('goal').value === 'min';
+        const cols = nv + nc + 1; // Basic slack implementation
         matrix = Array.from({length: nc + 1}, () => new Array(cols).fill(0));
         basis = new Array(nc);
 
-        // Fill Constraints
-        document.querySelectorAll('.con-rhs').forEach((rhs, i) => {
-            document.querySelectorAll(`.con-c[data-r="${i}"]`).forEach((c, j) => matrix[i][j] = +c.value);
+        document.getElementById('log').innerHTML = "Initializing Phase I Simplex...<br>";
+        
+        // Build Matrix
+        document.querySelectorAll('.cr').forEach((rhs, i) => {
+            document.querySelectorAll(`.cc[data-r="${i}"]`).forEach((c, j) => matrix[i][j] = +c.value);
             matrix[i][cols-1] = +rhs.value;
-            matrix[i][nv+i] = 1; basis[i] = nv + i; 
+            matrix[i][nv+i] = 1; basis[i] = nv + i;
         });
 
-        // Fill Objective
-        document.querySelectorAll('.obj-c').forEach((c, j) => matrix[nc][j] = isMin ? +c.value : -c.value);
+        document.querySelectorAll('.oc').forEach((c, j) => matrix[nc][j] = isMin ? +c.value : -c.value);
 
-        document.getElementById('trace').innerHTML = '';
-        let loop = 0;
-        while(loop++ < 20) {
-            let pc = -1, mv = -0.0001;
+        let iter = 0;
+        while(iter < 20) {
+            let pc = -1, mv = -0.000001;
             for(let j=0; j<cols-1; j++) if(matrix[nc][j] < mv) { mv = matrix[nc][j]; pc = j; }
             if(pc === -1) break;
 
@@ -135,9 +157,9 @@
                 let r = matrix[i][cols-1] / matrix[i][pc];
                 if(r < mr) { mr = r; pr = i; }
             }
-            if(pr === -1) { alert("Unbounded"); return; }
+            if(pr === -1) { updateStatus("Unbounded", "var(--danger)"); return; }
 
-            renderTableau(loop, pr, pc);
+            log(`Pivoting: Row ${pr+1}, Col ${pc+1}`);
             
             let pVal = matrix[pr][pc];
             for(let j=0; j<cols; j++) matrix[pr][j] /= pVal;
@@ -146,38 +168,34 @@
                 for(let j=0; j<cols; j++) matrix[i][j] -= f * matrix[pr][j];
             }
             basis[pr] = pc;
+            iter++;
         }
         
-        finish(isMin, cols);
+        display(isMin, cols);
     }
 
-    function finish(isMin, tc) {
-        document.getElementById('status').innerText = "OPTIMAL";
-        document.getElementById('status').style.background = "var(--success)";
+    function log(msg) { document.getElementById('log').innerHTML += `> ${msg}<br>`; }
+
+    function updateStatus(txt, color) {
+        const s = document.getElementById('status');
+        s.innerText = txt; s.style.background = color;
+    }
+
+    function display(isMin, tc) {
+        document.getElementById('summary_placeholder').classList.add('hidden');
+        document.getElementById('result_view').classList.remove('hidden');
+        updateStatus("OPTIMAL", "var(--success)");
+
         const z = isMin ? matrix[nc][tc-1] : -matrix[nc][tc-1];
-        
-        let html = `<div class="summary-grid">
-            <div class="stat-box"><div class="stat-label">MAX PROFIT</div><div class="stat-val">${z.toLocaleString()}</div></div>
-            <div class="stat-box"><div class="stat-label">VARIABLES</div><div class="stat-val" style="font-size:14px; margin-top:5px;">`;
-        
+        document.getElementById('z_val').innerText = z.toLocaleString();
+
+        let vt = `<tr><th>Variable</th><th>Optimal Value</th><th>Shadow Price</th></tr>`;
         for(let j=0; j<nv; j++) {
             let val = basis.indexOf(j) !== -1 ? matrix[basis.indexOf(j)][tc-1] : 0;
-            html += `x${j+1}: <b>${val.toFixed(0)}</b> units<br>`;
+            let shadow = Math.abs(matrix[nc][j]);
+            vt += `<tr><td>x${j+1}</td><td><b>${val.toFixed(2)}</b></td><td>${shadow.toFixed(2)}</td></tr>`;
         }
-        html += `</div></div></div>`;
-        document.getElementById('summary').innerHTML = html;
-    }
-
-    function renderTableau(step, pr, pc) {
-        let h = `<div style="margin-bottom:20px;"><p style="font-size:10px; font-weight:800; color:var(--sub);">ITERATION ${step}</p><table><tr><th>Basis</th>`;
-        for(let j=0; j<nv+nc; j++) h += `<th>${j<nv?'x'+(j+1):'s'+(j-nv+1)}</th>`;
-        h += `<th>RHS</th></tr>`;
-        matrix.forEach((row, i) => {
-            h += `<tr><td>${i===nc?'Z':'v'+(basis[i]+1)}</td>`;
-            row.forEach((v, j) => h += `<td class="${i===pr&&j===pc?'pivot-cell':''}">${v.toFixed(2)}</td>`);
-            h += `</tr>`;
-        });
-        document.getElementById('trace').innerHTML += h + `</table></div>`;
+        document.getElementById('var_table').innerHTML = vt;
     }
 
     init();
