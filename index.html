@@ -1,131 +1,243 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Pro LP Solver</title>
-  <style>
-    body { background:#0f172a; color:#fff; font-family:sans-serif; }
-    .box { background:#1e293b; padding:15px; margin:10px; border-radius:10px;}
-    input, select { margin:3px; padding:5px;}
-    button { padding:8px; background:#22c55e; border:none; cursor:pointer;}
-    table { border-collapse: collapse; }
-    td { padding:5px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LP Solver Pro - Enhanced Edition</title>
+    <style>
+        :root {
+            --bg: #f8f9fb; --bg2: #ffffff; --bg3: #f1f3f7; --text: #1a1d23;
+            --text2: #4a5568; --accent: #4f46e5; --accent-light: #ede9fe;
+            --success: #059669; --danger: #dc2626; --warning: #d97706;
+            --pivot-bg: #fef3c7; --pivot-cell: #f59e0b; --border: #e2e8f0;
+            --radius: 10px; --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        [data-theme="dark"] {
+            --bg: #0f1117; --bg2: #1a1d2e; --bg3: #252837; --text: #e2e8f0;
+            --text2: #a0aec0; --border: #2d3748; --accent: #818cf8;
+            --pivot-bg: #423b1a; --pivot-cell: #fbbf24;
+        }
+        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 14px; }
+        header { background: var(--bg2); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 60px; border-bottom: 1px solid var(--border); position: sticky; top:0; z-index:10; }
+        main { max-width: 1200px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: var(--bg2); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+        .card-header { padding: 15px 20px; background: var(--bg3); font-weight: 700; border-bottom: 1px solid var(--border); }
+        .card-body { padding: 20px; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
+        input, select { padding: 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
+        .coeff-input { width: 60px; } .rhs-input { width: 80px; }
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-reset { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+        .tableau-wrap { overflow-x: auto; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid var(--border); padding: 8px; text-align: center; }
+        .pivot-row { background: var(--pivot-bg); }
+        .pivot-col { background: rgba(79, 70, 229, 0.1); }
+        .pivot-cell { background: var(--pivot-cell) !important; font-weight: bold; color: #000; }
+        .hidden { display: none; }
+        .result-box { padding: 15px; border-radius: 8px; margin-top: 10px; }
+        .opt-box { background: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+        .multi-tag { display: inline-block; background: var(--warning); color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-left: 10px; }
+        @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+    </style>
 </head>
-
 <body>
 
-<h1>🚀 Advanced Linear Programming Solver</h1>
+<header>
+    <div style="font-weight: 800; color: var(--accent); font-size: 1.2rem;">LP SOLVER PRO</div>
+    <div style="display: flex; gap: 10px;">
+        <button class="btn btn-reset" onclick="location.reload()">Reset</button>
+        <button class="btn btn-primary" onclick="solveLP()">Solve Problem</button>
+    </div>
+</header>
 
-<div class="box">
-  <h3>Variables</h3>
-  <div id="vars"></div>
-  <button onclick="addVar()">+ Add Variable</button>
-</div>
+<main>
+    <div class="card">
+        <div class="card-header">Model Setup</div>
+        <div class="card-body">
+            <div class="form-row">
+                <select id="obj-type"><option value="max">Maximize</option><option value="min">Minimize</option></select>
+                <label>Vars:</label><input type="number" id="num-vars" value="2" min="1" max="6" onchange="initModel()">
+                <label>Cons:</label><input type="number" id="num-cons" value="2" min="1" max="6" onchange="initModel()">
+            </div>
+            <div id="obj-fn" class="form-row" style="background: var(--bg3); padding: 10px; border-radius: 8px;"></div>
+            <div id="cons-list" style="margin-top: 15px;"></div>
+        </div>
+    </div>
 
-<div class="box">
-  <h3>Objective Function</h3>
-  <select id="optType">
-    <option value="max">Maximize</option>
-    <option value="min">Minimize</option>
-  </select>
-  <div id="objective"></div>
-</div>
+    <div class="card">
+        <div class="card-header">Solution & Analysis</div>
+        <div class="card-body" id="results-area">
+            <p style="color: var(--text2); text-align: center;">Results will appear here...</p>
+        </div>
+    </div>
 
-<div class="box">
-  <h3>Constraints</h3>
-  <div id="constraints"></div>
-  <button onclick="addConstraint()">+ Add Constraint</button>
-</div>
-
-<div class="box">
-  <button onclick="solve()">⚡ Solve</button>
-</div>
-
-<div class="box">
-  <h3>Result</h3>
-  <div id="output"></div>
-</div>
+    <div class="card" style="grid-column: 1 / -1;">
+        <div class="card-header">Simplex Tableaus (Steps)</div>
+        <div id="steps-area" class="card-body"></div>
+    </div>
+</main>
 
 <script>
+    function initModel() {
+        const nv = +document.getElementById('num-vars').value;
+        const nc = +document.getElementById('num-cons').value;
+        
+        const objArea = document.getElementById('obj-fn');
+        objArea.innerHTML = 'Z = ';
+        for(let i=0; i<nv; i++) {
+            objArea.innerHTML += `<input type="number" class="coeff-input obj-c" value="0"> x<sub>${i+1}</sub> ${i < nv-1 ? '+' : ''}`;
+        }
 
-let varCount = 0;
-let constraintCount = 0;
-
-function addVar(){
-  varCount++;
-  document.getElementById("vars").innerHTML += `
-    x${varCount}
-    <input id="min${varCount}" placeholder="min" value="0">
-    <input id="max${varCount}" placeholder="max" value="100">
-    <br>
-  `;
-  renderObjective();
-}
-
-function renderObjective(){
-  let html = "";
-  for(let i=1;i<=varCount;i++){
-    html += `<input id="obj${i}" value="0"> x${i} `;
-    if(i<varCount) html += "+ ";
-  }
-  document.getElementById("objective").innerHTML = html;
-}
-
-function addConstraint(){
-  constraintCount++;
-  let row = `<div id="c${constraintCount}">`;
-
-  for(let i=1;i<=varCount;i++){
-    row += `<input id="c${constraintCount}_${i}" value="0"> x${i} `;
-    if(i<varCount) row += "+ ";
-  }
-
-  row += `
-    <select id="sign${constraintCount}">
-      <option value="<=">≤</option>
-      <option value=">=">≥</option>
-      <option value="=">=</option>
-    </select>
-    <input id="rhs${constraintCount}" value="0">
-  </div>`;
-
-  document.getElementById("constraints").innerHTML += row;
-}
-
-function solve(){
-  let output = "<h3>Model:</h3>";
-
-  // Objective
-  let obj = [];
-  for(let i=1;i<=varCount;i++){
-    obj.push(Number(document.getElementById("obj"+i).value));
-  }
-
-  output += "Objective: " + obj.join(", ") + "<br>";
-
-  // Constraints
-  output += "<br>Constraints:<br>";
-  for(let c=1;c<=constraintCount;c++){
-    let row = [];
-    for(let i=1;i<=varCount;i++){
-      row.push(Number(document.getElementById(`c${c}_${i}`).value));
+        const consArea = document.getElementById('cons-list');
+        consArea.innerHTML = '';
+        for(let j=0; j<nc; j++) {
+            let row = `<div class="form-row">`;
+            for(let i=0; i<nv; i++) row += `<input type="number" class="coeff-input con-c" data-row="${j}"> x<sub>${i+1}</sub> ${i < nv-1 ? '+' : ''}`;
+            row += `<select class="con-op"><option value="<=">&le;</option><option value="=">=</option><option value=">=">&ge;</option></select>`;
+            row += `<input type="number" class="rhs-input con-rhs" value="0"></div>`;
+            consArea.innerHTML += row;
+        }
     }
-    let sign = document.getElementById("sign"+c).value;
-    let rhs = document.getElementById("rhs"+c).value;
 
-    output += row.join(", ") + " " + sign + " " + rhs + "<br>";
-  }
+    function solveLP() {
+        const nv = +document.getElementById('num-vars').value;
+        const nc = +document.getElementById('num-cons').value;
+        const isMin = document.getElementById('obj-type').value === 'min';
+        const steps = document.getElementById('steps-area');
+        steps.innerHTML = '';
 
-  output += "<br>⚠️ Next step: integrate REAL SIMPLEX ENGINE";
+        // 1. Build Initial Matrix (handling Big-M for simplicity in a single phase logic)
+        // Table columns: x1...xn, s1...sm (slack/surplus), a1...ak (artificial), RHS
+        let slackCount = 0, artifCount = 0;
+        const ops = Array.from(document.querySelectorAll('.con-op')).map(s => s.value);
+        ops.forEach(op => {
+            if(op === '<=') slackCount++;
+            else if(op === '>=') { slackCount++; artifCount++; }
+            else artifCount++;
+        });
 
-  document.getElementById("output").innerHTML = output;
-}
+        const totalCols = nv + slackCount + artifCount + 1;
+        let tableau = Array.from({length: nc + 1}, () => new Array(totalCols).fill(0));
+        let basis = new Array(nc);
+        const M = 1000000;
 
-addVar();
-addVar();
-addConstraint();
+        // Fill constraints
+        let sIdx = nv, aIdx = nv + slackCount;
+        document.querySelectorAll('.con-rhs').forEach((rhsElem, i) => {
+            const rowCoeffs = document.querySelectorAll(`.con-c[data-row="${i}"]`);
+            rowCoeffs.forEach((c, j) => tableau[i][j] = +c.value);
+            tableau[i][totalCols-1] = +rhsElem.value;
+            
+            const op = ops[i];
+            if(op === '<=') {
+                tableau[i][sIdx] = 1; basis[i] = sIdx; sIdx++;
+            } else if(op === '>=') {
+                tableau[i][sIdx] = -1; tableau[i][aIdx] = 1; basis[i] = aIdx; sIdx++; aIdx++;
+            } else {
+                tableau[i][aIdx] = 1; basis[i] = aIdx; aIdx++;
+            }
+        });
 
+        // Objective Row
+        document.querySelectorAll('.obj-c').forEach((c, j) => {
+            tableau[nc][j] = isMin ? +c.value : -c.value;
+        });
+
+        // Apply Big-M penalties to Obj Row
+        for(let i=0; i<nc; i++) {
+            if(basis[i] >= nv + slackCount) { // Artificial
+                const penalty = isMin ? -M : M;
+                for(let j=0; j<totalCols; j++) tableau[nc][j] -= penalty * tableau[i][j];
+            }
+        }
+
+        // 2. Simplex Iterations
+        let iter = 0;
+        while(iter < 20) {
+            let pivotCol = -1, minRedCost = -0.00001;
+            for(let j=0; j<totalCols-1; j++) {
+                if(tableau[nc][j] < minRedCost) { minRedCost = tableau[nc][j]; pivotCol = j; }
+            }
+            if(pivotCol === -1) break;
+
+            let pivotRow = -1, minRatio = Infinity;
+            for(let i=0; i<nc; i++) {
+                if(tableau[i][pivotCol] > 0.00001) {
+                    const ratio = tableau[i][totalCols-1] / tableau[i][pivotCol];
+                    if(ratio < minRatio) { minRatio = ratio; pivotRow = i; }
+                }
+            }
+            if(pivotRow === -1) { alert("Unbounded!"); return; }
+
+            renderTableau(tableau, basis, iter++, pivotRow, pivotCol, nv, slackCount, artifCount);
+            
+            const pVal = tableau[pivotRow][pivotCol];
+            for(let j=0; j<totalCols; j++) tableau[pivotRow][j] /= pVal;
+            for(let i=0; i<=nc; i++) {
+                if(i !== pivotRow) {
+                    const factor = tableau[i][pivotCol];
+                    for(let j=0; j<totalCols; j++) tableau[i][j] -= factor * tableau[pivotRow][j];
+                }
+            }
+            basis[pivotRow] = pivotCol;
+        }
+
+        renderTableau(tableau, basis, 'Final', -1, -1, nv, slackCount, artifCount);
+        displayResults(tableau, basis, nv, nc, isMin);
+    }
+
+    function displayResults(m, basis, nv, nc, isMin) {
+        const resArea = document.getElementById('results-area');
+        const z = m[nc][nv + (m[0].length - nv - 1)]; // simplified RHS access
+        const finalZ = isMin ? m[nc][m[0].length-1] : -m[nc][m[0].length-1];
+
+        // Multi-solution check: Is there a non-basic var with 0 reduced cost?
+        let multi = false;
+        for(let j=0; j<nv; j++) {
+            if(!basis.includes(j) && Math.abs(m[nc][j]) < 0.0001) multi = true;
+        }
+
+        let html = `<div class="result-box opt-box">
+            <strong>Optimal Solution Found</strong> ${multi ? '<span class="multi-tag">Alternative Optima Exist</span>' : ''}
+            <div style="font-size: 24px; margin-top:5px;">Z = ${finalZ.toFixed(2)}</div>
+        </div>`;
+
+        html += `<table style="margin-top:15px;"><tr><th>Variable</th><th>Value</th><th>Reduced Cost</th></tr>`;
+        for(let j=0; j<nv; j++) {
+            const bIdx = basis.indexOf(j);
+            const val = bIdx !== -1 ? m[bIdx][m[0].length-1] : 0;
+            html += `<tr><td>x${j+1}</td><td>${val.toFixed(2)}</td><td>${m[nc][j].toFixed(2)}</td></tr>`;
+        }
+        html += `</table>`;
+        resArea.innerHTML = html;
+    }
+
+    function renderTableau(m, basis, iter, pr, pc, nv, ns, na) {
+        const wrap = document.createElement('div');
+        wrap.className = 'tableau-wrap';
+        let h = `<strong>Iteration: ${iter}</strong><table><tr><th>Basis</th>`;
+        for(let i=1; i<=nv; i++) h += `<th>x${i}</th>`;
+        for(let i=1; i<=ns; i++) h += `<th>s${i}</th>`;
+        for(let i=1; i<=na; i++) h += `<th>a${i}</th>`;
+        h += `<th>RHS</th></tr>`;
+        
+        m.forEach((row, i) => {
+            const isPR = (i === pr);
+            h += `<tr class="${isPR ? 'pivot-row' : ''}"><td>${i === m.length-1 ? 'Z' : 'Row '+(i+1)}</td>`;
+            row.forEach((cell, j) => {
+                let cls = (j === pc) ? 'pivot-col' : '';
+                if(isPR && j === pc) cls = 'pivot-cell';
+                h += `<td class="${cls}">${cell.toFixed(2)}</td>`;
+            });
+            h += `</tr>`;
+        });
+        wrap.innerHTML = h + `</table>`;
+        document.getElementById('steps-area').appendChild(wrap);
+    }
+
+    initModel();
 </script>
-
 </body>
 </html>
