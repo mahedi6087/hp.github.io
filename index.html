@@ -1,133 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>BI-OPTIMIZER | Custom Label Edition</title>
-    <style>
-        :root { --bg: #0f172a; --card: #1e293b; --accent: #3b82f6; --text: #f8fafc; --border: #334155; }
-        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-        .grid { display: grid; grid-template-columns: 450px 1fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
-        .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-        h2 { font-size: 0.8rem; letter-spacing: 1px; color: var(--accent); text-transform: uppercase; margin-bottom: 15px; }
-        .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
-        input, select { background: #0f172a; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 6px; }
-        .btn { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
-        th, td { border: 1px solid var(--border); padding: 8px; text-align: center; }
-        .stat-box { background: rgba(59,130,246,0.1); padding: 15px; border-radius: 8px; border-left: 4px solid var(--accent); }
-    </style>
-</head>
-<body>
-
-<div class="grid">
-    <!-- INPUTS -->
-    <div class="panel">
-        <h2>1. Problem Definition</h2>
-        <div class="row">
-            <label>Objective Name:</label>
-            <input type="text" id="obj_name" value="Monthly Profit" style="flex:1">
-        </div>
-        <div class="row">
-            <select id="goal"><option value="max">Maximize</option><option value="min">Minimize</option></select>
-            <input type="number" id="nv" value="2" title="Vars" onchange="build()">
-            <input type="number" id="nc" value="3" title="Cons" onchange="build()">
-        </div>
-
-        <h2 style="margin-top:20px;">2. Variable Names & Values</h2>
-        <div id="var_inputs"></div>
-
-        <h2 style="margin-top:20px;">3. Constraints</h2>
-        <div id="con_inputs"></div>
-
-        <button class="btn" onclick="solve()">⚡ Run Simulation</button>
-    </div>
-
-    <!-- OUTPUTS -->
-    <div>
-        <div class="panel">
-            <h2>4. Executive Analysis</h2>
-            <div id="summary"><p style="color:#64748b">Submit model to view optimal production mix.</p></div>
-        </div>
-        <div class="panel" style="margin-top:20px;">
-            <h2>5. Mathematical Trace</h2>
-            <div id="trace" style="overflow-x:auto;"></div>
-        </div>
-    </div>
-</div>
-
-<script>
-    function build() {
-        const nv = +document.getElementById('nv').value, nc = +document.getElementById('nc').value;
-        const vArea = document.getElementById('var_inputs'); vArea.innerHTML = '';
-        for(let i=0; i<nv; i++) {
-            vArea.innerHTML += `<div class="row">
-                <input type="text" class="v-label" value="Product ${i+1}" style="width:120px">
-                <input type="number" class="v-coeff" value="0" placeholder="Profit">
-            </div>`;
-        }
-        const cArea = document.getElementById('con_inputs'); cArea.innerHTML = '';
-        for(let j=0; j<nc; j++) {
-            let row = `<div class="row">`;
-            for(let i=0; i<nv; i++) row += `<input type="number" class="c-val" data-r="${j}" style="width:50px" placeholder="x${i+1}">`;
-            row += `<select class="c-op"><option value="<=">&le;</option></select>`;
-            row += `<input type="number" class="c-rhs" value="0" style="width:70px"></div>`;
-            cArea.innerHTML += row;
-        }
-    }
-
-    function solve() {
-        const nv = +document.getElementById('nv').value, nc = +document.getElementById('nc').value;
-        const isMin = document.getElementById('goal').value === 'min';
-        const cols = nv + nc + 1;
-        let matrix = Array.from({length: nc + 1}, () => new Array(cols).fill(0));
-        let basis = new Array(nc);
-        const labels = Array.from(document.querySelectorAll('.v-label')).map(el => el.value);
-        const objName = document.getElementById('obj_name').value;
-
-        // Load Constraints
-        document.querySelectorAll('.c-rhs').forEach((rhs, i) => {
-            document.querySelectorAll(`.c-val[data-r="${i}"]`).forEach((c, j) => matrix[i][j] = +c.value);
-            matrix[i][cols-1] = +rhs.value;
-            matrix[i][nv+i] = 1; basis[i] = nv+i;
-        });
-
-        // Load Objective
-        document.querySelectorAll('.v-coeff').forEach((c, j) => matrix[nc][j] = isMin ? +c.value : -c.value);
-
-        // Simplex Loop
-        let iters = 0;
-        while(iters++ < 20) {
-            let pc = -1, mv = -0.0001;
-            for(let j=0; j<cols-1; j++) if(matrix[nc][j] < mv) { mv = matrix[nc][j]; pc = j; }
-            if(pc === -1) break;
-            let pr = -1, mr = Infinity;
-            for(let i=0; i<nc; i++) if(matrix[i][pc] > 0) {
-                let r = matrix[i][cols-1] / matrix[i][pc];
-                if(r < mr) { mr = r; pr = i; }
-            }
-            if(pr === -1) break;
-            
-            let pVal = matrix[pr][pc];
-            for(let j=0; j<cols; j++) matrix[pr][j] /= pVal;
-            for(let i=0; i<=nc; i++) if(i !== pr) {
-                let f = matrix[i][pc];
-                for(let j=0; j<cols; j++) matrix[i][j] -= f * matrix[pr][j];
-            }
-            basis[pr] = pc;
-        }
-
-        // Display Summary
-        const z = isMin ? matrix[nc][cols-1] : -matrix[nc][cols-1];
-        let res = `<div class="stat-box"><div style="font-size:10px; font-weight:800; color:var(--accent)">MAX ${objName.toUpperCase()}</div><div style="font-size:24px; font-weight:900;">${z.toLocaleString()} CZK</div></div>`;
-        res += `<div style="margin-top:20px;"><h3>Optimal Allocation:</h3>`;
-        labels.forEach((label, j) => {
-            const val = basis.indexOf(j) !== -1 ? matrix[basis.indexOf(j)][cols-1] : 0;
-            res += `<div class="row"><b>${label}:</b> ${val.toFixed(0)} units</div>`;
-        });
-        document.getElementById('summary').innerHTML = res + `</div>`;
-    }
-    build();
-</script>
-</body>
-</html>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pizza Optimizer Full BB Visualizer</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{
+background:#0f172a;
+color:white;
+font-family:Arial,sans-serif;
+}
+.card{
+background:#111827;
+padding:24px;
+border-radius:24px;
+box-shadow:0 0 25px rgba(0,0,0,0.4);
+}
+.node{
+padding:14px;
+border-radius:14px;
+margin:10px 0;
+background:#1e293b;
+border-left:5px solid #10b981;
+transition:0.3s;
+}
+.node:hover{
