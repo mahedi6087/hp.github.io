@@ -131,7 +131,9 @@ Branch and Bound explores all combinations efficiently.
 <p id="stepDesc" class="text-gray-300 mt-3 leading-8"></p>
 </div>
 
-<div id="treeContainer" class="space-y-3"></div>
+<div class="overflow-auto bg-slate-950 rounded-2xl p-6 border border-slate-700">
+<svg id="treeSvg" width="12000" height="5000" class="min-w-max"></svg>
+</div>
 </div>
 
 <div class="card mt-8">
@@ -177,10 +179,9 @@ const toppings=[
 
 const tbody=document.getElementById('tableBody');
 
-for(let t of toppings){
-let ratio=(t.sat/t.cost).toFixed(2);
-
-tbody.innerHTML+=`
+for(const t of toppings){
+const ratio=(t.sat/t.cost).toFixed(2);
+tbody.innerHTML += `
 <tr>
 <td>${t.name}</td>
 <td>${t.cost}</td>
@@ -189,112 +190,132 @@ tbody.innerHTML+=`
 </tr>`;
 }
 
-const steps=[];
-
-steps.push({
-title:'Start Node',
-desc:'Root node begins with cost = 0 and satisfaction = 0.',
-html:`<div class="node visibleNode">Level 0 → Start (Cost 0, Sat 0)</div>`
-});
-
-function generateFullTree(){
-let totalNodes=1024;
-
-for(let mask=0; mask<totalNodes; mask++){
-let cost=0;
-let sat=0;
-let selected=[];
-let decisions=[];
-
-for(let i=0;i<10;i++){
-let bit=(mask>>i)&1;
-
-decisions.push(`x${i+1}=${bit}`);
-
-if(bit===1){
-cost+=toppings[i].cost;
-sat+=toppings[i].sat;
-selected.push(toppings[i].name);
-}
-}
-
-let feasible=cost<=7;
-
-let color='border-l-green-500';
-let status='FEASIBLE ✅';
-
-if(!feasible){
-color='border-l-red-500';
-status='PRUNED ❌';
-}
-
-steps.push({
-title:`Checking Combination ${mask+1} / 1024`,
-desc:`Full Branch & Bound exploration up to x10. Every possible combination is checked.`,
-html:`
-<div class="node ${color} visibleNode">
-<b>Decision Path</b><br>
-${decisions.join(' , ')}
-<br><br>
-<b>Selected Toppings</b><br>
-${selected.length?selected.join(', '):'None'}
-<br><br>
-<b>Total Cost:</b> ${cost.toFixed(2)}
-<br>
-<b>Total Satisfaction:</b> ${sat.toFixed(2)}
-<br><br>
-<b>Status:</b> ${status}
-</div>
-`
-});
-}
-
-steps.push({
-title:'Optimal Solution Found',
-desc:'After exploring all 1024 nodes from x1 to x10, this is the global optimal solution.',
-html:`
-<div class="node border-l-cyan-500 visibleNode">
-<h3 class="text-2xl font-bold mb-3">BEST SOLUTION ✅</h3>
-<b>x1=0</b><br>
-<b>x2=0</b><br>
-<b>x3=1</b><br>
-<b>x4=0</b><br>
-<b>x5=1</b><br>
-<b>x6=0</b><br>
-<b>x7=1</b><br>
-<b>x8=1</b><br>
-<b>x9=1</b><br>
-<b>x10=0</b><br><br>
-Selected: Ricotta, Parma Ham, Salame, Nduja, Zucchini<br><br>
-Total Cost = 6.50<br>
-Total Satisfaction = 28.00
-</div>
-`
-});
-}
-
-generateFullTree();
-
-let currentStep=0;
-const treeContainer=document.getElementById('treeContainer');
 const stepTitle=document.getElementById('stepTitle');
 const stepDesc=document.getElementById('stepDesc');
+const treeSvg=document.getElementById('treeSvg');
 
-function renderTree(){
-treeContainer.innerHTML='';
+const nodes=[];
+let currentStep=0;
+let autoInterval=null;
 
-for(let i=0;i<=currentStep;i++){
-let div=document.createElement('div');
-div.innerHTML=steps[i].html;
-treeContainer.appendChild(div);
+function buildTree(){
+let id=0;
+
+function dfs(level,x,y,spacing,cost,sat,path,choices){
+if(level>10) return;
+
+const feasible=cost<=7;
+
+nodes.push({
+id:id++,
+level,
+x,
+y,
+cost,
+sat,
+path:[...path],
+feasible,
+choices:[...choices],
+upperBound:(sat + Math.max(0,(7-cost))*2.5).toFixed(2),
+parent:path.length===0?null:path[path.length-1].nodeId
+});
+
+const currentNodeId=id-1;
+
+if(level===10) return;
+
+const leftPath=[...path,{nodeId:currentNodeId,decision:`x${level+1}=0`}];
+const leftChoices=[...choices,0];
+dfs(level+1,x-spacing,y+140,spacing/2,cost,sat,leftPath,leftChoices);
+
+const newCost=cost+toppings[level].cost;
+const newSat=sat+toppings[level].sat;
+
+const rightPath=[...path,{nodeId:currentNodeId,decision:`x${level+1}=1`}];
+const rightChoices=[...choices,1];
+dfs(level+1,x+spacing,y+140,spacing/2,newCost,newSat,rightPath,rightChoices);
 }
 
-stepTitle.innerText=steps[currentStep].title;
-stepDesc.innerText=steps[currentStep].desc;
+dfs(0,6000,50,3000,0,0,[],[]);
+}
+
+buildTree();
+
+function clearSvg(){
+while(treeSvg.firstChild){
+treeSvg.removeChild(treeSvg.firstChild);
+}
+}
+
+function drawLine(x1,y1,x2,y2){
+const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+line.setAttribute('x1',x1);
+line.setAttribute('y1',y1);
+line.setAttribute('x2',x2);
+line.setAttribute('y2',y2);
+line.setAttribute('stroke','#64748b');
+line.setAttribute('stroke-width','2');
+treeSvg.appendChild(line);
+}
+
+function drawNode(node){
+const group=document.createElementNS('http://www.w3.org/2000/svg','g');
+
+const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+rect.setAttribute('x',node.x);
+rect.setAttribute('y',node.y);
+rect.setAttribute('width','120');
+rect.setAttribute('height','60');
+rect.setAttribute('rx','10');
+rect.setAttribute('fill','#111827');
+rect.setAttribute('stroke',node.feasible ? '#22c55e' : '#ef4444');
+rect.setAttribute('stroke-width','3');
+
+group.appendChild(rect);
+
+const text=document.createElementNS('http://www.w3.org/2000/svg','text');
+text.setAttribute('x',node.x+10);
+text.setAttribute('y',node.y+25);
+text.setAttribute('fill','white');
+text.setAttribute('font-size','12');
+text.textContent=`N${node.id} | Level ${node.level}`;
+
+group.appendChild(text);
+
+const costText=document.createElementNS('http://www.w3.org/2000/svg','text');
+costText.setAttribute('x',node.x+10);
+costText.setAttribute('y',node.y+45);
+costText.setAttribute('fill','#cbd5e1');
+costText.setAttribute('font-size','10');
+costText.textContent=`Cost:${node.cost.toFixed(1)} Sat:${node.sat.toFixed(1)} UB:${node.upperBound}`;
+
+group.appendChild(costText);
+
+treeSvg.appendChild(group);
+}
+
+function renderTree(){
+clearSvg();
+
+for(let i=0;i<=currentStep && i<nodes.length;i++){
+const node=nodes[i];
+
+if(node.parent!==null){
+const parent=nodes[node.parent];
+drawLine(parent.x+60,parent.y+60,node.x+60,node.y);
+}
+
+drawNode(node);
+}
+
+const currentNode=nodes[Math.min(currentStep,nodes.length-1)];
+
+stepTitle.innerText=`Step ${currentStep+1} / ${nodes.length}`;
+stepDesc.innerText=`Currently exploring Level ${currentNode.level} | Decisions: ${currentNode.choices.map((v,i)=>`x${i+1}=${v}`).join(', ')} | Cost = ${currentNode.cost.toFixed(1)} | Satisfaction = ${currentNode.sat.toFixed(1)} | Upper Bound = ${currentNode.upperBound} | ${currentNode.feasible ? 'Feasible Node' : 'Pruned Node'}`;
 }
 
 function nextStep(){
-if(currentStep<steps.length-1){
+if(currentStep < nodes.length-1){
 currentStep++;
 renderTree();
 }
@@ -313,14 +334,17 @@ renderTree();
 }
 
 function autoPlay(){
-resetTree();
-let interval=setInterval(()=>{
-if(currentStep<steps.length-1){
+if(autoInterval){
+clearInterval(autoInterval);
+}
+
+autoInterval=setInterval(()=>{
+if(currentStep < nodes.length-1){
 nextStep();
 }else{
-clearInterval(interval);
+clearInterval(autoInterval);
 }
-},1500);
+},300);
 }
 
 renderTree();
