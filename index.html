@@ -27,3 +27,326 @@ border-left:5px solid #10b981;
 transition:0.3s;
 }
 .node:hover{
+transform:scale(1.02);
+}
+.step{
+background:#dc2626;
+padding:5px 12px;
+border-radius:20px;
+font-size:12px;
+font-weight:bold;
+}
+.hiddenNode{
+display:none;
+}
+.visibleNode{
+display:block;
+animation:fade 0.4s ease;
+}
+@keyframes fade{
+from{opacity:0;transform:translateY(10px)}
+to{opacity:1;transform:translateY(0)}
+}
+button{
+transition:0.2s;
+}
+button:hover{
+transform:scale(1.05);
+}
+table td,table th{
+border:1px solid rgba(255,255,255,0.2);
+padding:8px;
+text-align:center;
+}
+</style>
+</head>
+<body class="p-6">
+
+<div class="max-w-7xl mx-auto">
+
+<div class="text-center mb-10">
+<h1 class="text-6xl font-bold mb-4">🍕 Pizza Optimizer Visualizer</h1>
+<p class="text-xl text-gray-300">
+Interactive Full Decision Tree + Branch & Bound + Continuous LP Relaxation
+</p>
+</div>
+
+<div class="grid md:grid-cols-2 gap-6">
+
+<div class="card">
+<div class="flex items-center gap-3 mb-4">
+<span class="step">STEP 0</span>
+<h2 class="text-3xl font-bold">Problem Setup</h2>
+</div>
+
+<p class="leading-8 text-gray-300 mb-5">
+We must choose pizza toppings while staying under a budget of 7.
+Each topping has a cost and satisfaction score.
+Branch and Bound explores all combinations efficiently.
+</p>
+
+<div class="bg-black/30 rounded-2xl p-5">
+<p class="text-green-400 font-bold mb-2">Objective Function</p>
+<p class="mb-4">Maximize Z = Σ Satisfaction × xᵢ</p>
+
+<p class="text-yellow-300 font-bold mb-2">Constraint</p>
+<p>Σ Cost × xᵢ ≤ 7</p>
+<p>0 ≤ xᵢ ≤ 1</p>
+</div>
+</div>
+
+<div class="card">
+<h2 class="text-3xl font-bold mb-4">🍕 Dataset</h2>
+<table class="w-full text-sm">
+<thead>
+<tr class="bg-green-700">
+<th>Topping</th>
+<th>Cost</th>
+<th>Satisfaction</th>
+<th>Ratio</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+</div>
+
+</div>
+
+<div class="card mt-8 overflow-auto">
+<div class="flex items-center gap-3 mb-5">
+<span class="step">STEP 1</span>
+<h2 class="text-4xl font-bold">Interactive Step-by-Step Tree</h2>
+</div>
+
+<div class="flex gap-4 flex-wrap mb-6">
+<button onclick="prevStep()" class="bg-red-600 px-5 py-3 rounded-2xl font-bold">⬅ Previous</button>
+<button onclick="nextStep()" class="bg-green-600 px-5 py-3 rounded-2xl font-bold">Next ➡</button>
+<button onclick="autoPlay()" class="bg-blue-600 px-5 py-3 rounded-2xl font-bold">▶ Auto Play</button>
+<button onclick="resetTree()" class="bg-yellow-400 text-black px-5 py-3 rounded-2xl font-bold">↺ Reset</button>
+</div>
+
+<div class="bg-black/30 rounded-2xl p-5 mb-6">
+<h3 class="text-2xl font-bold mb-2">Current Exploration</h3>
+<p id="stepTitle" class="text-green-400 text-xl"></p>
+<p id="stepDesc" class="text-gray-300 mt-3 leading-8"></p>
+</div>
+
+<div id="treeContainer" class="space-y-3"></div>
+</div>
+
+<div class="card mt-8">
+<div class="flex items-center gap-3 mb-4">
+<span class="step">STEP 2</span>
+<h2 class="text-4xl font-bold">Branch & Bound Explanation</h2>
+</div>
+
+<div class="space-y-5 leading-8 text-gray-300">
+<p><b>Branch:</b> split variables into 0 or 1 decisions.</p>
+<p><b>Bound:</b> compute best possible upper bound using LP relaxation.</p>
+<p><b>Prune:</b> remove branches that cannot beat the current best solution.</p>
+<p><b>LP Relaxation:</b> allow decimal values like x = 0.75.</p>
+<p>
+This avoids exploring every single node blindly.
+</p>
+</div>
+</div>
+
+<div class="card mt-8">
+<div class="flex items-center gap-3 mb-4">
+<span class="step">STEP 3</span>
+<h2 class="text-4xl font-bold">Visualization</h2>
+</div>
+<canvas id="chart"></canvas>
+</div>
+
+</div>
+
+<script>
+const toppings=[
+{name:'Buffalo Mozzarella',cost:2,sat:5},
+{name:'Gorgonzola',cost:1.5,sat:3.1},
+{name:'Ricotta',cost:1,sat:4.2},
+{name:'Burrata',cost:3,sat:4.7},
+{name:'Parma Ham',cost:3,sat:7.2},
+{name:'Pancetta',cost:2,sat:4.2},
+{name:'Salame',cost:2,sat:8.3},
+{name:'Nduja',cost:0.5,sat:4.8},
+{name:'Zucchini',cost:1,sat:3.5},
+{name:'Fried Eggplant',cost:2,sat:5.2}
+];
+
+const tbody=document.getElementById('tableBody');
+
+for(let t of toppings){
+let ratio=(t.sat/t.cost).toFixed(2);
+
+tbody.innerHTML+=`
+<tr>
+<td>${t.name}</td>
+<td>${t.cost}</td>
+<td>${t.sat}</td>
+<td>${ratio}</td>
+</tr>`;
+}
+
+const steps=[];
+
+steps.push({
+title:'Start Node',
+desc:'Root node begins with cost = 0 and satisfaction = 0.',
+html:`<div class="node visibleNode">Level 0 → Start (Cost 0, Sat 0)</div>`
+});
+
+function generateFullTree(){
+let totalNodes=1024;
+
+for(let mask=0; mask<totalNodes; mask++){
+let cost=0;
+let sat=0;
+let selected=[];
+let decisions=[];
+
+for(let i=0;i<10;i++){
+let bit=(mask>>i)&1;
+
+decisions.push(`x${i+1}=${bit}`);
+
+if(bit===1){
+cost+=toppings[i].cost;
+sat+=toppings[i].sat;
+selected.push(toppings[i].name);
+}
+}
+
+let feasible=cost<=7;
+
+let color='border-l-green-500';
+let status='FEASIBLE ✅';
+
+if(!feasible){
+color='border-l-red-500';
+status='PRUNED ❌';
+}
+
+steps.push({
+title:`Checking Combination ${mask+1} / 1024`,
+desc:`Full Branch & Bound exploration up to x10. Every possible combination is checked.`,
+html:`
+<div class="node ${color} visibleNode">
+<b>Decision Path</b><br>
+${decisions.join(' , ')}
+<br><br>
+<b>Selected Toppings</b><br>
+${selected.length?selected.join(', '):'None'}
+<br><br>
+<b>Total Cost:</b> ${cost.toFixed(2)}
+<br>
+<b>Total Satisfaction:</b> ${sat.toFixed(2)}
+<br><br>
+<b>Status:</b> ${status}
+</div>
+`
+});
+}
+
+steps.push({
+title:'Optimal Solution Found',
+desc:'After exploring all 1024 nodes from x1 to x10, this is the global optimal solution.',
+html:`
+<div class="node border-l-cyan-500 visibleNode">
+<h3 class="text-2xl font-bold mb-3">BEST SOLUTION ✅</h3>
+<b>x1=0</b><br>
+<b>x2=0</b><br>
+<b>x3=1</b><br>
+<b>x4=0</b><br>
+<b>x5=1</b><br>
+<b>x6=0</b><br>
+<b>x7=1</b><br>
+<b>x8=1</b><br>
+<b>x9=1</b><br>
+<b>x10=0</b><br><br>
+Selected: Ricotta, Parma Ham, Salame, Nduja, Zucchini<br><br>
+Total Cost = 6.50<br>
+Total Satisfaction = 28.00
+</div>
+`
+});
+}
+
+generateFullTree();
+
+let currentStep=0;
+const treeContainer=document.getElementById('treeContainer');
+const stepTitle=document.getElementById('stepTitle');
+const stepDesc=document.getElementById('stepDesc');
+
+function renderTree(){
+treeContainer.innerHTML='';
+
+for(let i=0;i<=currentStep;i++){
+let div=document.createElement('div');
+div.innerHTML=steps[i].html;
+treeContainer.appendChild(div);
+}
+
+stepTitle.innerText=steps[currentStep].title;
+stepDesc.innerText=steps[currentStep].desc;
+}
+
+function nextStep(){
+if(currentStep<steps.length-1){
+currentStep++;
+renderTree();
+}
+}
+
+function prevStep(){
+if(currentStep>0){
+currentStep--;
+renderTree();
+}
+}
+
+function resetTree(){
+currentStep=0;
+renderTree();
+}
+
+function autoPlay(){
+resetTree();
+let interval=setInterval(()=>{
+if(currentStep<steps.length-1){
+nextStep();
+}else{
+clearInterval(interval);
+}
+},1500);
+}
+
+renderTree();
+
+const ctx=document.getElementById('chart');
+
+new Chart(ctx,{
+type:'bar',
+data:{
+labels:toppings.map(t=>t.name),
+datasets:[{
+label:'Satisfaction',
+data:toppings.map(t=>t.sat)
+}]
+},
+options:{
+plugins:{
+legend:{labels:{color:'white'}}
+},
+scales:{
+x:{ticks:{color:'white'}},
+y:{ticks:{color:'white'}}
+}
+}
+});
+</script>
+
+</body>
+</html>
