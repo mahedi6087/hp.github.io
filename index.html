@@ -3,91 +3,90 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>🍕 Pizza B&B — Full Decision Tree</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<title>🍕 Pizza B&B — Interactive Decision Tree</title>
+<link href="https://googleapis.com" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f1ede6;--white:#fff;--surface:#fafaf7;
-  --border:#e2ddd5;--border2:#d0c9be;
-  --orange:#ea580c;--orange2:#f97316;
+  --bg:#f3f4f6;--white:#fff;--surface:#fafafa;
+  --border:#e5e7eb;--border2:#d1d5db;
+  --orange:#ea580c;--orange-light:#ffedd5;
   --green:#059669;--green-bg:#d1fae5;
   --red:#dc2626;--red-bg:#fee2e2;
   --gold:#ca8a04;--gold-bg:#fefce8;
   --blue:#2563eb;--blue-bg:#eff6ff;
-  --text:#111827;--muted:#6b7280;--light:#9ca3af;
+  --text:#111827;--muted:#4b5563;
   --mono:'JetBrains Mono',monospace;
 }
 body{font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
 
-/* ── HEADER ── */
-.hdr{background:var(--white);border-bottom:2px solid var(--border2);padding:10px 20px;display:flex;align-items:center;gap:16px;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.06)}
-.hdr-logo{font-size:1.6rem}
-.hdr-info h1{font-size:1rem;font-weight:800;color:var(--orange)}
-.hdr-info p{font-size:.75rem;color:var(--muted);margin-top:1px}
+/* HEADER */
+.hdr{background:var(--white);border-bottom:2px solid var(--border2);padding:12px 20px;display:flex;align-items:center;gap:16px;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.hdr-logo{font-size:1.8rem}
+.hdr-info h1{font-size:1.1rem;font-weight:800;color:var(--orange)}
+.hdr-info p{font-size:.78rem;color:var(--muted);margin-top:2px}
 .hdr-stats{display:flex;gap:10px;margin-left:auto}
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 12px;text-align:center}
-.stat-val{font-size:1.1rem;font-weight:800;color:var(--orange);line-height:1}
-.stat-lbl{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:2px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 14px;text-align:center}
+.stat-val{font-size:1.15rem;font-weight:800;color:var(--orange);line-height:1}
+.stat-lbl{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:3px}
 
-/* ── LAYOUT ── */
+/* MAIN LAYOUT */
 .body-layout{display:flex;flex:1;overflow:hidden}
 
-/* ── SIDEBAR ── */
-.sidebar{width:280px;flex-shrink:0;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-.sb-scroll{flex:1;overflow-y:auto;padding:14px}
-.sb-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
-.model-box{background:#111827;color:#f9fafb;border-radius:8px;padding:12px;font-family:var(--mono);font-size:.72rem;line-height:1.9;margin-bottom:12px}
+/* SIDEBAR */
+.sidebar{width:320px;flex-shrink:0;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sb-scroll{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+.sb-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding-bottom:4px;border-bottom:1px solid var(--border)}
+.model-box{background:#111827;color:#f9fafb;border-radius:8px;padding:12px;font-family:var(--mono);font-size:.75rem;line-height:1.6}
 .kw{color:#fb923c}.vv{color:#67e8f9}.cc{color:#86efac}.cm{color:#6b7280}
 
-.tbl{width:100%;border-collapse:collapse;font-size:.73rem;margin-bottom:14px}
-.tbl th{background:#f3f0ea;color:var(--muted);font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;padding:5px 6px;border-bottom:2px solid var(--border);text-align:left}
-.tbl td{padding:4px 6px;border-bottom:1px solid var(--border);vertical-align:middle}
-.tbl tr.opt td{background:rgba(5,150,105,.06);font-weight:600}
-.eff-bar{width:44px;height:5px;background:#e5e7eb;border-radius:3px;display:inline-block;vertical-align:middle}
-.eff-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#f97316,#ea580c)}
+.tbl{width:100%;border-collapse:collapse;font-size:.75rem}
+.tbl th{background:#f3f4f6;color:var(--muted);font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;padding:6px;border-bottom:2px solid var(--border);text-align:left}
+.tbl td{padding:5px 6px;border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl tr.opt td{background:rgba(5,150,105,.08);font-weight:600}
 
-.result-box{background:var(--green-bg);border:1.5px solid var(--green);border-radius:8px;padding:12px;margin-bottom:12px}
-.result-box h3{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:6px}
-.result-box .z{font-size:1.6rem;font-weight:800;color:var(--green);line-height:1}
-.result-box .sub{font-size:.72rem;color:#065f46;margin-top:4px}
-.chip{display:inline-block;background:#fff;border:1px solid #a7f3d0;color:#065f46;border-radius:4px;padding:1px 6px;font-size:.7rem;margin:2px 1px}
+.result-box{background:var(--green-bg);border:1.5px solid var(--green);border-radius:8px;padding:14px}
+.result-box h3{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:6px}
+.result-box .z{font-size:1.75rem;font-weight:800;color:var(--green);line-height:1}
+.result-box .sub{font-size:.75rem;color:#065f46;margin-top:4px;font-weight:500}
+.chip{display:inline-block;background:#fff;border:1px solid #a7f3d0;color:#065f46;border-radius:4px;padding:2px 6px;font-size:.7rem;margin:3px 2px;font-weight:600}
 
-.node-info-box{background:#fefce8;border:1.5px solid #fde68a;border-radius:8px;padding:10px;margin-bottom:12px;font-size:.73rem}
-.node-info-box h3{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#92400e;margin-bottom:6px}
-.ni-row{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #fef9c3}
+.node-info-box{background:var(--gold-bg);border:1.5px solid #fde68a;border-radius:8px;padding:12px;font-size:.78rem}
+.node-info-box h3{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#92400e;margin-bottom:6px}
+.ni-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #fef9c3}
 .ni-row:last-child{border-bottom:none}
 .ni-label{color:#78716c}
-.ni-val{font-weight:600;color:#1c1917}
+.ni-val{font-weight:600;color:#1c1917;font-family:var(--mono)}
 
-.controls-row{display:flex;gap:6px;margin-bottom:10px}
-.ctrl-btn{flex:1;border:none;border-radius:6px;padding:7px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;transition:all .15s}
+.controls-row{display:flex;gap:8px}
+.ctrl-btn{flex:1;border:none;border-radius:6px;padding:8px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;text-align:center;text-decoration:none}
 .ctrl-zoom-in{background:#eff6ff;color:var(--blue);border:1px solid #bfdbfe}
 .ctrl-zoom-in:hover{background:#dbeafe}
 .ctrl-zoom-out{background:#eff6ff;color:var(--blue);border:1px solid #bfdbfe}
 .ctrl-zoom-out:hover{background:#dbeafe}
 .ctrl-reset{background:#fff7ed;color:var(--orange);border:1px solid #fed7aa}
 .ctrl-reset:hover{background:#ffedd5}
-.ctrl-fit{background:#f0fdf4;color:var(--green);border:1px solid #bbf7d0}
-.ctrl-fit:hover{background:#dcfce7}
 
-/* ── CANVAS ── */
-.canvas-area{flex:1;overflow:hidden;position:relative;background:var(--bg)}
-.canvas-area canvas{display:none}
+/* CANVAS & SVG GRAPH AREA */
+.canvas-area{flex:1;overflow:hidden;position:relative;background:#f8fafc}
 #pan-zoom-container{width:100%;height:100%;overflow:hidden;cursor:grab;position:relative}
 #pan-zoom-container:active{cursor:grabbing}
-#svg-wrapper{position:absolute;transform-origin:0 0;user-select:none}
-#svg-wrapper svg{display:block}
+#svg-wrapper{position:absolute;transform-origin:0 0;user-select:none;padding:40px}
 
-/* ── HIGHLIGHT HOVER ── */
-.node-hover{opacity:.8}
+/* SVG Elements Styling */
+svgLine{stroke:#94a3b8;stroke-width:2.5;fill:none}
+.branch-label{font-family:var(--mono);font-size:11px;fill:#475569;font-weight:600}
+.tree-node{cursor:pointer;transition:transform 0.1s ease}
+.tree-node:hover{transform:scale(1.03)}
+.node-rect{fill:#fff;stroke:#cbd5e1;stroke-width:2;rx:8px}
+.node-rect.active{stroke:var(--blue);stroke-width:3.5;fill:#f0f9ff}
+.node-rect.optimal{stroke:var(--green);stroke-width:3.5;fill:#f0fdf4}
+.node-rect.pruned{stroke:var(--red);stroke-width:2;fill:#fef2f2}
+.node-text-id{font-family:var(--mono);font-size:11px;fill:var(--muted);font-weight:600}
+.node-text-z{font-family:Inter,sans-serif;font-size:14px;fill:var(--text);font-weight:800}
+.node-text-status{font-family:Inter,sans-serif;font-size:10px;font-weight:700}
 
-/* ── MINI-MAP ── */
-.minimap{position:absolute;bottom:16px;right:16px;background:rgba(255,255,255,.92);border:1px solid var(--border2);border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.12);padding:4px}
-.minimap canvas{display:block;border-radius:4px}
-.mm-label{font-size:.6rem;text-align:center;color:var(--muted);margin-top:2px}
-
-.hint{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.65);color:#fff;border-radius:20px;padding:5px 14px;font-size:.72rem;pointer-events:none;opacity:1;transition:opacity 1s}
+.hint{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(17,24,39,0.85);color:#fff;border-radius:20px;padding:6px 16px;font-size:.75rem;pointer-events:none;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
 </style>
 </head>
 <body>
@@ -95,815 +94,271 @@ body{font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);h
 <div class="hdr">
   <div class="hdr-logo">🍕</div>
   <div class="hdr-info">
-    <h1>Pizza Optimizer — Branch &amp; Bound · Full Decision Tree</h1>
-    <p>Continuous variables x<sub>i</sub> ∈ [0,1] · All 10 toppings · Complete tree — every node, every branch, paper-style</p>
+    <h1>Pizza Branch &amp; Bound — Visible Decision Tree</h1>
+    <p>Continuous relaxation x<sub>i</sub> ∈ [0,1] evaluated at every node branch step</p>
   </div>
   <div class="hdr-stats">
-    <div class="stat"><div class="stat-val">59</div><div class="stat-lbl">Nodes</div></div>
-    <div class="stat"><div class="stat-val">7</div><div class="stat-lbl">Levels</div></div>
-    <div class="stat"><div class="stat-val">26.00</div><div class="stat-lbl">Z* (ww)</div></div>
-    <div class="stat"><div class="stat-val">6.50</div><div class="stat-lbl">Cost (ww)</div></div>
+    <div class="stat"><div class="stat-val">11</div><div class="stat-lbl">Key Nodes</div></div>
+    <div class="stat"><div class="stat-val">4</div><div class="stat-lbl">Max Levels</div></div>
+    <div class="stat"><div class="stat-val">26.00</div><div class="stat-lbl">Z* Integer</div></div>
+    <div class="stat"><div class="stat-val">6.50</div><div class="stat-lbl">Best Cost</div></div>
   </div>
 </div>
 
 <div class="body-layout">
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <div class="sb-scroll">
-
-    <div class="sb-title">🎯 Optimal Solution</div>
-    <div class="result-box">
-      <h3>Best Integer Solution</h3>
-      <div class="z">Z* = 26.00</div>
-      <div class="sub">Cost: 6.50 / 7.00 ww</div>
-      <div style="margin-top:8px">
-        <span class="chip">'Nduja</span>
-        <span class="chip">Ricotta</span>
-        <span class="chip">Salame</span>
-        <span class="chip">Zucchini</span>
-        <span class="chip">Fried eggplant</span>
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-scroll">
+      <div>
+        <div class="sb-title">🎯 Optimal Solution Found</div>
+        <div class="result-box" style="margin-top:8px">
+          <h3>Best Valid Recipe</h3>
+          <div class="z">Z* = 26.00</div>
+          <div class="sub">Budget Used: 6.50 / 7.00 coins</div>
+          <div style="margin-top:10px">
+            <span class="chip">'Nduja</span>
+            <span class="chip">Ricotta</span>
+            <span class="chip">Salame</span>
+            <span class="chip">Zucchini</span>
+            <span class="chip">Eggplant</span>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <div class="sb-title">📐 Model (Continuous LP)</div>
-    <div class="model-box">
+      <div>
+        <div class="sb-title">📐 Relaxation Mechanics</div>
+        <div class="model-box" style="margin-top:8px">
 <span class="kw">max</span> Z = <span class="vv">Σ sat<sub>i</sub>·x<sub>i</sub></span><br>
 <span class="kw">s.t.</span> <span class="vv">Σ cost<sub>i</sub>·x<sub>i</sub></span> ≤ <span class="cc">7.00</span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="cc">0</span> ≤ <span class="vv">x<sub>i</sub></span> ≤ <span class="cc">1</span> <span class="cm">// NOT binary</span><br>
-<span class="cm">// Branch to enforce integers</span>
-    </div>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cc">0</span> ≤ <span class="vv">x<sub>i</sub></span> ≤ <span class="cc">1</span> <span class="cm">(Fractional Allowed)</span><br>
+<span class="cm">// Branch on fractions to enforce 0/1</span>
+        </div>
+      </div>
 
-    <div class="sb-title">📊 Topping Data (sorted by eff.)</div>
-    <table class="tbl" id="data-tbl"></table>
+      <div>
+        <div class="sb-title">📊 Topping Efficiency Data</div>
+        <table class="tbl" id="data-tbl" style="margin-top:8px">
+          <thead>
+            <tr><th>Topping</th><th>Sat</th><th>Cost</th><th>Eff</th></tr>
+          </thead>
+          <tbody>
+            <tr class="opt"><td>'Nduja</td><td>7.0</td><td>1.5</td><td>4.67</td></tr>
+            <tr class="opt"><td>Ricotta</td><td>6.0</td><td>1.5</td><td>4.00</td></tr>
+            <tr class="opt"><td>Salame</td><td>5.0</td><td>1.5</td><td>3.33</td></tr>
+            <tr class="opt"><td>Zucchini</td><td>4.0</td><td>1.0</td><td>4.00</td></tr>
+            <tr class="opt"><td>Eggplant</td><td>4.0</td><td>1.0</td><td>4.00</td></tr>
+            <tr><td>Artichoke</td><td>3.0</td><td>2.0</td><td>1.50</td></tr>
+            <tr><td>Mushrooms</td><td>2.0</td><td>1.0</td><td>2.00</td></tr>
+          </tbody>
+        </table>
+      </div>
 
-    <div class="sb-title">🔍 Click a Node</div>
-    <div class="node-info-box" id="node-info">
-      <h3>Node Details</h3>
-      <div style="color:#78716c;font-size:.72rem">Click any node in the tree to see its details here.</div>
-    </div>
+      <div>
+        <div class="sb-title">🔍 Node Relaxations Inspector</div>
+        <div class="node-info-box" id="node-info" style="margin-top:8px">
+          <h3>Click any tree node</h3>
+          <div style="color:#78716c;font-size:.75rem;margin-top:4px">Select nodes inside the right panel to analyze bounds, fractional values, and variables.</div>
+        </div>
+      </div>
 
-    <div class="sb-title">🎮 Controls</div>
-    <div class="controls-row">
-      <button class="ctrl-btn ctrl-zoom-in" onclick="zoom(1.3)">＋ Zoom In</button>
-      <button class="ctrl-btn ctrl-zoom-out" onclick="zoom(0.77)">－ Zoom Out</button>
-    </div>
-    <div class="controls-row">
-      <button class="ctrl-btn ctrl-fit" onclick="fitToView()">⊡ Fit View</button>
-      <button class="ctrl-btn ctrl-reset" onclick="resetView()">↺ Reset</button>
-    </div>
-    <div style="font-size:.7rem;color:var(--muted);text-align:center">Scroll to zoom · Drag to pan · Click node for details</div>
-
-  </div>
-</div>
-
-<!-- CANVAS -->
-<div class="canvas-area" id="canvas-area">
-  <div id="pan-zoom-container">
-    <div id="svg-wrapper">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2434.0 -40 4868.0 1092" width="4868.0" height="1092">
-<defs>
-  <style>text { font-family: Inter, Arial, sans-serif; }</style>
-</defs>
-<rect x="-2434.0" y="-40" width="4868.0" height="1092" fill="#fafafa"/>
-<line x1="-2424.0" y1="-8" x2="2424.0" y2="-8" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,4"/>
-<text x="-2420.0" y="6" font-family="Inter,Arial,sans-serif" font-size="11" fill="#9ca3af" font-weight="600">Level 0</text>
-<line x1="-2424.0" y1="138" x2="2424.0" y2="138" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,4"/>
-<text x="-2420.0" y="152" font-family="Inter,Arial,sans-serif" font-size="11" fill="#9ca3af" font-weight="600">Level 1</text>
-<line x1="-2424.0" y1="284" x2="2424.0" y2="284" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,4"/>
-<text x="-2420.0" y="298" font-family="Inter,Arial,sans-serif" font-size="11" fill="#9ca3af" font-weight="600">Level 2</text>
-<line x1="-2424.0" y1="430" x2="2424.0" y2="430" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,4"/>
-<text x="-2420.0" y="444" font-family="Inter,Arial,sans-serif" font-size="11" fill="#9ca3af" font-weight="600">Level 3</text>
-<line x1="-2424.0" y1="576" x2="2424.0" y2="576" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,4"/>
-<text x="-2420.0" y="590" font-family="Inter,Arial,sans-serif" font-size="11" fill="#9ca3af" font-weight="600">Level 4</text>
-<line x1="-2424.0" y1="722" x2="2424.0" y2="722" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,4"/>
-<text x="-2420.0" y="736" font-family="Inter,Arial,sans-serif" font-size="11" fill="#9ca3af" font-weight="600">Level 5</text>
-<line x1="-2424.0" y1="868" x2="2424.0" y2="868" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,4"/>
-<text x="-2420.0" y="882" font-family="Inter,Arial,sans-serif" font-size="11" fill="#9ca3af" font-weight="600">Level 6</text>
-<text x="0.0" y="-12" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="800" fill="#1f2937">🍕 Pizza Optimizer — Branch &amp; Bound Full Decision Tree</text>
-<text x="0.0" y="6" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="12" fill="#6b7280">Continuous variables x_i ∈ [0,1] · Budget = 7.00 ww · Z* = 26.00 · 59 nodes · Optimal: 'Nduja + Ricotta + Salame + Zucchini + Fried eggplant</text>
-<rect x="-2414.0" y="16" width="16" height="10" rx="3" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
-<text x="-2394.0" y="25" font-family="Inter,Arial,sans-serif" font-size="10" fill="#374151">Root</text>
-<rect x="-2352.0" y="16" width="16" height="10" rx="3" fill="#fefce8" stroke="#ca8a04" stroke-width="1.5"/>
-<text x="-2332.0" y="25" font-family="Inter,Arial,sans-serif" font-size="10" fill="#374151">Fractional (branch)</text>
-<rect x="-2200.0" y="16" width="16" height="10" rx="3" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
-<text x="-2180.0" y="25" font-family="Inter,Arial,sans-serif" font-size="10" fill="#374151">★ Optimal</text>
-<rect x="-2108.0" y="16" width="16" height="10" rx="3" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5"/>
-<text x="-2088.0" y="25" font-family="Inter,Arial,sans-serif" font-size="10" fill="#374151">Integer</text>
-<rect x="-2028.0" y="16" width="16" height="10" rx="3" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
-<text x="-2008.0" y="25" font-family="Inter,Arial,sans-serif" font-size="10" fill="#374151">Infeasible ✂</text>
-<rect x="-1918.0" y="16" width="16" height="10" rx="3" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="-1898.0" y="25" font-family="Inter,Arial,sans-serif" font-size="10" fill="#374151">Fathomed ✂</text>
-<path d="M0,76 C0,111.0 -1120.0,111.0 -1120.0,146" stroke="#dc2626" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="-606.2" y="103.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-560.0" y="113.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x5=0 (Buffalo)</text>
-<path d="M0,76 C0,111.0 1280.0,111.0 1280.0,146" stroke="#16a34a" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="593.8" y="103.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="640.0" y="113.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x5=1 (Buffalo)</text>
-<path d="M-1120.0,222 C-1120.0,257.0 -1760.0,257.0 -1760.0,292" stroke="#dc2626" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="-1486.2" y="249.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-1440.0" y="259.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x6=0 (Parma h)</text>
-<path d="M-1120.0,222 C-1120.0,257.0 -480.0,257.0 -480.0,292" stroke="#16a34a" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="-846.2" y="249.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-800.0" y="259.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x6=1 (Parma h)</text>
-<path d="M1280.0,222 C1280.0,257.0 800.0,257.0 800.0,292" stroke="#dc2626" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="993.8" y="249.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="1040.0" y="259.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x4=0 (Fried e)</text>
-<path d="M1280.0,222 C1280.0,257.0 1920.0,257.0 1920.0,292" stroke="#16a34a" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="1553.8" y="249.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="1600.0" y="259.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x4=1 (Fried e)</text>
-<path d="M-1760.0,368 C-1760.0,403.0 -2080.0,403.0 -2080.0,438" stroke="#dc2626" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="-1966.2" y="395.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-1920.0" y="405.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x7=0 (Pancett)</text>
-<path d="M-1760.0,368 C-1760.0,403.0 -1440.0,403.0 -1440.0,438" stroke="#16a34a" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="-1646.2" y="395.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-1600.0" y="405.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x7=1 (Pancett)</text>
-<path d="M-480.0,368 C-480.0,403.0 -800.0,403.0 -800.0,438" stroke="#dc2626" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="-686.2" y="395.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-640.0" y="405.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x3=0 (Zucchin)</text>
-<path d="M-480.0,368 C-480.0,403.0 -160.0,403.0 -160.0,438" stroke="#16a34a" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="-366.2" y="395.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-320.0" y="405.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x3=1 (Zucchin)</text>
-<path d="M800.0,368 C800.0,403.0 560.0,403.0 560.0,438" stroke="#dc2626" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="633.8" y="395.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="680.0" y="405.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x6=0 (Parma h)</text>
-<path d="M800.0,368 C800.0,403.0 1200.0,403.0 1200.0,438" stroke="#16a34a" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="953.8" y="395.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="1000.0" y="405.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x6=1 (Parma h)</text>
-<path d="M1920.0,368 C1920.0,403.0 1680.0,403.0 1680.0,438" stroke="#dc2626" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="1757.1" y="395.0" width="85.8" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="1800.0" y="405.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x2=0 (Salame)</text>
-<path d="M1920.0,368 C1920.0,403.0 2160.0,403.0 2160.0,438" stroke="#16a34a" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="1997.1" y="395.0" width="85.8" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="2040.0" y="405.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x2=1 (Salame)</text>
-<path d="M-2080.0,514 C-2080.0,549.0 -2240.0,549.0 -2240.0,584" stroke="#dc2626" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="-2206.2" y="541.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-2160.0" y="551.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x8=0 (Gorgonz)</text>
-<path d="M-2080.0,514 C-2080.0,549.0 -1920.0,549.0 -1920.0,584" stroke="#16a34a" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="-2046.2" y="541.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-2000.0" y="551.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x8=1 (Gorgonz)</text>
-<path d="M-1440.0,514 C-1440.0,549.0 -1600.0,549.0 -1600.0,584" stroke="#dc2626" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="-1566.2" y="541.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-1520.0" y="551.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x4=0 (Fried e)</text>
-<path d="M-1440.0,514 C-1440.0,549.0 -1280.0,549.0 -1280.0,584" stroke="#16a34a" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="-1406.2" y="541.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-1360.0" y="551.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x4=1 (Fried e)</text>
-<path d="M-800.0,514 C-800.0,549.0 -960.0,549.0 -960.0,584" stroke="#dc2626" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="-926.2" y="541.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-880.0" y="551.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x4=0 (Fried e)</text>
-<path d="M-800.0,514 C-800.0,549.0 -640.0,549.0 -640.0,584" stroke="#16a34a" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="-766.2" y="541.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-720.0" y="551.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x4=1 (Fried e)</text>
-<path d="M-160.0,514 C-160.0,549.0 -320.0,549.0 -320.0,584" stroke="#dc2626" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="-282.9" y="541.0" width="85.8" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-240.0" y="551.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x2=0 (Salame)</text>
-<path d="M-160.0,514 C-160.0,549.0 0.0,549.0 0.0,584" stroke="#16a34a" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="-122.9" y="541.0" width="85.8" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-80.0" y="551.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x2=1 (Salame)</text>
-<path d="M560.0,514 C560.0,549.0 400.0,549.0 400.0,584" stroke="#dc2626" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="433.8" y="541.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="480.0" y="551.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x7=0 (Pancett)</text>
-<path d="M560.0,514 C560.0,549.0 800.0,549.0 800.0,584" stroke="#16a34a" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="633.8" y="541.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="680.0" y="551.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x7=1 (Pancett)</text>
-<path d="M1200.0,514 C1200.0,549.0 1120.0,549.0 1120.0,584" stroke="#dc2626" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="1117.1" y="541.0" width="85.8" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="1160.0" y="551.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x2=0 (Salame)</text>
-<path d="M1200.0,514 C1200.0,549.0 1360.0,549.0 1360.0,584" stroke="#16a34a" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="1237.1" y="541.0" width="85.8" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="1280.0" y="551.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x2=1 (Salame)</text>
-<path d="M1680.0,514 C1680.0,549.0 1600.0,549.0 1600.0,584" stroke="#dc2626" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="1593.8" y="541.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="1640.0" y="551.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x6=0 (Parma h)</text>
-<path d="M1680.0,514 C1680.0,549.0 1840.0,549.0 1840.0,584" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="1713.8" y="541.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="1760.0" y="551.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x6=1 (Parma h)</text>
-<path d="M2160.0,514 C2160.0,549.0 2080.0,549.0 2080.0,584" stroke="#dc2626" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="2073.8" y="541.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="2120.0" y="551.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x1=0 (Ricotta)</text>
-<path d="M2160.0,514 C2160.0,549.0 2320.0,549.0 2320.0,584" stroke="#16a34a" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="2193.8" y="541.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="2240.0" y="551.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x1=1 (Ricotta)</text>
-<path d="M-2240.0,660 C-2240.0,695.0 -2320.0,695.0 -2320.0,730" stroke="#dc2626" stroke-width="2.5" fill="none"  opacity="0.7"/>
-<rect x="-2326.2" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-2280.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x9=0 (Burrata)</text>
-<path d="M-2240.0,660 C-2240.0,695.0 -2160.0,695.0 -2160.0,730" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="-2246.2" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-2200.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x9=1 (Burrata)</text>
-<path d="M-1920.0,660 C-1920.0,695.0 -2000.0,695.0 -2000.0,730" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="-2006.2" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-1960.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x4=0 (Fried e)</text>
-<path d="M-1920.0,660 C-1920.0,695.0 -1840.0,695.0 -1840.0,730" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="-1926.2" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-1880.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x4=1 (Fried e)</text>
-<path d="M-1600.0,660 C-1600.0,695.0 -1680.0,695.0 -1680.0,730" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="-1686.2" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-1640.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x8=0 (Gorgonz)</text>
-<path d="M-1600.0,660 C-1600.0,695.0 -1520.0,695.0 -1520.0,730" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="-1606.2" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-1560.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x8=1 (Gorgonz)</text>
-<path d="M-1280.0,660 C-1280.0,695.0 -1360.0,695.0 -1360.0,730" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="-1362.9" y="687.0" width="85.8" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-1320.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x2=0 (Salame)</text>
-<path d="M-1280.0,660 C-1280.0,695.0 -1200.0,695.0 -1200.0,730" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="-1282.9" y="687.0" width="85.8" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-1240.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x2=1 (Salame)</text>
-<path d="M-960.0,660 C-960.0,695.0 -1040.0,695.0 -1040.0,730" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="-1046.2" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-1000.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x7=0 (Pancett)</text>
-<path d="M-960.0,660 C-960.0,695.0 -880.0,695.0 -880.0,730" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="-966.2" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-920.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x7=1 (Pancett)</text>
-<path d="M-640.0,660 C-640.0,695.0 -720.0,695.0 -720.0,730" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="-722.9" y="687.0" width="85.8" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-680.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x2=0 (Salame)</text>
-<path d="M-640.0,660 C-640.0,695.0 -560.0,695.0 -560.0,730" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="-642.9" y="687.0" width="85.8" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-600.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x2=1 (Salame)</text>
-<path d="M-320.0,660 C-320.0,695.0 -400.0,695.0 -400.0,730" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="-406.2" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-360.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x4=0 (Fried e)</text>
-<path d="M-320.0,660 C-320.0,695.0 -240.0,695.0 -240.0,730" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="-326.2" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-280.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x4=1 (Fried e)</text>
-<path d="M0.0,660 C0.0,695.0 -80.0,695.0 -80.0,730" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="-86.19999999999999" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="-40.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x1=0 (Ricotta)</text>
-<path d="M0.0,660 C0.0,695.0 80.0,695.0 80.0,730" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="-6.199999999999996" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="40.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x1=1 (Ricotta)</text>
-<path d="M400.0,660 C400.0,695.0 320.0,695.0 320.0,730" stroke="#dc2626" stroke-width="1.5" fill="none"  opacity="0.7"/>
-<rect x="313.8" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="360.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x8=0 (Gorgonz)</text>
-<path d="M400.0,660 C400.0,695.0 560.0,695.0 560.0,730" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="433.8" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="480.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x8=1 (Gorgonz)</text>
-<path d="M800.0,660 C800.0,695.0 720.0,695.0 720.0,730" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="717.1" y="687.0" width="85.8" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="760.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x2=0 (Salame)</text>
-<path d="M800.0,660 C800.0,695.0 880.0,695.0 880.0,730" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="797.1" y="687.0" width="85.8" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="840.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x2=1 (Salame)</text>
-<path d="M1120.0,660 C1120.0,695.0 1040.0,695.0 1040.0,730" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="1033.8" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="1080.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x3=0 (Zucchin)</text>
-<path d="M1120.0,660 C1120.0,695.0 1200.0,695.0 1200.0,730" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="1113.8" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="1160.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x3=1 (Zucchin)</text>
-<path d="M1600.0,660 C1600.0,695.0 1520.0,695.0 1520.0,730" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="1513.8" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="1560.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x7=0 (Pancett)</text>
-<path d="M1600.0,660 C1600.0,695.0 1680.0,695.0 1680.0,730" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="1593.8" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="1640.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x7=1 (Pancett)</text>
-<path d="M2080.0,660 C2080.0,695.0 2000.0,695.0 2000.0,730" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="1993.8" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="2040.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x3=0 (Zucchin)</text>
-<path d="M2080.0,660 C2080.0,695.0 2160.0,695.0 2160.0,730" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="2073.8" y="687.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="2120.0" y="697.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x3=1 (Zucchin)</text>
-<path d="M320.0,806 C320.0,841.0 240.0,841.0 240.0,876" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="233.8" y="833.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="280.0" y="843.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#dc2626">x9=0 (Burrata)</text>
-<path d="M320.0,806 C320.0,841.0 400.0,841.0 400.0,876" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity="0.7"/>
-<rect x="313.8" y="833.0" width="92.39999999999999" height="13" rx="3" fill="white" opacity="0.85"/>
-<text x="360.0" y="843.0" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" font-weight="600" fill="#16a34a">x9=1 (Burrata)</text>
-<rect x="-74.0" y="0" width="148" height="76" rx="7" fill="#fff7ed" stroke="#ea580c" stroke-width="3"/>
-<text x="-68.0" y="12" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N0</text>
-<text x="0" y="28" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#9a3412">Z = 27.25</text>
-<text x="0" y="42" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x5(Buffalo )=0.250</text>
-<rect x="-72.0" y="58" width="144" height="16" rx="0 0 6 6" fill="#ea580c" opacity="0.9"/>
-<text x="0" y="69" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">ROOT</text>
-<rect x="-1194.0" y="146" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="-1188.0" y="158" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N1</text>
-<text x="-1120.0" y="174" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 27.20</text>
-<text x="-1120.0" y="188" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x6(Parma ha)=0.167</text>
-<rect x="-1192.0" y="204" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="-1120.0" y="215" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="1206.0" y="146" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="1212.0" y="158" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N2</text>
-<text x="1280.0" y="174" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 27.10</text>
-<text x="1280.0" y="188" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x4(Fried eg)=0.250</text>
-<rect x="1208.0" y="204" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="1280.0" y="215" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="-1834.0" y="292" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="-1828.0" y="304" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N3</text>
-<text x="-1760.0" y="320" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 27.05</text>
-<text x="-1760.0" y="334" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x7(Pancetta)=0.250</text>
-<rect x="-1832.0" y="350" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="-1760.0" y="361" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="-554.0" y="292" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="-548.0" y="304" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N4</text>
-<text x="-480.0" y="320" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 26.25</text>
-<text x="-480.0" y="334" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x3(Zucchini)=0.500</text>
-<rect x="-552.0" y="350" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="-480.0" y="361" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="726.0" y="292" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="732.0" y="304" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N5</text>
-<text x="800.0" y="320" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 27.00</text>
-<text x="800.0" y="334" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x6(Parma ha)=0.167</text>
-<rect x="728.0" y="350" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="800.0" y="361" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="1846.0" y="292" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="1852.0" y="304" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N6</text>
-<text x="1920.0" y="320" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 25.43</text>
-<text x="1920.0" y="334" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x2(Salame)=0.750</text>
-<rect x="1848.0" y="350" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="1920.0" y="361" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="-2154.0" y="438" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="-2148.0" y="450" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N7</text>
-<text x="-2080.0" y="466" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 27.03</text>
-<text x="-2080.0" y="480" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x8(Gorgonzo)=0.333</text>
-<rect x="-2152.0" y="496" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="-2080.0" y="507" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="-1514.0" y="438" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="-1508.0" y="450" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N8</text>
-<text x="-1440.0" y="466" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 26.30</text>
-<text x="-1440.0" y="480" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x4(Fried eg)=0.250</text>
-<rect x="-1512.0" y="496" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="-1440.0" y="507" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="-874.0" y="438" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="-868.0" y="450" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N9</text>
-<text x="-800.0" y="466" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 25.80</text>
-<text x="-800.0" y="480" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x4(Fried eg)=0.250</text>
-<rect x="-872.0" y="496" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="-800.0" y="507" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="-234.0" y="438" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="-228.0" y="450" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N10</text>
-<text x="-160.0" y="466" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 25.93</text>
-<text x="-160.0" y="480" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x2(Salame)=0.750</text>
-<rect x="-232.0" y="496" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="-160.0" y="507" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="486.0" y="438" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="492.0" y="450" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N11</text>
-<text x="560.0" y="466" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 26.85</text>
-<text x="560.0" y="480" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x7(Pancetta)=0.250</text>
-<rect x="488.0" y="496" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="560.0" y="507" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="1126.0" y="438" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="1132.0" y="450" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N12</text>
-<text x="1200.0" y="466" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 23.27</text>
-<text x="1200.0" y="480" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x2(Salame)=0.250</text>
-<rect x="1128.0" y="496" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="1200.0" y="507" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="1606.0" y="438" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="1612.0" y="450" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N13</text>
-<text x="1680.0" y="466" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 23.90</text>
-<text x="1680.0" y="480" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x6(Parma ha)=0.167</text>
-<rect x="1608.0" y="496" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="1680.0" y="507" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="2086.0" y="438" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="2092.0" y="450" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N14</text>
-<text x="2160.0" y="466" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 25.40</text>
-<text x="2160.0" y="480" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x1(Ricotta)=0.500</text>
-<rect x="2088.0" y="496" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="2160.0" y="507" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="-2314.0" y="584" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="-2308.0" y="596" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N15</text>
-<text x="-2240.0" y="612" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 26.78</text>
-<text x="-2240.0" y="626" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x9(Burrata)=0.167</text>
-<rect x="-2312.0" y="642" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="-2240.0" y="653" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="-1994.0" y="584" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="-1988.0" y="596" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N16</text>
-<text x="-1920.0" y="612" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 26.50</text>
-<text x="-1920.0" y="626" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x4(Fried eg)=0.500</text>
-<rect x="-1992.0" y="642" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="-1920.0" y="653" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="-1674.0" y="584" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="-1668.0" y="596" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N17</text>
-<text x="-1600.0" y="612" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 26.03</text>
-<text x="-1600.0" y="626" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x8(Gorgonzo)=0.333</text>
-<rect x="-1672.0" y="642" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="-1600.0" y="653" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="-1354.0" y="584" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="-1348.0" y="596" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N18</text>
-<text x="-1280.0" y="612" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 24.62</text>
-<text x="-1280.0" y="626" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x2(Salame)=0.750</text>
-<rect x="-1352.0" y="642" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="-1280.0" y="653" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="-1034.0" y="584" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="-1028.0" y="596" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N19</text>
-<text x="-960.0" y="612" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 25.55</text>
-<text x="-960.0" y="626" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x7(Pancetta)=0.250</text>
-<rect x="-1032.0" y="642" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="-960.0" y="653" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="-714.0" y="584" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="-708.0" y="596" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N20</text>
-<text x="-640.0" y="612" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 23.48</text>
-<text x="-640.0" y="626" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x2(Salame)=0.250</text>
-<rect x="-712.0" y="642" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="-640.0" y="653" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="-394.0" y="584" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="-388.0" y="596" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N21</text>
-<text x="-320.0" y="612" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 23.60</text>
-<text x="-320.0" y="626" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x4(Fried eg)=0.750</text>
-<rect x="-392.0" y="642" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="-320.0" y="653" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="-74.0" y="584" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="-68.0" y="596" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N22</text>
-<text x="0.0" y="612" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 25.90</text>
-<text x="0.0" y="626" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x1(Ricotta)=0.500</text>
-<rect x="-72.0" y="642" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="0.0" y="653" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="326.0" y="584" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="332.0" y="596" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N23</text>
-<text x="400.0" y="612" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 26.83</text>
-<text x="400.0" y="626" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x8(Gorgonzo)=0.333</text>
-<rect x="328.0" y="642" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="400.0" y="653" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="726.0" y="584" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="732.0" y="596" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N24</text>
-<text x="800.0" y="612" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 24.43</text>
-<text x="800.0" y="626" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x2(Salame)=0.750</text>
-<rect x="728.0" y="642" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="800.0" y="653" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="1046.0" y="584" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="1052.0" y="596" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N25</text>
-<text x="1120.0" y="612" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 22.95</text>
-<text x="1120.0" y="626" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x3(Zucchini)=0.500</text>
-<rect x="1048.0" y="642" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="1120.0" y="653" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="1286.0" y="584" width="148" height="76" rx="7" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
-<text x="1292.0" y="596" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N26</text>
-<text x="1360.0" y="612" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#15803d">Z = 20.50</text>
-<text x="1360.0" y="626" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="8.5" fill="#15803d">Salam,Buffa,Parma</text>
-<rect x="1288.0" y="642" width="144" height="16" rx="0 0 6 6" fill="#16a34a" opacity="0.9"/>
-<text x="1360.0" y="653" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">INTEGER</text>
-<rect x="1526.0" y="584" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="1532.0" y="596" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N27</text>
-<text x="1600.0" y="612" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 23.75</text>
-<text x="1600.0" y="626" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x7(Pancetta)=0.250</text>
-<rect x="1528.0" y="642" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="1600.0" y="653" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="1766.0" y="584" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="1772.0" y="596" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N28</text>
-<text x="1840.0" y="612" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 17.40</text>
-<text x="1840.0" y="626" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=17.40≤z*=20.50</text>
-<rect x="1768.0" y="642" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="1840.0" y="653" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="2006.0" y="584" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="2012.0" y="596" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N29</text>
-<text x="2080.0" y="612" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 25.05</text>
-<text x="2080.0" y="626" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x3(Zucchini)=0.500</text>
-<rect x="2008.0" y="642" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="2080.0" y="653" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="2246.0" y="584" width="148" height="76" rx="7" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
-<text x="2252.0" y="596" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N30</text>
-<text x="2320.0" y="612" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#15803d">Z = 22.70</text>
-<text x="2320.0" y="626" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="8.5" fill="#15803d">Ricot,Salam,Fried…</text>
-<rect x="2248.0" y="642" width="144" height="16" rx="0 0 6 6" fill="#16a34a" opacity="0.9"/>
-<text x="2320.0" y="653" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">INTEGER</text>
-<rect x="-2391.0" y="733" width="148" height="76" rx="8" fill="rgba(5,150,105,0.2)"/>
-<rect x="-2394.0" y="730" width="148" height="76" rx="7" fill="#d1fae5" stroke="#059669" stroke-width="3"/>
-<text x="-2388.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N31</text>
-<text x="-2320.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#065f46">Z = 26.00</text>
-<text x="-2320.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="8.5" fill="#15803d">'Nduj,Ricot,Salam…</text>
-<rect x="-2392.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#059669" opacity="0.9"/>
-<text x="-2320.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">★ OPTIMAL</text>
-<rect x="-2234.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="-2228.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N32</text>
-<text x="-2160.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 23.75</text>
-<text x="-2160.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=23.75≤z*=26.00</text>
-<rect x="-2232.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="-2160.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="-2074.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="-2068.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N33</text>
-<text x="-2000.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 25.47</text>
-<text x="-2000.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=25.47≤z*=26.00</text>
-<rect x="-2072.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="-2000.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="-1914.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="-1908.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N34</text>
-<text x="-1840.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 25.60</text>
-<text x="-1840.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=25.60≤z*=26.00</text>
-<rect x="-1912.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="-1840.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="-1754.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="-1748.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N35</text>
-<text x="-1680.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 25.78</text>
-<text x="-1680.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=25.78≤z*=26.00</text>
-<rect x="-1752.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="-1680.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="-1594.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="-1588.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N36</text>
-<text x="-1520.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 24.60</text>
-<text x="-1520.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=24.60≤z*=26.00</text>
-<rect x="-1592.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="-1520.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="-1434.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="-1428.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N37</text>
-<text x="-1360.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 22.93</text>
-<text x="-1360.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=22.93≤z*=26.00</text>
-<rect x="-1432.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="-1360.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="-1274.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="-1268.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N38</text>
-<text x="-1200.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 24.60</text>
-<text x="-1200.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=24.60≤z*=26.00</text>
-<rect x="-1272.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="-1200.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="-1114.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="-1108.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N39</text>
-<text x="-1040.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 25.53</text>
-<text x="-1040.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=25.53≤z*=26.00</text>
-<rect x="-1112.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="-1040.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="-954.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="-948.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N40</text>
-<text x="-880.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 22.48</text>
-<text x="-880.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=22.48≤z*=26.00</text>
-<rect x="-952.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="-880.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="-794.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="-788.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N41</text>
-<text x="-720.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 22.45</text>
-<text x="-720.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=22.45≤z*=26.00</text>
-<rect x="-792.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="-720.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="-634.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="-628.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N42</text>
-<text x="-560.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 20.70</text>
-<text x="-560.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=20.70≤z*=26.00</text>
-<rect x="-632.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="-560.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="-474.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="-468.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N43</text>
-<text x="-400.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 22.85</text>
-<text x="-400.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=22.85≤z*=26.00</text>
-<rect x="-472.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="-400.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="-314.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="-308.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N44</text>
-<text x="-240.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 22.80</text>
-<text x="-240.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=22.80≤z*=26.00</text>
-<rect x="-312.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="-240.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="-154.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="-148.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N45</text>
-<text x="-80.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 25.10</text>
-<text x="-80.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=25.10≤z*=26.00</text>
-<rect x="-152.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="-80.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="6.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="12.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N46</text>
-<text x="80.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 23.20</text>
-<text x="80.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=23.20≤z*=26.00</text>
-<rect x="8.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="80.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="246.0" y="730" width="148" height="76" rx="7" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
-<text x="252.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N47</text>
-<text x="320.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#713f12">Z = 26.58</text>
-<text x="320.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9.5" fill="#6b7280">branch: x9(Burrata)=0.167</text>
-<rect x="248.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ca8a04" opacity="0.9"/>
-<text x="320.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FRACTIONAL</text>
-<rect x="486.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="492.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N48</text>
-<text x="560.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 25.40</text>
-<text x="560.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=25.40≤z*=26.00</text>
-<rect x="488.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="560.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="646.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="652.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N49</text>
-<text x="720.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 22.73</text>
-<text x="720.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=22.73≤z*=26.00</text>
-<rect x="648.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="720.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="806.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="812.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N50</text>
-<text x="880.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 24.40</text>
-<text x="880.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=24.40≤z*=26.00</text>
-<rect x="808.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="880.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="966.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="972.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N51</text>
-<text x="1040.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 22.25</text>
-<text x="1040.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=22.25≤z*=26.00</text>
-<rect x="968.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="1040.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="1126.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="1132.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N52</text>
-<text x="1200.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 22.60</text>
-<text x="1200.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=22.60≤z*=26.00</text>
-<rect x="1128.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="1200.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="1446.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="1452.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N53</text>
-<text x="1520.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 23.73</text>
-<text x="1520.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=23.73≤z*=26.00</text>
-<rect x="1448.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="1520.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="1606.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="1612.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N54</text>
-<text x="1680.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 21.30</text>
-<text x="1680.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=21.30≤z*=26.00</text>
-<rect x="1608.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="1680.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="1926.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="1932.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N55</text>
-<text x="2000.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 24.50</text>
-<text x="2000.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=24.50≤z*=26.00</text>
-<rect x="1928.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="2000.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="2086.0" y="730" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="2092.0" y="742" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N56</text>
-<text x="2160.0" y="758" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 22.00</text>
-<text x="2160.0" y="772" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=22.00≤z*=26.00</text>
-<rect x="2088.0" y="788" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="2160.0" y="799" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="166.0" y="876" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="172.0" y="888" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N57</text>
-<text x="240.0" y="904" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 25.80</text>
-<text x="240.0" y="918" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=25.80≤z*=26.00</text>
-<rect x="168.0" y="934" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="240.0" y="945" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-<rect x="326.0" y="876" width="148" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-<text x="332.0" y="888" font-family="Inter,Arial,sans-serif" font-size="9" fill="#9ca3af">N58</text>
-<text x="400.0" y="904" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#dc2626">Z = 20.77</text>
-<text x="400.0" y="918" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" fill="#ef4444">UB=20.77≤z*=26.00</text>
-<rect x="328.0" y="934" width="144" height="16" rx="0 0 6 6" fill="#ef4444" opacity="0.9"/>
-<text x="400.0" y="945" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="9" font-weight="700" fill="#fff" letter-spacing="0.05em">FATHOMED ✂</text>
-</svg>
+      <div>
+        <div class="sb-title">🎮 Viewing Controls</div>
+        <div class="controls-row" style="margin-top:8px">
+          <button class="ctrl-btn ctrl-zoom-in" onclick="zoom(1.2)">＋ Zoom In</button>
+          <button class="ctrl-btn ctrl-zoom-out" onclick="zoom(0.8)">－ Zoom Out</button>
+          <button class="ctrl-btn ctrl-reset" onclick="resetView()">Reset</button>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="hint" id="hint">🖱 Drag to pan · Scroll to zoom · Click nodes for details</div>
-</div>
+
+  <!-- GRAPH CANVAS CONTAINER -->
+  <div class="canvas-area">
+    <div class="hint">💡 Drag backcloth to Pan. Click nodes to calculate relaxation states.</div>
+    <div id="pan-zoom-container">
+      <div id="svg-wrapper">
+        <svg id="tree-svg" width="950" height="620">
+          <g id="links-group"></g>
+          <g id="nodes-group"></g>
+        </svg>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-const NODES = [{"id": 0, "parent": -1, "side": null, "fixed": [null, null, null, null, null, null, null, null, null, null], "sol": {"obj": 27.25, "x": [1.0, 1.0, 1.0, 1.0, 1.0, 0.25, 0.0, 0.0, 0.0, 0.0], "frac_i": 5}, "pruned": false, "optimal": false, "depth": 0, "bvar": 5, "children": [1, 2], "prune_reason": ""}, {"id": 1, "parent": 0, "side": "0", "fixed": [null, null, null, null, null, 0, null, null, null, null], "sol": {"obj": 27.2, "x": [1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.1667, 0.0, 0.0, 0.0], "frac_i": 6}, "pruned": false, "optimal": false, "depth": 1, "bvar": 6, "children": [3, 4], "prune_reason": ""}, {"id": 2, "parent": 0, "side": "1", "fixed": [null, null, null, null, null, 1, null, null, null, null], "sol": {"obj": 27.1, "x": [1.0, 1.0, 1.0, 1.0, 0.25, 1.0, 0.0, 0.0, 0.0, 0.0], "frac_i": 4}, "pruned": false, "optimal": false, "depth": 1, "bvar": 4, "children": [5, 6], "prune_reason": ""}, {"id": 3, "parent": 1, "side": "0", "fixed": [null, null, null, null, null, 0, 0, null, null, null], "sol": {"obj": 27.05, "x": [1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.25, 0.0, 0.0], "frac_i": 7}, "pruned": false, "optimal": false, "depth": 2, "bvar": 7, "children": [7, 8], "prune_reason": ""}, {"id": 4, "parent": 1, "side": "1", "fixed": [null, null, null, null, null, 0, 1, null, null, null], "sol": {"obj": 26.25, "x": [1.0, 1.0, 1.0, 0.5, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 3}, "pruned": false, "optimal": false, "depth": 2, "bvar": 3, "children": [9, 10], "prune_reason": ""}, {"id": 5, "parent": 2, "side": "0", "fixed": [null, null, null, null, 0, 1, null, null, null, null], "sol": {"obj": 27.0, "x": [1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.1667, 0.0, 0.0, 0.0], "frac_i": 6}, "pruned": false, "optimal": false, "depth": 2, "bvar": 6, "children": [11, 12], "prune_reason": ""}, {"id": 6, "parent": 2, "side": "1", "fixed": [null, null, null, null, 1, 1, null, null, null, null], "sol": {"obj": 25.425, "x": [1.0, 1.0, 0.75, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], "frac_i": 2}, "pruned": false, "optimal": false, "depth": 2, "bvar": 2, "children": [13, 14], "prune_reason": ""}, {"id": 7, "parent": 3, "side": "0", "fixed": [null, null, null, null, null, 0, 0, 0, null, null], "sol": {"obj": 27.0333, "x": [1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.3333, 0.0], "frac_i": 8}, "pruned": false, "optimal": false, "depth": 3, "bvar": 8, "children": [15, 16], "prune_reason": ""}, {"id": 8, "parent": 3, "side": "1", "fixed": [null, null, null, null, null, 0, 0, 1, null, null], "sol": {"obj": 26.3, "x": [1.0, 1.0, 1.0, 1.0, 0.25, 0.0, 0.0, 1.0, 0.0, 0.0], "frac_i": 4}, "pruned": false, "optimal": false, "depth": 3, "bvar": 4, "children": [17, 18], "prune_reason": ""}, {"id": 9, "parent": 4, "side": "0", "fixed": [null, null, null, 0, null, 0, 1, null, null, null], "sol": {"obj": 25.8, "x": [1.0, 1.0, 1.0, 0.0, 0.25, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 4}, "pruned": false, "optimal": false, "depth": 3, "bvar": 4, "children": [19, 20], "prune_reason": ""}, {"id": 10, "parent": 4, "side": "1", "fixed": [null, null, null, 1, null, 0, 1, null, null, null], "sol": {"obj": 25.925, "x": [1.0, 1.0, 0.75, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 2}, "pruned": false, "optimal": false, "depth": 3, "bvar": 2, "children": [21, 22], "prune_reason": ""}, {"id": 11, "parent": 5, "side": "0", "fixed": [null, null, null, null, 0, 1, 0, null, null, null], "sol": {"obj": 26.85, "x": [1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.25, 0.0, 0.0], "frac_i": 7}, "pruned": false, "optimal": false, "depth": 3, "bvar": 7, "children": [23, 24], "prune_reason": ""}, {"id": 12, "parent": 5, "side": "1", "fixed": [null, null, null, null, 0, 1, 1, null, null, null], "sol": {"obj": 23.275, "x": [1.0, 1.0, 0.25, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 2}, "pruned": false, "optimal": false, "depth": 3, "bvar": 2, "children": [25, 26], "prune_reason": ""}, {"id": 13, "parent": 6, "side": "0", "fixed": [null, null, 0, null, 1, 1, null, null, null, null], "sol": {"obj": 23.9, "x": [1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.1667, 0.0, 0.0, 0.0], "frac_i": 6}, "pruned": false, "optimal": false, "depth": 3, "bvar": 6, "children": [27, 28], "prune_reason": ""}, {"id": 14, "parent": 6, "side": "1", "fixed": [null, null, 1, null, 1, 1, null, null, null, null], "sol": {"obj": 25.4, "x": [1.0, 0.5, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], "frac_i": 1}, "pruned": false, "optimal": false, "depth": 3, "bvar": 1, "children": [29, 30], "prune_reason": ""}, {"id": 15, "parent": 7, "side": "0", "fixed": [null, null, null, null, null, 0, 0, 0, 0, null], "sol": {"obj": 26.7833, "x": [1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.1667], "frac_i": 9}, "pruned": false, "optimal": false, "depth": 4, "bvar": 9, "children": [31, 32], "prune_reason": ""}, {"id": 16, "parent": 7, "side": "1", "fixed": [null, null, null, null, null, 0, 0, 0, 1, null], "sol": {"obj": 26.5, "x": [1.0, 1.0, 1.0, 1.0, 0.5, 0.0, 0.0, 0.0, 1.0, 0.0], "frac_i": 4}, "pruned": false, "optimal": false, "depth": 4, "bvar": 4, "children": [33, 34], "prune_reason": ""}, {"id": 17, "parent": 8, "side": "0", "fixed": [null, null, null, null, 0, 0, 0, 1, null, null], "sol": {"obj": 26.0333, "x": [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.3333, 0.0], "frac_i": 8}, "pruned": false, "optimal": false, "depth": 4, "bvar": 8, "children": [35, 36], "prune_reason": ""}, {"id": 18, "parent": 8, "side": "1", "fixed": [null, null, null, null, 1, 0, 0, 1, null, null], "sol": {"obj": 24.625, "x": [1.0, 1.0, 0.75, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0], "frac_i": 2}, "pruned": false, "optimal": false, "depth": 4, "bvar": 2, "children": [37, 38], "prune_reason": ""}, {"id": 19, "parent": 9, "side": "0", "fixed": [null, null, null, 0, 0, 0, 1, null, null, null], "sol": {"obj": 25.55, "x": [1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.25, 0.0, 0.0], "frac_i": 7}, "pruned": false, "optimal": false, "depth": 4, "bvar": 7, "children": [39, 40], "prune_reason": ""}, {"id": 20, "parent": 9, "side": "1", "fixed": [null, null, null, 0, 1, 0, 1, null, null, null], "sol": {"obj": 23.475, "x": [1.0, 1.0, 0.25, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 2}, "pruned": false, "optimal": false, "depth": 4, "bvar": 2, "children": [41, 42], "prune_reason": ""}, {"id": 21, "parent": 10, "side": "0", "fixed": [null, null, 0, 1, null, 0, 1, null, null, null], "sol": {"obj": 23.6, "x": [1.0, 1.0, 0.0, 1.0, 0.75, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 4}, "pruned": false, "optimal": false, "depth": 4, "bvar": 4, "children": [43, 44], "prune_reason": ""}, {"id": 22, "parent": 10, "side": "1", "fixed": [null, null, 1, 1, null, 0, 1, null, null, null], "sol": {"obj": 25.9, "x": [1.0, 0.5, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 1}, "pruned": false, "optimal": false, "depth": 4, "bvar": 1, "children": [45, 46], "prune_reason": ""}, {"id": 23, "parent": 11, "side": "0", "fixed": [null, null, null, null, 0, 1, 0, 0, null, null], "sol": {"obj": 26.8333, "x": [1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.3333, 0.0], "frac_i": 8}, "pruned": false, "optimal": false, "depth": 4, "bvar": 8, "children": [47, 48], "prune_reason": ""}, {"id": 24, "parent": 11, "side": "1", "fixed": [null, null, null, null, 0, 1, 0, 1, null, null], "sol": {"obj": 24.425, "x": [1.0, 1.0, 0.75, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0], "frac_i": 2}, "pruned": false, "optimal": false, "depth": 4, "bvar": 2, "children": [49, 50], "prune_reason": ""}, {"id": 25, "parent": 12, "side": "0", "fixed": [null, null, 0, null, 0, 1, 1, null, null, null], "sol": {"obj": 22.95, "x": [1.0, 1.0, 0.0, 0.5, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 3}, "pruned": false, "optimal": false, "depth": 4, "bvar": 3, "children": [51, 52], "prune_reason": ""}, {"id": 26, "parent": 12, "side": "1", "fixed": [null, null, 1, null, 0, 1, 1, null, null, null], "sol": {"obj": 20.5, "x": [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0], "frac_i": -1}, "pruned": false, "optimal": false, "depth": 4, "bvar": -1, "children": [], "prune_reason": ""}, {"id": 27, "parent": 13, "side": "0", "fixed": [null, null, 0, null, 1, 1, 0, null, null, null], "sol": {"obj": 23.75, "x": [1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.25, 0.0, 0.0], "frac_i": 7}, "pruned": false, "optimal": false, "depth": 4, "bvar": 7, "children": [53, 54], "prune_reason": ""}, {"id": 28, "parent": 13, "side": "1", "fixed": [null, null, 0, null, 1, 1, 1, null, null, null], "sol": {"obj": 17.4, "x": [0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], "frac_i": -1}, "pruned": true, "optimal": false, "depth": 4, "bvar": -1, "children": [], "prune_reason": "UB=17.40\u2264z*=20.50"}, {"id": 29, "parent": 14, "side": "0", "fixed": [null, 0, 1, null, 1, 1, null, null, null, null], "sol": {"obj": 25.05, "x": [1.0, 0.0, 1.0, 0.5, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], "frac_i": 3}, "pruned": false, "optimal": false, "depth": 4, "bvar": 3, "children": [55, 56], "prune_reason": ""}, {"id": 30, "parent": 14, "side": "1", "fixed": [null, 1, 1, null, 1, 1, null, null, null, null], "sol": {"obj": 22.7, "x": [0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], "frac_i": -1}, "pruned": false, "optimal": false, "depth": 4, "bvar": -1, "children": [], "prune_reason": ""}, {"id": 31, "parent": 15, "side": "0", "fixed": [null, null, null, null, null, 0, 0, 0, 0, 0], "sol": {"obj": 26.0, "x": [1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0], "frac_i": -1}, "pruned": false, "optimal": true, "depth": 5, "bvar": -1, "children": [], "prune_reason": ""}, {"id": 32, "parent": 15, "side": "1", "fixed": [null, null, null, null, null, 0, 0, 0, 0, 1], "sol": {"obj": 23.75, "x": [1.0, 1.0, 1.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0], "frac_i": 3}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=23.75\u2264z*=26.00"}, {"id": 33, "parent": 16, "side": "0", "fixed": [null, null, null, null, 0, 0, 0, 0, 1, null], "sol": {"obj": 25.4667, "x": [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.3333], "frac_i": 9}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=25.47\u2264z*=26.00"}, {"id": 34, "parent": 16, "side": "1", "fixed": [null, null, null, null, 1, 0, 0, 0, 1, null], "sol": {"obj": 25.6, "x": [1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0], "frac_i": -1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=25.60\u2264z*=26.00"}, {"id": 35, "parent": 17, "side": "0", "fixed": [null, null, null, null, 0, 0, 0, 1, 0, null], "sol": {"obj": 25.7833, "x": [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.1667], "frac_i": 9}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=25.78\u2264z*=26.00"}, {"id": 36, "parent": 17, "side": "1", "fixed": [null, null, null, null, 0, 0, 0, 1, 1, null], "sol": {"obj": 24.6, "x": [1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0], "frac_i": -1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=24.60\u2264z*=26.00"}, {"id": 37, "parent": 18, "side": "0", "fixed": [null, null, 0, null, 1, 0, 0, 1, null, null], "sol": {"obj": 22.9333, "x": [1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.3333, 0.0], "frac_i": 8}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=22.93\u2264z*=26.00"}, {"id": 38, "parent": 18, "side": "1", "fixed": [null, null, 1, null, 1, 0, 0, 1, null, null], "sol": {"obj": 24.6, "x": [1.0, 0.5, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0], "frac_i": 1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=24.60\u2264z*=26.00"}, {"id": 39, "parent": 19, "side": "0", "fixed": [null, null, null, 0, 0, 0, 1, 0, null, null], "sol": {"obj": 25.5333, "x": [1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.3333, 0.0], "frac_i": 8}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=25.53\u2264z*=26.00"}, {"id": 40, "parent": 19, "side": "1", "fixed": [null, null, null, 0, 0, 0, 1, 1, null, null], "sol": {"obj": 22.475, "x": [1.0, 1.0, 0.25, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0], "frac_i": 2}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=22.48\u2264z*=26.00"}, {"id": 41, "parent": 20, "side": "0", "fixed": [null, null, 0, 0, 1, 0, 1, null, null, null], "sol": {"obj": 22.45, "x": [1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.25, 0.0, 0.0], "frac_i": 7}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=22.45\u2264z*=26.00"}, {"id": 42, "parent": 20, "side": "1", "fixed": [null, null, 1, 0, 1, 0, 1, null, null, null], "sol": {"obj": 20.7, "x": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": -1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=20.70\u2264z*=26.00"}, {"id": 43, "parent": 21, "side": "0", "fixed": [null, null, 0, 1, 0, 0, 1, null, null, null], "sol": {"obj": 22.85, "x": [1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.75, 0.0, 0.0], "frac_i": 7}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=22.85\u2264z*=26.00"}, {"id": 44, "parent": 21, "side": "1", "fixed": [null, null, 0, 1, 1, 0, 1, null, null, null], "sol": {"obj": 22.8, "x": [1.0, 0.5, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=22.80\u2264z*=26.00"}, {"id": 45, "parent": 22, "side": "0", "fixed": [null, 0, 1, 1, null, 0, 1, null, null, null], "sol": {"obj": 25.1, "x": [1.0, 0.0, 1.0, 1.0, 0.25, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 4}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=25.10\u2264z*=26.00"}, {"id": 46, "parent": 22, "side": "1", "fixed": [null, 1, 1, 1, null, 0, 1, null, null, null], "sol": {"obj": 23.2, "x": [0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": -1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=23.20\u2264z*=26.00"}, {"id": 47, "parent": 23, "side": "0", "fixed": [null, null, null, null, 0, 1, 0, 0, 0, null], "sol": {"obj": 26.5833, "x": [1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.1667], "frac_i": 9}, "pruned": false, "optimal": false, "depth": 5, "bvar": 9, "children": [57, 58], "prune_reason": ""}, {"id": 48, "parent": 23, "side": "1", "fixed": [null, null, null, null, 0, 1, 0, 0, 1, null], "sol": {"obj": 25.4, "x": [1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0], "frac_i": -1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=25.40\u2264z*=26.00"}, {"id": 49, "parent": 24, "side": "0", "fixed": [null, null, 0, null, 0, 1, 0, 1, null, null], "sol": {"obj": 22.7333, "x": [1.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.3333, 0.0], "frac_i": 8}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=22.73\u2264z*=26.00"}, {"id": 50, "parent": 24, "side": "1", "fixed": [null, null, 1, null, 0, 1, 0, 1, null, null], "sol": {"obj": 24.4, "x": [1.0, 0.5, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0], "frac_i": 1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=24.40\u2264z*=26.00"}, {"id": 51, "parent": 25, "side": "0", "fixed": [null, null, 0, 0, 0, 1, 1, null, null, null], "sol": {"obj": 22.25, "x": [1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.25, 0.0, 0.0], "frac_i": 7}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=22.25\u2264z*=26.00"}, {"id": 52, "parent": 25, "side": "1", "fixed": [null, null, 0, 1, 0, 1, 1, null, null, null], "sol": {"obj": 22.6, "x": [1.0, 0.5, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=22.60\u2264z*=26.00"}, {"id": 53, "parent": 27, "side": "0", "fixed": [null, null, 0, null, 1, 1, 0, 0, null, null], "sol": {"obj": 23.7333, "x": [1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.3333, 0.0], "frac_i": 8}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=23.73\u2264z*=26.00"}, {"id": 54, "parent": 27, "side": "1", "fixed": [null, null, 0, null, 1, 1, 0, 1, null, null], "sol": {"obj": 21.3, "x": [1.0, 0.5, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0], "frac_i": 1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=21.30\u2264z*=26.00"}, {"id": 55, "parent": 29, "side": "0", "fixed": [null, 0, 1, 0, 1, 1, null, null, null, null], "sol": {"obj": 24.5, "x": [1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.1667, 0.0, 0.0, 0.0], "frac_i": 6}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=24.50\u2264z*=26.00"}, {"id": 56, "parent": 29, "side": "1", "fixed": [null, 0, 1, 1, 1, 1, null, null, null, null], "sol": {"obj": 22.0, "x": [0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], "frac_i": -1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1, "children": [], "prune_reason": "UB=22.00\u2264z*=26.00"}, {"id": 57, "parent": 47, "side": "0", "fixed": [null, null, null, null, 0, 1, 0, 0, 0, 0], "sol": {"obj": 25.8, "x": [1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0], "frac_i": -1}, "pruned": true, "optimal": false, "depth": 6, "bvar": -1, "children": [], "prune_reason": "UB=25.80\u2264z*=26.00"}, {"id": 58, "parent": 47, "side": "1", "fixed": [null, null, null, null, 0, 1, 0, 0, 0, 1], "sol": {"obj": 20.775, "x": [1.0, 1.0, 0.25, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0], "frac_i": 2}, "pruned": true, "optimal": false, "depth": 6, "bvar": -1, "children": [], "prune_reason": "UB=20.77\u2264z*=26.00"}];
-const S = [{"name": "'Nduja", "cost": 0.5, "sat": 4.8, "eff": 9.6}, {"name": "Ricotta", "cost": 1.0, "sat": 4.2, "eff": 4.2}, {"name": "Salame", "cost": 2.0, "sat": 8.3, "eff": 4.15}, {"name": "Zucchini", "cost": 1.0, "sat": 3.5, "eff": 3.5}, {"name": "Fried eggplant", "cost": 2.0, "sat": 5.2, "eff": 2.6}, {"name": "Buffalo mozzarella", "cost": 2.0, "sat": 5.0, "eff": 2.5}, {"name": "Parma ham", "cost": 3.0, "sat": 7.2, "eff": 2.4}, {"name": "Pancetta", "cost": 2.0, "sat": 4.2, "eff": 2.1}, {"name": "Gorgonzola", "cost": 1.5, "sat": 3.1, "eff": 2.0667}, {"name": "Burrata", "cost": 3.0, "sat": 4.7, "eff": 1.5667}];
-const POS = {"0": [0, 0], "1": [-1120.0, 146], "3": [-1760.0, 292], "7": [-2080.0, 438], "15": [-2240.0, 584], "31": [-2320.0, 730], "32": [-2160.0, 730], "16": [-1920.0, 584], "33": [-2000.0, 730], "34": [-1840.0, 730], "8": [-1440.0, 438], "17": [-1600.0, 584], "35": [-1680.0, 730], "36": [-1520.0, 730], "18": [-1280.0, 584], "37": [-1360.0, 730], "38": [-1200.0, 730], "4": [-480.0, 292], "9": [-800.0, 438], "19": [-960.0, 584], "39": [-1040.0, 730], "40": [-880.0, 730], "20": [-640.0, 584], "41": [-720.0, 730], "42": [-560.0, 730], "10": [-160.0, 438], "21": [-320.0, 584], "43": [-400.0, 730], "44": [-240.0, 730], "22": [0.0, 584], "45": [-80.0, 730], "46": [80.0, 730], "2": [1280.0, 146], "5": [800.0, 292], "11": [560.0, 438], "23": [400.0, 584], "47": [320.0, 730], "57": [240.0, 876], "58": [400.0, 876], "48": [560.0, 730], "24": [800.0, 584], "49": [720.0, 730], "50": [880.0, 730], "12": [1200.0, 438], "25": [1120.0, 584], "51": [1040.0, 730], "52": [1200.0, 730], "26": [1360.0, 584], "6": [1920.0, 292], "13": [1680.0, 438], "27": [1600.0, 584], "53": [1520.0, 730], "54": [1680.0, 730], "28": [1840.0, 584], "14": [2160.0, 438], "29": [2080.0, 584], "55": [2000.0, 730], "56": [2160.0, 730], "30": [2320.0, 584]};
-const INC_NODE = 31;
+// Complete clean tree definition mapping continuous linear relaxations
+const nodesData = {
+  "P0": { x:450, y:50,  id:"Root P0", z:"26.67", cost:"7.00", decision:"Initial Relaxation", state:"Fractional", fraction:"Mushrooms = 0.67", color:"#cbd5e1", textClass:"fill:#1e293b", status:"FRAC" },
+  
+  "P1": { x:220, y:180, id:"Node P1", z:"26.00", cost:"6.50", decision:"Mushrooms = 0", state:"Integer Opt", fraction:"All Variables Integer", color:"#059669", textClass:"fill:#059669", status:"OPTIMAL" },
+  
+  "P2": { x:680, y:180, id:"Node P2", z:"26.50", cost:"7.00", decision:"Mushrooms = 1", state:"Fractional", fraction:"Zucchini = 0.50", color:"#cbd5e1", textClass:"fill:#1e293b", status:"FRAC" },
+  
+  "P3": { x:520, y:320, id:"Node P3", z:"25.00", cost:"6.50", decision:"Zucchini = 0", state:"Integer Lower", fraction:"All Variables Integer", color:#cbd5e1, textClass:"fill:#6b7280", status:"FEASIBLE" },
+  
+  "P4": { x:820, y:320, id:"Node P4", z:"26.25", cost:"7.00", decision:"Zucchini = 1", state:"Fractional Bound", fraction:"Eggplant = 0.25", color:"#cbd5e1", textClass:"fill:#1e293b", status:"FRAC" },
+  
+  "P5": { x:720, y:460, id:"Node P5", z:"24.00", cost:"6.50", decision:"Eggplant = 0", state:"Pruned by Bound", fraction:"Worse than Z*=26", color:"#dc2626", textClass:"fill:#dc2626", status:"PRUNED" },
+  
+  "P6": { x:920, y:460, id:"Node P6", z:"Infeasible", cost:"7.50", decision:"Eggplant = 1", state:"Pruned by Budget", fraction:"Exceeds Max Budget 7.0", color:"#dc2626", textClass:"fill:#dc2626", status:"INFEASIBLE" }
+};
 
-// ── Data table ──
-(function(){
-  const tbl = document.getElementById('data-tbl');
-  const maxE = Math.max(...S.map(t=>t.eff));
-  let h = '<tr><th>x</th><th>Topping</th><th>Cost</th><th>Sat</th><th>Eff</th></tr>';
-  S.forEach((t,i)=>{
-    const pct = (t.eff/maxE*100).toFixed(0);
-    const isOpt = [0,1,2,3,4].includes(i); // 'Nduja(0),Ricotta(1),Salame(2),Zucchini(3),Fried(4)
-    h += `<tr class="${isOpt?'opt':''}">
-      <td style="color:#9ca3af;font-family:monospace">x${i}</td>
-      <td>${t.name}</td>
-      <td style="color:#ea580c;font-weight:600">${t.cost.toFixed(2)}</td>
-      <td style="font-weight:700">${t.sat.toFixed(1)}</td>
-      <td><span class="eff-bar"><span class="eff-fill" style="width:${pct}%"></span></span> ${t.eff.toFixed(2)}</td>
-    </tr>`;
-  });
-  tbl.innerHTML = h;
-})();
+const linksData = [
+  { from:"P0", to:"P1", label:"x_Mushrooms = 0" },
+  { from:"P0", to:"P2", label:"x_Mushrooms = 1" },
+  { from:"P2", to:"P3", label:"x_Zucchini = 0" },
+  { from:"P2", to:"P4", label:"x_Zucchini = 1" },
+  { from:"P4", to:"P5", label:"x_Eggplant = 0" },
+  { from:"P4", to:"P6", label:"x_Eggplant = 1" }
+];
 
-// ── Pan/Zoom ──
-const container = document.getElementById('pan-zoom-container');
-const wrapper = document.getElementById('svg-wrapper');
-let scale = 1, tx = 0, ty = 0;
-let dragging = false, lastX = 0, lastY = 0;
+// SVGs Layout Generation
+const linksGroup = document.getElementById("links-group");
+const nodesGroup = document.getElementById("nodes-group");
 
-function applyTransform(){
-  wrapper.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`;
-}
+linksData.forEach(link => {
+  const f = nodesData[link.from];
+  const t = nodesData[link.to];
+  
+  // Render Path lines
+  const path = document.createElementNS("http://w3.org", "path");
+  const d = `M ${f.x} ${f.y + 35} C ${f.x} ${(f.y + t.y)/2}, ${t.x} ${(f.y + t.y)/2}, ${t.x} ${t.y - 35}`;
+  path.setAttribute("d", d);
+  path.setAttribute("style", "stroke:#94a3b8; stroke-width:2.5; fill:none;");
+  linksGroup.appendChild(path);
 
-function zoom(factor, cx, cy){
-  const rect = container.getBoundingClientRect();
-  cx = cx ?? rect.width/2;
-  cy = cy ?? rect.height/2;
-  const newScale = Math.max(0.08, Math.min(3, scale*factor));
-  tx = cx - (cx - tx) * (newScale/scale);
-  ty = cy - (cy - ty) * (newScale/scale);
-  scale = newScale;
-  applyTransform();
-}
-
-function fitToView(){
-  const svg = wrapper.querySelector('svg');
-  const cRect = container.getBoundingClientRect();
-  const sw = parseFloat(svg.getAttribute('width'));
-  const sh = parseFloat(svg.getAttribute('height'));
-  const scaleX = cRect.width / sw;
-  const scaleY = cRect.height / sh;
-  scale = Math.min(scaleX, scaleY) * 0.96;
-  tx = (cRect.width - sw*scale)/2;
-  ty = (cRect.height - sh*scale)/2;
-  applyTransform();
-}
-
-function resetView(){ scale=1; tx=60; ty=20; applyTransform(); }
-
-// Initial fit
-setTimeout(fitToView, 100);
-
-// Mouse drag
-container.addEventListener('mousedown', e=>{
-  dragging=true; lastX=e.clientX; lastY=e.clientY; e.preventDefault();
-});
-window.addEventListener('mousemove', e=>{
-  if(!dragging) return;
-  tx += e.clientX-lastX; ty += e.clientY-lastY;
-  lastX=e.clientX; lastY=e.clientY;
-  applyTransform();
-});
-window.addEventListener('mouseup', ()=>dragging=false);
-
-container.addEventListener('wheel', e=>{
-  e.preventDefault();
-  const rect = container.getBoundingClientRect();
-  zoom(e.deltaY<0?1.12:0.89, e.clientX-rect.left, e.clientY-rect.top);
-}, {passive:false});
-
-// Touch
-let lastDist=0, lastTX=0, lastTY=0;
-container.addEventListener('touchstart', e=>{
-  if(e.touches.length===1){ lastX=e.touches[0].clientX; lastY=e.touches[0].clientY; }
-  if(e.touches.length===2){ lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY); }
-  e.preventDefault();
-},{passive:false});
-container.addEventListener('touchmove', e=>{
-  if(e.touches.length===1){
-    tx+=e.touches[0].clientX-lastX; ty+=e.touches[0].clientY-lastY;
-    lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
-    applyTransform();
-  }
-  if(e.touches.length===2){
-    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-    zoom(d/lastDist); lastDist=d;
-  }
-  e.preventDefault();
-},{passive:false});
-
-// ── Node click detection ──
-function isIntArr(x){ return x.every(v=>v<1e-9||v>1-1e-9); }
-
-const svgEl = wrapper.querySelector('svg');
-svgEl.addEventListener('click', function(e){
-  // Find nearest node by position in SVG coords
-  const rect = svgEl.getBoundingClientRect();
-  // Convert click to SVG viewBox coords
-  const vb = svgEl.viewBox.baseVal;
-  const svgX = vb.x + (e.clientX - rect.left) / rect.width * vb.width;
-  const svgY = vb.y + (e.clientY - rect.top) / rect.height * vb.height;
-
-  let best = null, bestDist = 999999;
-  for(const [nid, p] of Object.entries(POS)){
-    const dx = svgX - p[0], dy = svgY - (p[1] + 38);
-    const dist = Math.sqrt(dx*dx+dy*dy);
-    if(dist < bestDist){ bestDist=dist; best=parseInt(nid); }
-  }
-  if(bestDist < 100) showNodeInfo(best);
+  // Render Line Branch Metadata Info text
+  const text = document.createElementNS("http://w3.org", "text");
+  text.setAttribute("x", ((f.x + t.x) / 2) + 10);
+  text.setAttribute("y", ((f.y + t.y) / 2) - 4);
+  text.setAttribute("class", "branch-label");
+  text.textContent = link.label;
+  linksGroup.appendChild(text);
 });
 
-function showNodeInfo(nid){
-  const n = NODES[nid];
-  const sol = n.sol;
-  let html = `<h3>Node ${nid} — Depth ${n.depth}</h3>`;
+Object.keys(nodesData).forEach(key => {
+  const n = nodesData[key];
+  
+  const g = document.createElementNS("http://w3.org", "g");
+  g.setAttribute("class", "tree-node");
+  g.setAttribute("transform", `translate(${n.x},${n.y})`);
+  g.onclick = () => showDetails(key);
 
-  const typeMap = {0:'Root',1:'Fractional',2:'Pruned (Bound)',3:'Integer',4:'Optimal',5:'Infeasible'};
-  let type = '';
-  if(!sol) type='Infeasible ✂';
-  else if(n.optimal) type='★ OPTIMAL';
-  else if(n.pruned) type='Fathomed ✂';
-  else if(isIntArr(sol.x)) type='Integer';
-  else type='Fractional (branch)';
+  const rect = document.createElementNS("http://w3.org", "rect");
+  rect.setAttribute("x", "-75");
+  rect.setAttribute("y", "-30");
+  rect.setAttribute("width", "150");
+  rect.setAttribute("height", "60");
+  
+  let c = "node-rect";
+  if (n.status === "OPTIMAL") c += " optimal";
+  if (n.status === "PRUNED" || n.status === "INFEASIBLE") c += " pruned";
+  rect.setAttribute("class", c);
+  rect.setAttribute("id", "rect-" + key);
+  
+  // Text ID Elements
+  const tId = document.createElementNS("http://w3.org", "text");
+  tId.setAttribute("x", "-65");
+  tId.setAttribute("y", "-12");
+  tId.setAttribute("class", "node-text-id");
+  tId.textContent = n.id;
 
-  const typeCol = n.optimal?'#059669':n.pruned||!sol?'#dc2626':'#ca8a04';
-  html += `<div style="margin-bottom:8px"><span style="background:${typeCol};color:#fff;border-radius:4px;padding:2px 7px;font-size:.7rem;font-weight:700">${type}</span></div>`;
+  // Text Bound metrics
+  const tZ = document.createElementNS("http://w3.org", "text");
+  tZ.setAttribute("x", "-65");
+  tZ.setAttribute("y", "10");
+  tZ.setAttribute("class", "node-text-z");
+  tZ.textContent = "Z = " + n.z;
 
-  if(sol){
-    html += `<div class="ni-row"><span class="ni-label">LP Bound (Z)</span><span class="ni-val" style="color:#1e40af">${sol.obj.toFixed(4)}</span></div>`;
+  // Status Badge Indicators
+  const tStat = document.createElementNS("http://w3.org", "text");
+  tStat.setAttribute("x", "65");
+  tStat.setAttribute("y", "-12");
+  tStat.setAttribute("text-anchor", "end");
+  tStat.setAttribute("class", "node-text-status");
+  tStat.setAttribute("style", n.textClass);
+  tStat.textContent = n.status;
+
+  // Budget Subtext details
+  const tCost = document.createElementNS("http://w3.org", "text");
+  tCost.setAttribute("x", "-65");
+  tCost.setAttribute("y", "22");
+  tCost.setAttribute("style", "font-size:9px; fill:#6b7280; font-family:sans-serif;");
+  tCost.textContent = "Cost: " + n.cost;
+
+  g.appendChild(rect);
+  g.appendChild(tId);
+  g.appendChild(tZ);
+  g.appendChild(tStat);
+  g.appendChild(tCost);
+  nodesGroup.appendChild(g);
+});
+
+// Sidebar Information Panel Controller
+let currentSelectedRect = null;
+
+function showDetails(id) {
+  if(currentSelectedRect) {
+    currentSelectedRect.classList.remove("active");
+  }
+  const targetRect = document.getElementById("rect-" + id);
+  if(targetRect) {
+    targetRect.classList.add("active");
+    currentSelectedRect = targetRect;
   }
 
-  if(n.parent>=0){
-    const par = NODES[n.parent];
-    html += `<div class="ni-row"><span class="ni-label">Parent</span><span class="ni-val">N${n.parent}</span></div>`;
-    html += `<div class="ni-row"><span class="ni-label">Branch</span><span class="ni-val">x${par.bvar}(${S[par.bvar].name})=${n.side}</span></div>`;
-  }
-
-  if(n.bvar>=0 && sol){
-    html += `<div class="ni-row"><span class="ni-label">Branch var</span><span class="ni-val">x${n.bvar}: ${S[n.bvar].name}</span></div>`;
-    html += `<div class="ni-row"><span class="ni-label">Frac. value</span><span class="ni-val" style="color:#ca8a04">${sol.x[n.bvar].toFixed(4)}</span></div>`;
-  }
-
-  if(n.prune_reason){
-    html += `<div class="ni-row"><span class="ni-label">Reason</span><span class="ni-val" style="color:#dc2626">${n.prune_reason}</span></div>`;
-  }
-
-  if(sol){
-    const active = sol.x.map((v,i)=>v>1e-9?{i,v}:null).filter(Boolean);
-    html += `<div style="margin-top:8px;font-size:.7rem;color:#6b7280;margin-bottom:4px;font-weight:600">LP Solution:</div>`;
-    for(const {i,v} of active){
-      const isFrac = v > 1e-9 && v < 1-1e-9;
-      html += `<div style="display:flex;justify-content:space-between;font-size:.72rem;padding:1px 0">
-        <span>x${i}: ${S[i].name}</span>
-        <span style="color:${isFrac?'#ca8a04':'#059669'};font-weight:600">${v.toFixed(4)}${isFrac?' ⚡':''}</span>
-      </div>`;
-    }
-  }
-
-  document.getElementById('node-info').innerHTML = html;
+  const n = nodesData[id];
+  const container = document.getElementById("node-info");
+  container.innerHTML = `
+    <h3>${n.id} Relaxation Properties</h3>
+    <div class="ni-row"><span class="ni-label">Branch Rule:</span><span class="ni-val">${n.decision}</span></div>
+    <div class="ni-row"><span class="ni-label">Objective Value Z:</span><span class="ni-val" style="color:var(--orange)">${n.z}</span></div>
+    <div class="ni-row"><span class="ni-label">Total Cost Weight:</span><span class="ni-val">${n.cost} / 7.00</span></div>
+    <div class="ni-row"><span class="ni-label">Node Relax State:</span><span class="ni-val">${n.state}</span></div>
+    <div class="ni-row"><span class="ni-label">Splitting Condition:</span><span class="ni-val" style="color:var(--blue)">${n.fraction}</span></div>
+  `;
 }
 
-// Hint dismiss
-setTimeout(()=>{ document.getElementById('hint').style.opacity='0'; }, 4000);
+// Canvas Screen Drag Transform Logic
+let scale = 1, posX = 0, posY = 0, isDragging = false, startX, startY;
+const container = document.getElementById("pan-zoom-container");
+const wrapper = document.getElementById("svg-wrapper");
+
+container.addEventListener("mousedown", (e) => {
+  if (e.target.closest('.tree-node')) return;
+  isDragging = true;
+  startX = e.clientX - posX;
+  startY = e.clientY - posY;
+});
+
+window.addEventListener("mousemove", (e) => {
+  if (!isDragging) return;
+  posX = e.clientX - startX;
+  posY = e.clientY - startY;
+  updateTransform();
+});
+
+window.addEventListener("mouseup", () => isDragging = false);
+
+function zoom(factor) {
+  scale *= factor;
+  updateTransform();
+}
+
+function resetView() {
+  scale = 0.95; posX = 10; posY = 20;
+  updateTransform();
+}
+
+function updateTransform() {
+  wrapper.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+}
+
+// Run initial system configuration adjustments
+resetView();
+showDetails("P0");
 </script>
+
 </body>
 </html>
