@@ -2,375 +2,345 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pizza Optimizer Full BB Visualizer</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🍕 Pizza B&B — Step-by-Step Decision Tree</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-body{
-background:#0f172a;
-color:white;
-font-family:Arial,sans-serif;
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f2ee;--white:#ffffff;--surface:#fafaf8;
+  --border:#e0ddd7;--border2:#ccc9c2;
+  --accent:#e85d04;--accent2:#f48c06;
+  --green:#2d6a4f;--green-bg:#d8f3dc;--green-border:#74c69d;
+  --red:#c1121f;--red-bg:#ffe5e5;--red-border:#e07070;
+  --blue:#1565c0;--blue-bg:#e3f0ff;--blue-border:#90b8e8;
+  --gold:#b5860d;--gold-bg:#fff8e1;--gold-border:#f0c040;
+  --purple:#6a0dad;--purple-bg:#f3e5ff;--purple-border:#c07be8;
+  --text:#1a1a1a;--muted:#666;--light:#999;
+  --font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
 }
-.card{
-background:#111827;
-padding:24px;
-border-radius:24px;
-box-shadow:0 0 25px rgba(0,0,0,0.4);
-}
-.node{
-padding:14px;
-border-radius:14px;
-margin:10px 0;
-background:#1e293b;
-border-left:5px solid #10b981;
-transition:0.3s;
-}
-.node:hover{
-transform:scale(1.02);
-}
-.step{
-background:#dc2626;
-padding:5px 12px;
-border-radius:20px;
-font-size:12px;
-font-weight:bold;
-}
-.hiddenNode{
-display:none;
-}
-.visibleNode{
-display:block;
-animation:fade 0.4s ease;
-}
-@keyframes fade{
-from{opacity:0;transform:translateY(10px)}
-to{opacity:1;transform:translateY(0)}
-}
-button{
-transition:0.2s;
-}
-button:hover{
-transform:scale(1.05);
-}
-table td,table th{
-border:1px solid rgba(255,255,255,0.2);
-padding:8px;
-text-align:center;
-}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+/* ── TOP BAR ── */
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:12px}
+.topbar-emoji{font-size:1.5rem}
+.topbar h1{font-size:1.1rem;font-weight:700;color:var(--accent)}
+.topbar p{color:var(--muted);font-size:.8rem;margin-left:auto}
+
+/* ── MAIN LAYOUT ── */
+.layout{display:grid;grid-template-columns:380px 1fr;height:calc(100vh - 50px)}
+
+/* ── LEFT PANEL ── */
+.left{background:var(--white);border-right:2px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.step-badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#fff;border-radius:20px;padding:3px 12px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.left-scroll{flex:1;overflow-y:auto;padding:20px}
+.step-header{margin-bottom:14px}
+.step-title{font-size:1.1rem;font-weight:700;line-height:1.3;margin-bottom:10px}
+.step-explanation{font-size:.85rem;line-height:1.65;color:#333;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px}
+.step-explanation b{color:var(--accent)}
+
+/* type banners */
+.type-banner{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.banner-solve{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.banner-branch{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-border)}
+.banner-incumbent{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.banner-prune{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.banner-final{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
+
+/* Controls */
+.controls{padding:16px 20px;border-top:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:8px}
+.btn{border:none;border-radius:8px;padding:8px 18px;font-family:var(--font);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-back{background:#e8e4dc;color:#555}
+.btn-back:hover{background:#ddd9d0}
+.btn-next{background:var(--accent);color:#fff}
+.btn-next:hover{background:#c94e00}
+.btn-reset{background:#e8e4dc;color:#555;margin-left:auto}
+.btn-reset:hover{background:#ddd9d0}
+.step-counter{font-size:.8rem;color:var(--muted);margin-left:4px}
+
+/* Problem data */
+.prob-section{padding:16px 20px;border-top:1px solid var(--border)}
+.prob-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.model-box{background:#1a1a1a;color:#e8e8e8;border-radius:8px;padding:12px 14px;font-family:var(--mono);font-size:.75rem;line-height:1.8}
+.model-box .kw{color:#ff9f1c}
+.model-box .v{color:#80deea}
+.model-box .c{color:#a5d6a7}
+.data-tbl{width:100%;border-collapse:collapse;font-size:.75rem;margin-top:10px}
+.data-tbl th{background:#f0ede6;color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;padding:5px 6px;border-bottom:2px solid var(--border);text-align:left}
+.data-tbl td{padding:5px 6px;border-bottom:1px solid var(--border)}
+.data-tbl tr.hl td{background:rgba(232,93,4,.06)}
+.eff-bar{height:5px;background:#e8e4dc;border-radius:3px;margin-top:2px}
+.eff-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent2),var(--accent))}
+
+/* ── RIGHT PANEL ── */
+.right{background:var(--surface);overflow:auto;padding:20px;position:relative}
+.tree-header{display:flex;align-items:center;gap:14px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.tree-title{font-size:1rem;font-weight:700}
+.legend{display:flex;gap:10px;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:4px;font-size:.73rem;color:var(--muted)}
+.leg-dot{width:11px;height:11px;border-radius:50%;border:2px solid}
+.leg-bound .leg-dot{background:var(--blue-bg);border-color:var(--blue)}
+.leg-inc .leg-dot{background:var(--green-bg);border-color:var(--green)}
+.leg-prune .leg-dot{background:var(--red-bg);border-color:var(--red)}
+.leg-frac .leg-dot{background:var(--gold-bg);border-color:var(--gold)}
+.leg-root .leg-dot{background:#fff;border-color:var(--accent);border-width:2px}
+
+#tree-container{overflow:auto}
+#tree-svg{display:block}
+
+/* Node styles */
+.node-rect{rx:6;ry:6;stroke-width:2}
+.node-body{font-family:'Inter',sans-serif}
+.node-z{font-weight:700;font-size:13px}
+.node-id{font-size:9px;fill:#999}
+.edge-line{stroke:#c5c1b8;stroke-width:1.5;fill:none}
+.edge-lbl{font-size:10px;font-family:'Inter',sans-serif;font-weight:600}
 </style>
 </head>
-<body class="p-6">
+<body>
 
-<div class="max-w-7xl mx-auto">
-
-<div class="text-center mb-10">
-<h1 class="text-6xl font-bold mb-4">🍕 Pizza Optimizer Visualizer</h1>
-<p class="text-xl text-gray-300">
-Interactive Full Decision Tree + Branch & Bound + Continuous LP Relaxation
-</p>
+<div class="topbar">
+  <div class="topbar-emoji">🍕</div>
+  <h1>Pizza Optimizer — Branch &amp; Bound (Continuous Variables)</h1>
+  <p>10 toppings · Budget = 7.00 ww · x<sub>i</sub> ∈ [0,1]</p>
 </div>
 
-<div class="grid md:grid-cols-2 gap-6">
+<div class="layout">
+<!-- ── LEFT ── -->
+<div class="left">
+  <div class="left-scroll" id="left-panel">
+    <div class="step-header">
+      <div class="step-badge" id="step-badge">Step 1</div>
+      <div class="type-banner banner-solve" id="type-banner">Solve LP</div>
+      <div class="step-title" id="step-title">Loading…</div>
+      <div class="step-explanation" id="step-explanation"></div>
+    </div>
+  </div>
 
-<div class="card">
-<div class="flex items-center gap-3 mb-4">
-<span class="step">STEP 0</span>
-<h2 class="text-3xl font-bold">Problem Setup</h2>
-</div>
+  <div class="prob-section">
+    <div class="prob-title">Problem Data</div>
+    <div class="model-box">
+      <span class="kw">Maximize</span> Z = <span class="v">Σ sat<sub>i</sub>·x<sub>i</sub></span><br>
+      <span class="kw">Subject&nbsp;to:</span> <span class="v">Σ cost<sub>i</sub>·x<sub>i</sub></span> ≤ <span class="c">7.00 ww</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="v">0</span> ≤ <span class="v">x<sub>i</sub></span> ≤ <span class="c">1</span> &nbsp;∀i
+    </div>
+    <table class="data-tbl" id="data-tbl"></table>
+  </div>
 
-<p class="leading-8 text-gray-300 mb-5">
-We must choose pizza toppings while staying under a budget of 7.
-Each topping has a cost and satisfaction score.
-Branch and Bound explores all combinations efficiently.
-</p>
-
-<div class="bg-black/30 rounded-2xl p-5">
-<p class="text-green-400 font-bold mb-2">Objective Function</p>
-<p class="mb-4">Maximize Z = Σ Satisfaction × xᵢ</p>
-
-<p class="text-yellow-300 font-bold mb-2">Constraint</p>
-<p>Σ Cost × xᵢ ≤ 7</p>
-<p>0 ≤ xᵢ ≤ 1</p>
-</div>
-</div>
-
-<div class="card">
-<h2 class="text-3xl font-bold mb-4">🍕 Dataset</h2>
-<table class="w-full text-sm">
-<thead>
-<tr class="bg-green-700">
-<th>Topping</th>
-<th>Cost</th>
-<th>Satisfaction</th>
-<th>Ratio</th>
-</tr>
-</thead>
-<tbody id="tableBody"></tbody>
-</table>
+  <div class="controls">
+    <button class="btn btn-back" onclick="prevStep()">← Back</button>
+    <button class="btn btn-next" onclick="nextStep()">Next →</button>
+    <span class="step-counter" id="step-counter">1 / 1</span>
+    <button class="btn btn-reset" onclick="resetBB()">Reset</button>
+  </div>
 </div>
 
+<!-- ── RIGHT ── -->
+<div class="right">
+  <div class="tree-header">
+    <div class="tree-title">Decision Tree</div>
+    <div class="legend">
+      <div class="leg leg-root"><div class="leg-dot"></div>Root / Best Bound</div>
+      <div class="leg leg-bound"><div class="leg-dot"></div>Bound</div>
+      <div class="leg leg-frac"><div class="leg-dot"></div>Fractional</div>
+      <div class="leg leg-inc"><div class="leg-dot"></div>Best Incumbent</div>
+      <div class="leg leg-prune"><div class="leg-dot"></div>Fathomed</div>
+    </div>
+  </div>
+  <div id="tree-container">
+    <svg id="tree-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
 </div>
-
-<div class="card mt-8 overflow-auto">
-<div class="flex items-center gap-3 mb-5">
-<span class="step">STEP 1</span>
-<h2 class="text-4xl font-bold">Interactive Step-by-Step Tree</h2>
-</div>
-
-<div class="flex gap-4 flex-wrap mb-6">
-<button onclick="prevStep()" class="bg-red-600 px-5 py-3 rounded-2xl font-bold">⬅ Previous</button>
-<button onclick="nextStep()" class="bg-green-600 px-5 py-3 rounded-2xl font-bold">Next ➡</button>
-<button onclick="autoPlay()" class="bg-blue-600 px-5 py-3 rounded-2xl font-bold">▶ Auto Play</button>
-<button onclick="resetTree()" class="bg-yellow-400 text-black px-5 py-3 rounded-2xl font-bold">↺ Reset</button>
-</div>
-
-<div class="bg-black/30 rounded-2xl p-5 mb-6">
-<h3 class="text-2xl font-bold mb-2">Current Exploration</h3>
-<p id="stepTitle" class="text-green-400 text-xl"></p>
-<p id="stepDesc" class="text-gray-300 mt-3 leading-8"></p>
-</div>
-
-<div class="overflow-auto bg-slate-950 rounded-2xl p-6 border border-slate-700">
-<svg id="treeSvg" width="12000" height="5000" class="min-w-max"></svg>
-</div>
-</div>
-
-<div class="card mt-8">
-<div class="flex items-center gap-3 mb-4">
-<span class="step">STEP 2</span>
-<h2 class="text-4xl font-bold">Branch & Bound Explanation</h2>
-</div>
-
-<div class="space-y-5 leading-8 text-gray-300">
-<p><b>Branch:</b> split variables into 0 or 1 decisions.</p>
-<p><b>Bound:</b> compute best possible upper bound using LP relaxation.</p>
-<p><b>Prune:</b> remove branches that cannot beat the current best solution.</p>
-<p><b>LP Relaxation:</b> allow decimal values like x = 0.75.</p>
-<p>
-This avoids exploring every single node blindly.
-</p>
-</div>
-</div>
-
-<div class="card mt-8">
-<div class="flex items-center gap-3 mb-4">
-<span class="step">STEP 3</span>
-<h2 class="text-4xl font-bold">Visualization</h2>
-</div>
-<canvas id="chart"></canvas>
-</div>
-
 </div>
 
 <script>
-const toppings=[
-{name:'Buffalo Mozzarella',cost:2,sat:5},
-{name:'Gorgonzola',cost:1.5,sat:3.1},
-{name:'Ricotta',cost:1,sat:4.2},
-{name:'Burrata',cost:3,sat:4.7},
-{name:'Parma Ham',cost:3,sat:7.2},
-{name:'Pancetta',cost:2,sat:4.2},
-{name:'Salame',cost:2,sat:8.3},
-{name:'Nduja',cost:0.5,sat:4.8},
-{name:'Zucchini',cost:1,sat:3.5},
-{name:'Fried Eggplant',cost:2,sat:5.2}
-];
+const NODES = [{"id": 0, "parent": -1, "side": null, "fixed": [null, null, null, null, null, null, null, null, null, null], "sol": {"obj": 27.25, "x": [1.0, 1.0, 1.0, 1.0, 1.0, 0.25, 0.0, 0.0, 0.0, 0.0], "frac_i": 5}, "pruned": false, "optimal": false, "depth": 0, "bvar": 5}, {"id": 1, "parent": 0, "side": "0", "fixed": [null, null, null, null, null, 0, null, null, null, null], "sol": {"obj": 27.2, "x": [1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.16666666666666666, 0.0, 0.0, 0.0], "frac_i": 6}, "pruned": false, "optimal": false, "depth": 1, "bvar": 6}, {"id": 2, "parent": 0, "side": "1", "fixed": [null, null, null, null, null, 1, null, null, null, null], "sol": {"obj": 27.1, "x": [1.0, 1.0, 1.0, 1.0, 0.25, 1.0, 0.0, 0.0, 0.0, 0.0], "frac_i": 4}, "pruned": false, "optimal": false, "depth": 1, "bvar": 4}, {"id": 3, "parent": 1, "side": "0", "fixed": [null, null, null, null, null, 0, 0, null, null, null], "sol": {"obj": 27.05, "x": [1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.25, 0.0, 0.0], "frac_i": 7}, "pruned": false, "optimal": false, "depth": 2, "bvar": 7}, {"id": 4, "parent": 1, "side": "1", "fixed": [null, null, null, null, null, 0, 1, null, null, null], "sol": {"obj": 26.25, "x": [1.0, 1.0, 1.0, 0.5, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 3}, "pruned": false, "optimal": false, "depth": 2, "bvar": 3}, {"id": 5, "parent": 2, "side": "0", "fixed": [null, null, null, null, 0, 1, null, null, null, null], "sol": {"obj": 27.0, "x": [1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.16666666666666666, 0.0, 0.0, 0.0], "frac_i": 6}, "pruned": false, "optimal": false, "depth": 2, "bvar": 6}, {"id": 6, "parent": 2, "side": "1", "fixed": [null, null, null, null, 1, 1, null, null, null, null], "sol": {"obj": 25.425, "x": [1.0, 1.0, 0.75, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], "frac_i": 2}, "pruned": false, "optimal": false, "depth": 2, "bvar": 2}, {"id": 7, "parent": 3, "side": "0", "fixed": [null, null, null, null, null, 0, 0, 0, null, null], "sol": {"obj": 27.033333, "x": [1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.3333333333333333, 0.0], "frac_i": 8}, "pruned": false, "optimal": false, "depth": 3, "bvar": 8}, {"id": 8, "parent": 3, "side": "1", "fixed": [null, null, null, null, null, 0, 0, 1, null, null], "sol": {"obj": 26.3, "x": [1.0, 1.0, 1.0, 1.0, 0.25, 0.0, 0.0, 1.0, 0.0, 0.0], "frac_i": 4}, "pruned": false, "optimal": false, "depth": 3, "bvar": 4}, {"id": 9, "parent": 4, "side": "0", "fixed": [null, null, null, 0, null, 0, 1, null, null, null], "sol": {"obj": 25.8, "x": [1.0, 1.0, 1.0, 0.0, 0.25, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 4}, "pruned": false, "optimal": false, "depth": 3, "bvar": 4}, {"id": 10, "parent": 4, "side": "1", "fixed": [null, null, null, 1, null, 0, 1, null, null, null], "sol": {"obj": 25.925, "x": [1.0, 1.0, 0.75, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 2}, "pruned": false, "optimal": false, "depth": 3, "bvar": 2}, {"id": 11, "parent": 5, "side": "0", "fixed": [null, null, null, null, 0, 1, 0, null, null, null], "sol": {"obj": 26.85, "x": [1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.25, 0.0, 0.0], "frac_i": 7}, "pruned": false, "optimal": false, "depth": 3, "bvar": 7}, {"id": 12, "parent": 5, "side": "1", "fixed": [null, null, null, null, 0, 1, 1, null, null, null], "sol": {"obj": 23.275, "x": [1.0, 1.0, 0.25, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 2}, "pruned": false, "optimal": false, "depth": 3, "bvar": 2}, {"id": 13, "parent": 6, "side": "0", "fixed": [null, null, 0, null, 1, 1, null, null, null, null], "sol": {"obj": 23.9, "x": [1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.16666666666666666, 0.0, 0.0, 0.0], "frac_i": 6}, "pruned": false, "optimal": false, "depth": 3, "bvar": 6}, {"id": 14, "parent": 6, "side": "1", "fixed": [null, null, 1, null, 1, 1, null, null, null, null], "sol": {"obj": 25.4, "x": [1.0, 0.5, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], "frac_i": 1}, "pruned": false, "optimal": false, "depth": 3, "bvar": 1}, {"id": 15, "parent": 7, "side": "0", "fixed": [null, null, null, null, null, 0, 0, 0, 0, null], "sol": {"obj": 26.783333, "x": [1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.16666666666666666], "frac_i": 9}, "pruned": false, "optimal": false, "depth": 4, "bvar": 9}, {"id": 16, "parent": 7, "side": "1", "fixed": [null, null, null, null, null, 0, 0, 0, 1, null], "sol": {"obj": 26.5, "x": [1.0, 1.0, 1.0, 1.0, 0.5, 0.0, 0.0, 0.0, 1.0, 0.0], "frac_i": 4}, "pruned": false, "optimal": false, "depth": 4, "bvar": 4}, {"id": 17, "parent": 8, "side": "0", "fixed": [null, null, null, null, 0, 0, 0, 1, null, null], "sol": {"obj": 26.033333, "x": [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.3333333333333333, 0.0], "frac_i": 8}, "pruned": false, "optimal": false, "depth": 4, "bvar": 8}, {"id": 18, "parent": 8, "side": "1", "fixed": [null, null, null, null, 1, 0, 0, 1, null, null], "sol": {"obj": 24.625, "x": [1.0, 1.0, 0.75, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0], "frac_i": 2}, "pruned": false, "optimal": false, "depth": 4, "bvar": 2}, {"id": 19, "parent": 9, "side": "0", "fixed": [null, null, null, 0, 0, 0, 1, null, null, null], "sol": {"obj": 25.55, "x": [1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.25, 0.0, 0.0], "frac_i": 7}, "pruned": false, "optimal": false, "depth": 4, "bvar": 7}, {"id": 20, "parent": 9, "side": "1", "fixed": [null, null, null, 0, 1, 0, 1, null, null, null], "sol": {"obj": 23.475, "x": [1.0, 1.0, 0.25, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 2}, "pruned": false, "optimal": false, "depth": 4, "bvar": 2}, {"id": 21, "parent": 10, "side": "0", "fixed": [null, null, 0, 1, null, 0, 1, null, null, null], "sol": {"obj": 23.6, "x": [1.0, 1.0, 0.0, 1.0, 0.75, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 4}, "pruned": false, "optimal": false, "depth": 4, "bvar": 4}, {"id": 22, "parent": 10, "side": "1", "fixed": [null, null, 1, 1, null, 0, 1, null, null, null], "sol": {"obj": 25.9, "x": [1.0, 0.5, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 1}, "pruned": false, "optimal": false, "depth": 4, "bvar": 1}, {"id": 23, "parent": 11, "side": "0", "fixed": [null, null, null, null, 0, 1, 0, 0, null, null], "sol": {"obj": 26.833333, "x": [1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.3333333333333333, 0.0], "frac_i": 8}, "pruned": false, "optimal": false, "depth": 4, "bvar": 8}, {"id": 24, "parent": 11, "side": "1", "fixed": [null, null, null, null, 0, 1, 0, 1, null, null], "sol": {"obj": 24.425, "x": [1.0, 1.0, 0.75, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0], "frac_i": 2}, "pruned": false, "optimal": false, "depth": 4, "bvar": 2}, {"id": 25, "parent": 12, "side": "0", "fixed": [null, null, 0, null, 0, 1, 1, null, null, null], "sol": {"obj": 22.95, "x": [1.0, 1.0, 0.0, 0.5, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 3}, "pruned": false, "optimal": false, "depth": 4, "bvar": 3}, {"id": 26, "parent": 12, "side": "1", "fixed": [null, null, 1, null, 0, 1, 1, null, null, null], "sol": {"obj": 20.5, "x": [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0], "frac_i": -1}, "pruned": false, "optimal": true, "depth": 4, "bvar": -1}, {"id": 27, "parent": 13, "side": "0", "fixed": [null, null, 0, null, 1, 1, 0, null, null, null], "sol": {"obj": 23.75, "x": [1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.25, 0.0, 0.0], "frac_i": 7}, "pruned": false, "optimal": false, "depth": 4, "bvar": 7}, {"id": 28, "parent": 13, "side": "1", "fixed": [null, null, 0, null, 1, 1, 1, null, null, null], "sol": {"obj": 17.4, "x": [0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], "frac_i": -1}, "pruned": true, "optimal": false, "depth": 4, "bvar": -1}, {"id": 29, "parent": 14, "side": "0", "fixed": [null, 0, 1, null, 1, 1, null, null, null, null], "sol": {"obj": 25.05, "x": [1.0, 0.0, 1.0, 0.5, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], "frac_i": 3}, "pruned": false, "optimal": false, "depth": 4, "bvar": 3}, {"id": 30, "parent": 14, "side": "1", "fixed": [null, 1, 1, null, 1, 1, null, null, null, null], "sol": {"obj": 22.7, "x": [0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], "frac_i": -1}, "pruned": false, "optimal": true, "depth": 4, "bvar": -1}, {"id": 31, "parent": 15, "side": "0", "fixed": [null, null, null, null, null, 0, 0, 0, 0, 0], "sol": {"obj": 26.0, "x": [1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0], "frac_i": -1}, "pruned": false, "optimal": true, "depth": 5, "bvar": -1}, {"id": 32, "parent": 15, "side": "1", "fixed": [null, null, null, null, null, 0, 0, 0, 0, 1], "sol": {"obj": 23.75, "x": [1.0, 1.0, 1.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0], "frac_i": 3}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 33, "parent": 16, "side": "0", "fixed": [null, null, null, null, 0, 0, 0, 0, 1, null], "sol": {"obj": 25.466667, "x": [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.3333333333333333], "frac_i": 9}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 34, "parent": 16, "side": "1", "fixed": [null, null, null, null, 1, 0, 0, 0, 1, null], "sol": {"obj": 25.6, "x": [1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0], "frac_i": -1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 35, "parent": 17, "side": "0", "fixed": [null, null, null, null, 0, 0, 0, 1, 0, null], "sol": {"obj": 25.783333, "x": [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.16666666666666666], "frac_i": 9}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 36, "parent": 17, "side": "1", "fixed": [null, null, null, null, 0, 0, 0, 1, 1, null], "sol": {"obj": 24.6, "x": [1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0], "frac_i": -1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 37, "parent": 18, "side": "0", "fixed": [null, null, 0, null, 1, 0, 0, 1, null, null], "sol": {"obj": 22.933333, "x": [1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.3333333333333333, 0.0], "frac_i": 8}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 38, "parent": 18, "side": "1", "fixed": [null, null, 1, null, 1, 0, 0, 1, null, null], "sol": {"obj": 24.6, "x": [1.0, 0.5, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0], "frac_i": 1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 39, "parent": 19, "side": "0", "fixed": [null, null, null, 0, 0, 0, 1, 0, null, null], "sol": {"obj": 25.533333, "x": [1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.3333333333333333, 0.0], "frac_i": 8}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 40, "parent": 19, "side": "1", "fixed": [null, null, null, 0, 0, 0, 1, 1, null, null], "sol": {"obj": 22.475, "x": [1.0, 1.0, 0.25, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0], "frac_i": 2}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 41, "parent": 20, "side": "0", "fixed": [null, null, 0, 0, 1, 0, 1, null, null, null], "sol": {"obj": 22.45, "x": [1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.25, 0.0, 0.0], "frac_i": 7}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 42, "parent": 20, "side": "1", "fixed": [null, null, 1, 0, 1, 0, 1, null, null, null], "sol": {"obj": 20.7, "x": [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": -1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 43, "parent": 21, "side": "0", "fixed": [null, null, 0, 1, 0, 0, 1, null, null, null], "sol": {"obj": 22.85, "x": [1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.75, 0.0, 0.0], "frac_i": 7}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 44, "parent": 21, "side": "1", "fixed": [null, null, 0, 1, 1, 0, 1, null, null, null], "sol": {"obj": 22.8, "x": [1.0, 0.5, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 45, "parent": 22, "side": "0", "fixed": [null, 0, 1, 1, null, 0, 1, null, null, null], "sol": {"obj": 25.1, "x": [1.0, 0.0, 1.0, 1.0, 0.25, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 4}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 46, "parent": 22, "side": "1", "fixed": [null, 1, 1, 1, null, 0, 1, null, null, null], "sol": {"obj": 23.2, "x": [0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], "frac_i": -1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 47, "parent": 23, "side": "0", "fixed": [null, null, null, null, 0, 1, 0, 0, 0, null], "sol": {"obj": 26.583333, "x": [1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.16666666666666666], "frac_i": 9}, "pruned": false, "optimal": false, "depth": 5, "bvar": 9}, {"id": 48, "parent": 23, "side": "1", "fixed": [null, null, null, null, 0, 1, 0, 0, 1, null], "sol": {"obj": 25.4, "x": [1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0], "frac_i": -1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 49, "parent": 24, "side": "0", "fixed": [null, null, 0, null, 0, 1, 0, 1, null, null], "sol": {"obj": 22.733333, "x": [1.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.3333333333333333, 0.0], "frac_i": 8}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 50, "parent": 24, "side": "1", "fixed": [null, null, 1, null, 0, 1, 0, 1, null, null], "sol": {"obj": 24.4, "x": [1.0, 0.5, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0], "frac_i": 1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 51, "parent": 25, "side": "0", "fixed": [null, null, 0, 0, 0, 1, 1, null, null, null], "sol": {"obj": 22.25, "x": [1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.25, 0.0, 0.0], "frac_i": 7}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 52, "parent": 25, "side": "1", "fixed": [null, null, 0, 1, 0, 1, 1, null, null, null], "sol": {"obj": 22.6, "x": [1.0, 0.5, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0], "frac_i": 1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 53, "parent": 27, "side": "0", "fixed": [null, null, 0, null, 1, 1, 0, 0, null, null], "sol": {"obj": 23.733333, "x": [1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.3333333333333333, 0.0], "frac_i": 8}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 54, "parent": 27, "side": "1", "fixed": [null, null, 0, null, 1, 1, 0, 1, null, null], "sol": {"obj": 21.3, "x": [1.0, 0.5, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0], "frac_i": 1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 55, "parent": 29, "side": "0", "fixed": [null, 0, 1, 0, 1, 1, null, null, null, null], "sol": {"obj": 24.5, "x": [1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.16666666666666666, 0.0, 0.0, 0.0], "frac_i": 6}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 56, "parent": 29, "side": "1", "fixed": [null, 0, 1, 1, 1, 1, null, null, null, null], "sol": {"obj": 22.0, "x": [0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0], "frac_i": -1}, "pruned": true, "optimal": false, "depth": 5, "bvar": -1}, {"id": 57, "parent": 47, "side": "0", "fixed": [null, null, null, null, 0, 1, 0, 0, 0, 0], "sol": {"obj": 25.8, "x": [1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0], "frac_i": -1}, "pruned": true, "optimal": false, "depth": 6, "bvar": -1}, {"id": 58, "parent": 47, "side": "1", "fixed": [null, null, null, null, 0, 1, 0, 0, 0, 1], "sol": {"obj": 20.775, "x": [1.0, 1.0, 0.25, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0], "frac_i": 2}, "pruned": true, "optimal": false, "depth": 6, "bvar": -1}];
+const STEPS = [{"step": 1, "type": "solve", "node_id": 0, "title": "Step 1: Solve LP Relaxation at Root Node", "explanation": "We start at the <b>root node</b> (Node 0) with all 10 variables free: x<sub>i</sub> \u2208 [0,1]. Solving the LP relaxation (greedy fractional knapsack by sat/cost ratio) gives the initial <b>upper bound Z = 27.25</b>. Since x<sub>5</sub> (Buffalo mozzarella) = 0.25 is fractional, we must branch to enforce integrality.", "incumbent": null}, {"step": 2, "type": "branch", "node_id": 0, "title": "Step 2: Branch on x<sub>5</sub> \u2014 Buffalo mozzarella", "explanation": "Node 0 has Z = 27.25 but x<sub>5</sub> (<i>Buffalo mozzarella</i>) = <b>0.25</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>5</sub> = 0 (exclude Buffalo mozzarella)<br>\u2022 <b>Right branch:</b> x<sub>5</sub> = 1 (include Buffalo mozzarella)", "incumbent": -1}, {"step": 3, "type": "solve", "node_id": 1, "title": "Step 3: Solve Node 1 (x<sub>5</sub>=0)", "explanation": "With x<sub>5</sub> (Buffalo mozzarella) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 27.2</b>. x<sub>6</sub> (Parma ham) = 0.167 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 4, "type": "solve", "node_id": 2, "title": "Step 4: Solve Node 2 (x<sub>5</sub>=1)", "explanation": "With x<sub>5</sub> (Buffalo mozzarella) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 27.1</b>. x<sub>4</sub> (Fried eggplant) = 0.25 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 5, "type": "branch", "node_id": 1, "title": "Step 5: Branch on x<sub>6</sub> \u2014 Parma ham", "explanation": "Node 1 has Z = 27.2 but x<sub>6</sub> (<i>Parma ham</i>) = <b>0.167</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>6</sub> = 0 (exclude Parma ham)<br>\u2022 <b>Right branch:</b> x<sub>6</sub> = 1 (include Parma ham)", "incumbent": -1}, {"step": 6, "type": "solve", "node_id": 3, "title": "Step 6: Solve Node 3 (x<sub>6</sub>=0)", "explanation": "With x<sub>6</sub> (Parma ham) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 27.05</b>. x<sub>7</sub> (Pancetta) = 0.25 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 7, "type": "solve", "node_id": 4, "title": "Step 7: Solve Node 4 (x<sub>6</sub>=1)", "explanation": "With x<sub>6</sub> (Parma ham) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 26.25</b>. x<sub>3</sub> (Zucchini) = 0.5 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 8, "type": "branch", "node_id": 2, "title": "Step 8: Branch on x<sub>4</sub> \u2014 Fried eggplant", "explanation": "Node 2 has Z = 27.1 but x<sub>4</sub> (<i>Fried eggplant</i>) = <b>0.25</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>4</sub> = 0 (exclude Fried eggplant)<br>\u2022 <b>Right branch:</b> x<sub>4</sub> = 1 (include Fried eggplant)", "incumbent": -1}, {"step": 9, "type": "solve", "node_id": 5, "title": "Step 9: Solve Node 5 (x<sub>4</sub>=0)", "explanation": "With x<sub>4</sub> (Fried eggplant) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 27.0</b>. x<sub>6</sub> (Parma ham) = 0.167 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 10, "type": "solve", "node_id": 6, "title": "Step 10: Solve Node 6 (x<sub>4</sub>=1)", "explanation": "With x<sub>4</sub> (Fried eggplant) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 25.43</b>. x<sub>2</sub> (Salame) = 0.75 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 11, "type": "branch", "node_id": 3, "title": "Step 11: Branch on x<sub>7</sub> \u2014 Pancetta", "explanation": "Node 3 has Z = 27.05 but x<sub>7</sub> (<i>Pancetta</i>) = <b>0.25</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>7</sub> = 0 (exclude Pancetta)<br>\u2022 <b>Right branch:</b> x<sub>7</sub> = 1 (include Pancetta)", "incumbent": -1}, {"step": 12, "type": "solve", "node_id": 7, "title": "Step 12: Solve Node 7 (x<sub>7</sub>=0)", "explanation": "With x<sub>7</sub> (Pancetta) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 27.03</b>. x<sub>8</sub> (Gorgonzola) = 0.333 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 13, "type": "solve", "node_id": 8, "title": "Step 13: Solve Node 8 (x<sub>7</sub>=1)", "explanation": "With x<sub>7</sub> (Pancetta) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 26.3</b>. x<sub>4</sub> (Fried eggplant) = 0.25 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 14, "type": "branch", "node_id": 4, "title": "Step 14: Branch on x<sub>3</sub> \u2014 Zucchini", "explanation": "Node 4 has Z = 26.25 but x<sub>3</sub> (<i>Zucchini</i>) = <b>0.5</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>3</sub> = 0 (exclude Zucchini)<br>\u2022 <b>Right branch:</b> x<sub>3</sub> = 1 (include Zucchini)", "incumbent": -1}, {"step": 15, "type": "solve", "node_id": 9, "title": "Step 15: Solve Node 9 (x<sub>3</sub>=0)", "explanation": "With x<sub>3</sub> (Zucchini) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 25.8</b>. x<sub>4</sub> (Fried eggplant) = 0.25 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 16, "type": "solve", "node_id": 10, "title": "Step 16: Solve Node 10 (x<sub>3</sub>=1)", "explanation": "With x<sub>3</sub> (Zucchini) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 25.93</b>. x<sub>2</sub> (Salame) = 0.75 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 17, "type": "branch", "node_id": 5, "title": "Step 17: Branch on x<sub>6</sub> \u2014 Parma ham", "explanation": "Node 5 has Z = 27.0 but x<sub>6</sub> (<i>Parma ham</i>) = <b>0.167</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>6</sub> = 0 (exclude Parma ham)<br>\u2022 <b>Right branch:</b> x<sub>6</sub> = 1 (include Parma ham)", "incumbent": -1}, {"step": 18, "type": "solve", "node_id": 11, "title": "Step 18: Solve Node 11 (x<sub>6</sub>=0)", "explanation": "With x<sub>6</sub> (Parma ham) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 26.85</b>. x<sub>7</sub> (Pancetta) = 0.25 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 19, "type": "solve", "node_id": 12, "title": "Step 19: Solve Node 12 (x<sub>6</sub>=1)", "explanation": "With x<sub>6</sub> (Parma ham) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 23.27</b>. x<sub>2</sub> (Salame) = 0.25 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 20, "type": "branch", "node_id": 6, "title": "Step 20: Branch on x<sub>2</sub> \u2014 Salame", "explanation": "Node 6 has Z = 25.43 but x<sub>2</sub> (<i>Salame</i>) = <b>0.75</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>2</sub> = 0 (exclude Salame)<br>\u2022 <b>Right branch:</b> x<sub>2</sub> = 1 (include Salame)", "incumbent": -1}, {"step": 21, "type": "solve", "node_id": 13, "title": "Step 21: Solve Node 13 (x<sub>2</sub>=0)", "explanation": "With x<sub>2</sub> (Salame) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 23.9</b>. x<sub>6</sub> (Parma ham) = 0.167 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 22, "type": "solve", "node_id": 14, "title": "Step 22: Solve Node 14 (x<sub>2</sub>=1)", "explanation": "With x<sub>2</sub> (Salame) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 25.4</b>. x<sub>1</sub> (Ricotta) = 0.5 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 23, "type": "branch", "node_id": 7, "title": "Step 23: Branch on x<sub>8</sub> \u2014 Gorgonzola", "explanation": "Node 7 has Z = 27.03 but x<sub>8</sub> (<i>Gorgonzola</i>) = <b>0.333</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>8</sub> = 0 (exclude Gorgonzola)<br>\u2022 <b>Right branch:</b> x<sub>8</sub> = 1 (include Gorgonzola)", "incumbent": -1}, {"step": 24, "type": "solve", "node_id": 15, "title": "Step 24: Solve Node 15 (x<sub>8</sub>=0)", "explanation": "With x<sub>8</sub> (Gorgonzola) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 26.78</b>. x<sub>9</sub> (Burrata) = 0.167 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 25, "type": "solve", "node_id": 16, "title": "Step 25: Solve Node 16 (x<sub>8</sub>=1)", "explanation": "With x<sub>8</sub> (Gorgonzola) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 26.5</b>. x<sub>4</sub> (Fried eggplant) = 0.5 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 26, "type": "branch", "node_id": 8, "title": "Step 26: Branch on x<sub>4</sub> \u2014 Fried eggplant", "explanation": "Node 8 has Z = 26.3 but x<sub>4</sub> (<i>Fried eggplant</i>) = <b>0.25</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>4</sub> = 0 (exclude Fried eggplant)<br>\u2022 <b>Right branch:</b> x<sub>4</sub> = 1 (include Fried eggplant)", "incumbent": -1}, {"step": 27, "type": "solve", "node_id": 17, "title": "Step 27: Solve Node 17 (x<sub>4</sub>=0)", "explanation": "With x<sub>4</sub> (Fried eggplant) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 26.03</b>. x<sub>8</sub> (Gorgonzola) = 0.333 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 28, "type": "solve", "node_id": 18, "title": "Step 28: Solve Node 18 (x<sub>4</sub>=1)", "explanation": "With x<sub>4</sub> (Fried eggplant) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 24.62</b>. x<sub>2</sub> (Salame) = 0.75 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 29, "type": "branch", "node_id": 9, "title": "Step 29: Branch on x<sub>4</sub> \u2014 Fried eggplant", "explanation": "Node 9 has Z = 25.8 but x<sub>4</sub> (<i>Fried eggplant</i>) = <b>0.25</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>4</sub> = 0 (exclude Fried eggplant)<br>\u2022 <b>Right branch:</b> x<sub>4</sub> = 1 (include Fried eggplant)", "incumbent": -1}, {"step": 30, "type": "solve", "node_id": 19, "title": "Step 30: Solve Node 19 (x<sub>4</sub>=0)", "explanation": "With x<sub>4</sub> (Fried eggplant) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 25.55</b>. x<sub>7</sub> (Pancetta) = 0.25 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 31, "type": "solve", "node_id": 20, "title": "Step 31: Solve Node 20 (x<sub>4</sub>=1)", "explanation": "With x<sub>4</sub> (Fried eggplant) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 23.48</b>. x<sub>2</sub> (Salame) = 0.25 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 32, "type": "branch", "node_id": 10, "title": "Step 32: Branch on x<sub>2</sub> \u2014 Salame", "explanation": "Node 10 has Z = 25.93 but x<sub>2</sub> (<i>Salame</i>) = <b>0.75</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>2</sub> = 0 (exclude Salame)<br>\u2022 <b>Right branch:</b> x<sub>2</sub> = 1 (include Salame)", "incumbent": -1}, {"step": 33, "type": "solve", "node_id": 21, "title": "Step 33: Solve Node 21 (x<sub>2</sub>=0)", "explanation": "With x<sub>2</sub> (Salame) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 23.6</b>. x<sub>4</sub> (Fried eggplant) = 0.75 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 34, "type": "solve", "node_id": 22, "title": "Step 34: Solve Node 22 (x<sub>2</sub>=1)", "explanation": "With x<sub>2</sub> (Salame) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 25.9</b>. x<sub>1</sub> (Ricotta) = 0.5 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 35, "type": "branch", "node_id": 11, "title": "Step 35: Branch on x<sub>7</sub> \u2014 Pancetta", "explanation": "Node 11 has Z = 26.85 but x<sub>7</sub> (<i>Pancetta</i>) = <b>0.25</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>7</sub> = 0 (exclude Pancetta)<br>\u2022 <b>Right branch:</b> x<sub>7</sub> = 1 (include Pancetta)", "incumbent": -1}, {"step": 36, "type": "solve", "node_id": 23, "title": "Step 36: Solve Node 23 (x<sub>7</sub>=0)", "explanation": "With x<sub>7</sub> (Pancetta) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 26.83</b>. x<sub>8</sub> (Gorgonzola) = 0.333 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 37, "type": "solve", "node_id": 24, "title": "Step 37: Solve Node 24 (x<sub>7</sub>=1)", "explanation": "With x<sub>7</sub> (Pancetta) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 24.43</b>. x<sub>2</sub> (Salame) = 0.75 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 38, "type": "branch", "node_id": 12, "title": "Step 38: Branch on x<sub>2</sub> \u2014 Salame", "explanation": "Node 12 has Z = 23.27 but x<sub>2</sub> (<i>Salame</i>) = <b>0.25</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>2</sub> = 0 (exclude Salame)<br>\u2022 <b>Right branch:</b> x<sub>2</sub> = 1 (include Salame)", "incumbent": -1}, {"step": 39, "type": "solve", "node_id": 25, "title": "Step 39: Solve Node 25 (x<sub>2</sub>=0)", "explanation": "With x<sub>2</sub> (Salame) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 22.95</b>. x<sub>3</sub> (Zucchini) = 0.5 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 40, "type": "solve", "node_id": 26, "title": "Step 40: Solve Node 26 (x<sub>2</sub>=1)", "explanation": "With x<sub>2</sub> (Salame) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 20.5</b> \u2014 all integer! Will update incumbent.", "incumbent": -1}, {"step": 41, "type": "branch", "node_id": 13, "title": "Step 41: Branch on x<sub>6</sub> \u2014 Parma ham", "explanation": "Node 13 has Z = 23.9 but x<sub>6</sub> (<i>Parma ham</i>) = <b>0.167</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>6</sub> = 0 (exclude Parma ham)<br>\u2022 <b>Right branch:</b> x<sub>6</sub> = 1 (include Parma ham)", "incumbent": -1}, {"step": 42, "type": "solve", "node_id": 27, "title": "Step 42: Solve Node 27 (x<sub>6</sub>=0)", "explanation": "With x<sub>6</sub> (Parma ham) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 23.75</b>. x<sub>7</sub> (Pancetta) = 0.25 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 43, "type": "solve", "node_id": 28, "title": "Step 43: Solve Node 28 (x<sub>6</sub>=1)", "explanation": "With x<sub>6</sub> (Parma ham) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 17.4</b> \u2014 all integer! Will update incumbent.", "incumbent": -1}, {"step": 44, "type": "branch", "node_id": 14, "title": "Step 44: Branch on x<sub>1</sub> \u2014 Ricotta", "explanation": "Node 14 has Z = 25.4 but x<sub>1</sub> (<i>Ricotta</i>) = <b>0.5</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>1</sub> = 0 (exclude Ricotta)<br>\u2022 <b>Right branch:</b> x<sub>1</sub> = 1 (include Ricotta)", "incumbent": -1}, {"step": 45, "type": "solve", "node_id": 29, "title": "Step 45: Solve Node 29 (x<sub>1</sub>=0)", "explanation": "With x<sub>1</sub> (Ricotta) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 25.05</b>. x<sub>3</sub> (Zucchini) = 0.5 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 46, "type": "solve", "node_id": 30, "title": "Step 46: Solve Node 30 (x<sub>1</sub>=1)", "explanation": "With x<sub>1</sub> (Ricotta) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 22.7</b> \u2014 all integer! Will update incumbent.", "incumbent": -1}, {"step": 47, "type": "branch", "node_id": 15, "title": "Step 47: Branch on x<sub>9</sub> \u2014 Burrata", "explanation": "Node 15 has Z = 26.78 but x<sub>9</sub> (<i>Burrata</i>) = <b>0.167</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>9</sub> = 0 (exclude Burrata)<br>\u2022 <b>Right branch:</b> x<sub>9</sub> = 1 (include Burrata)", "incumbent": -1}, {"step": 48, "type": "solve", "node_id": 31, "title": "Step 48: Solve Node 31 (x<sub>9</sub>=0)", "explanation": "With x<sub>9</sub> (Burrata) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 26.0</b> \u2014 all integer! Will update incumbent.", "incumbent": -1}, {"step": 49, "type": "solve", "node_id": 32, "title": "Step 49: Solve Node 32 (x<sub>9</sub>=1)", "explanation": "With x<sub>9</sub> (Burrata) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 23.75</b>. x<sub>3</sub> (Zucchini) = 0.5 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 50, "type": "branch", "node_id": 16, "title": "Step 50: Branch on x<sub>4</sub> \u2014 Fried eggplant", "explanation": "Node 16 has Z = 26.5 but x<sub>4</sub> (<i>Fried eggplant</i>) = <b>0.5</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>4</sub> = 0 (exclude Fried eggplant)<br>\u2022 <b>Right branch:</b> x<sub>4</sub> = 1 (include Fried eggplant)", "incumbent": -1}, {"step": 51, "type": "solve", "node_id": 33, "title": "Step 51: Solve Node 33 (x<sub>4</sub>=0)", "explanation": "With x<sub>4</sub> (Fried eggplant) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 25.47</b>. x<sub>9</sub> (Burrata) = 0.333 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 52, "type": "solve", "node_id": 34, "title": "Step 52: Solve Node 34 (x<sub>4</sub>=1)", "explanation": "With x<sub>4</sub> (Fried eggplant) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 25.6</b> \u2014 all integer! Will update incumbent.", "incumbent": -1}, {"step": 53, "type": "branch", "node_id": 17, "title": "Step 53: Branch on x<sub>8</sub> \u2014 Gorgonzola", "explanation": "Node 17 has Z = 26.03 but x<sub>8</sub> (<i>Gorgonzola</i>) = <b>0.333</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>8</sub> = 0 (exclude Gorgonzola)<br>\u2022 <b>Right branch:</b> x<sub>8</sub> = 1 (include Gorgonzola)", "incumbent": -1}, {"step": 54, "type": "solve", "node_id": 35, "title": "Step 54: Solve Node 35 (x<sub>8</sub>=0)", "explanation": "With x<sub>8</sub> (Gorgonzola) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 25.78</b>. x<sub>9</sub> (Burrata) = 0.167 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 55, "type": "solve", "node_id": 36, "title": "Step 55: Solve Node 36 (x<sub>8</sub>=1)", "explanation": "With x<sub>8</sub> (Gorgonzola) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 24.6</b> \u2014 all integer! Will update incumbent.", "incumbent": -1}, {"step": 56, "type": "branch", "node_id": 18, "title": "Step 56: Branch on x<sub>2</sub> \u2014 Salame", "explanation": "Node 18 has Z = 24.62 but x<sub>2</sub> (<i>Salame</i>) = <b>0.75</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>2</sub> = 0 (exclude Salame)<br>\u2022 <b>Right branch:</b> x<sub>2</sub> = 1 (include Salame)", "incumbent": -1}, {"step": 57, "type": "solve", "node_id": 37, "title": "Step 57: Solve Node 37 (x<sub>2</sub>=0)", "explanation": "With x<sub>2</sub> (Salame) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 22.93</b>. x<sub>8</sub> (Gorgonzola) = 0.333 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 58, "type": "solve", "node_id": 38, "title": "Step 58: Solve Node 38 (x<sub>2</sub>=1)", "explanation": "With x<sub>2</sub> (Salame) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 24.6</b>. x<sub>1</sub> (Ricotta) = 0.5 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 59, "type": "branch", "node_id": 19, "title": "Step 59: Branch on x<sub>7</sub> \u2014 Pancetta", "explanation": "Node 19 has Z = 25.55 but x<sub>7</sub> (<i>Pancetta</i>) = <b>0.25</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>7</sub> = 0 (exclude Pancetta)<br>\u2022 <b>Right branch:</b> x<sub>7</sub> = 1 (include Pancetta)", "incumbent": -1}, {"step": 60, "type": "solve", "node_id": 39, "title": "Step 60: Solve Node 39 (x<sub>7</sub>=0)", "explanation": "With x<sub>7</sub> (Pancetta) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 25.53</b>. x<sub>8</sub> (Gorgonzola) = 0.333 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 61, "type": "solve", "node_id": 40, "title": "Step 61: Solve Node 40 (x<sub>7</sub>=1)", "explanation": "With x<sub>7</sub> (Pancetta) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 22.48</b>. x<sub>2</sub> (Salame) = 0.25 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 62, "type": "branch", "node_id": 20, "title": "Step 62: Branch on x<sub>2</sub> \u2014 Salame", "explanation": "Node 20 has Z = 23.48 but x<sub>2</sub> (<i>Salame</i>) = <b>0.25</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>2</sub> = 0 (exclude Salame)<br>\u2022 <b>Right branch:</b> x<sub>2</sub> = 1 (include Salame)", "incumbent": -1}, {"step": 63, "type": "solve", "node_id": 41, "title": "Step 63: Solve Node 41 (x<sub>2</sub>=0)", "explanation": "With x<sub>2</sub> (Salame) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 22.45</b>. x<sub>7</sub> (Pancetta) = 0.25 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 64, "type": "solve", "node_id": 42, "title": "Step 64: Solve Node 42 (x<sub>2</sub>=1)", "explanation": "With x<sub>2</sub> (Salame) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 20.7</b> \u2014 all integer! Will update incumbent.", "incumbent": -1}, {"step": 65, "type": "branch", "node_id": 21, "title": "Step 65: Branch on x<sub>4</sub> \u2014 Fried eggplant", "explanation": "Node 21 has Z = 23.6 but x<sub>4</sub> (<i>Fried eggplant</i>) = <b>0.75</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>4</sub> = 0 (exclude Fried eggplant)<br>\u2022 <b>Right branch:</b> x<sub>4</sub> = 1 (include Fried eggplant)", "incumbent": -1}, {"step": 66, "type": "solve", "node_id": 43, "title": "Step 66: Solve Node 43 (x<sub>4</sub>=0)", "explanation": "With x<sub>4</sub> (Fried eggplant) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 22.85</b>. x<sub>7</sub> (Pancetta) = 0.75 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 67, "type": "solve", "node_id": 44, "title": "Step 67: Solve Node 44 (x<sub>4</sub>=1)", "explanation": "With x<sub>4</sub> (Fried eggplant) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 22.8</b>. x<sub>1</sub> (Ricotta) = 0.5 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 68, "type": "branch", "node_id": 22, "title": "Step 68: Branch on x<sub>1</sub> \u2014 Ricotta", "explanation": "Node 22 has Z = 25.9 but x<sub>1</sub> (<i>Ricotta</i>) = <b>0.5</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>1</sub> = 0 (exclude Ricotta)<br>\u2022 <b>Right branch:</b> x<sub>1</sub> = 1 (include Ricotta)", "incumbent": -1}, {"step": 69, "type": "solve", "node_id": 45, "title": "Step 69: Solve Node 45 (x<sub>1</sub>=0)", "explanation": "With x<sub>1</sub> (Ricotta) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 25.1</b>. x<sub>4</sub> (Fried eggplant) = 0.25 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 70, "type": "solve", "node_id": 46, "title": "Step 70: Solve Node 46 (x<sub>1</sub>=1)", "explanation": "With x<sub>1</sub> (Ricotta) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 23.2</b> \u2014 all integer! Will update incumbent.", "incumbent": -1}, {"step": 71, "type": "branch", "node_id": 23, "title": "Step 71: Branch on x<sub>8</sub> \u2014 Gorgonzola", "explanation": "Node 23 has Z = 26.83 but x<sub>8</sub> (<i>Gorgonzola</i>) = <b>0.333</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>8</sub> = 0 (exclude Gorgonzola)<br>\u2022 <b>Right branch:</b> x<sub>8</sub> = 1 (include Gorgonzola)", "incumbent": -1}, {"step": 72, "type": "solve", "node_id": 47, "title": "Step 72: Solve Node 47 (x<sub>8</sub>=0)", "explanation": "With x<sub>8</sub> (Gorgonzola) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 26.58</b>. x<sub>9</sub> (Burrata) = 0.167 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 73, "type": "solve", "node_id": 48, "title": "Step 73: Solve Node 48 (x<sub>8</sub>=1)", "explanation": "With x<sub>8</sub> (Gorgonzola) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 25.4</b> \u2014 all integer! Will update incumbent.", "incumbent": -1}, {"step": 74, "type": "branch", "node_id": 24, "title": "Step 74: Branch on x<sub>2</sub> \u2014 Salame", "explanation": "Node 24 has Z = 24.43 but x<sub>2</sub> (<i>Salame</i>) = <b>0.75</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>2</sub> = 0 (exclude Salame)<br>\u2022 <b>Right branch:</b> x<sub>2</sub> = 1 (include Salame)", "incumbent": -1}, {"step": 75, "type": "solve", "node_id": 49, "title": "Step 75: Solve Node 49 (x<sub>2</sub>=0)", "explanation": "With x<sub>2</sub> (Salame) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 22.73</b>. x<sub>8</sub> (Gorgonzola) = 0.333 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 76, "type": "solve", "node_id": 50, "title": "Step 76: Solve Node 50 (x<sub>2</sub>=1)", "explanation": "With x<sub>2</sub> (Salame) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 24.4</b>. x<sub>1</sub> (Ricotta) = 0.5 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 77, "type": "branch", "node_id": 25, "title": "Step 77: Branch on x<sub>3</sub> \u2014 Zucchini", "explanation": "Node 25 has Z = 22.95 but x<sub>3</sub> (<i>Zucchini</i>) = <b>0.5</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>3</sub> = 0 (exclude Zucchini)<br>\u2022 <b>Right branch:</b> x<sub>3</sub> = 1 (include Zucchini)", "incumbent": -1}, {"step": 78, "type": "solve", "node_id": 51, "title": "Step 78: Solve Node 51 (x<sub>3</sub>=0)", "explanation": "With x<sub>3</sub> (Zucchini) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 22.25</b>. x<sub>7</sub> (Pancetta) = 0.25 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 79, "type": "solve", "node_id": 52, "title": "Step 79: Solve Node 52 (x<sub>3</sub>=1)", "explanation": "With x<sub>3</sub> (Zucchini) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 22.6</b>. x<sub>1</sub> (Ricotta) = 0.5 is fractional \u2014 may branch further.", "incumbent": -1}, {"step": 80, "type": "incumbent", "node_id": 26, "title": "Step 80: New Incumbent at Node 26!", "explanation": "Node 26 yields a <b>fully integer solution</b> with <b>Z = 20.5</b>! This becomes the new <b>best incumbent</b> z* = 20.5. Toppings selected: <b>Salame, Buffalo mozzarella, Parma ham</b> (cost: 7.0 ww). We continue to verify no better solution exists.", "incumbent": 26}, {"step": 81, "type": "branch", "node_id": 27, "title": "Step 81: Branch on x<sub>7</sub> \u2014 Pancetta", "explanation": "Node 27 has Z = 23.75 but x<sub>7</sub> (<i>Pancetta</i>) = <b>0.25</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>7</sub> = 0 (exclude Pancetta)<br>\u2022 <b>Right branch:</b> x<sub>7</sub> = 1 (include Pancetta)", "incumbent": 26}, {"step": 82, "type": "solve", "node_id": 53, "title": "Step 82: Solve Node 53 (x<sub>7</sub>=0)", "explanation": "With x<sub>7</sub> (Pancetta) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 23.73</b>. x<sub>8</sub> (Gorgonzola) = 0.333 is fractional \u2014 may branch further.", "incumbent": 26}, {"step": 83, "type": "solve", "node_id": 54, "title": "Step 83: Solve Node 54 (x<sub>7</sub>=1)", "explanation": "With x<sub>7</sub> (Pancetta) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 21.3</b>. x<sub>1</sub> (Ricotta) = 0.5 is fractional \u2014 may branch further.", "incumbent": 26}, {"step": 84, "type": "prune", "node_id": 28, "title": "Step 84: Fathom Node 28 by Bound", "explanation": "Node 28 has upper bound <b>Z = 17.4</b>, which is \u2264 current best integer solution <b>z* = 20.5</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 26}, {"step": 85, "type": "branch", "node_id": 29, "title": "Step 85: Branch on x<sub>3</sub> \u2014 Zucchini", "explanation": "Node 29 has Z = 25.05 but x<sub>3</sub> (<i>Zucchini</i>) = <b>0.5</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>3</sub> = 0 (exclude Zucchini)<br>\u2022 <b>Right branch:</b> x<sub>3</sub> = 1 (include Zucchini)", "incumbent": 26}, {"step": 86, "type": "solve", "node_id": 55, "title": "Step 86: Solve Node 55 (x<sub>3</sub>=0)", "explanation": "With x<sub>3</sub> (Zucchini) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 24.5</b>. x<sub>6</sub> (Parma ham) = 0.167 is fractional \u2014 may branch further.", "incumbent": 26}, {"step": 87, "type": "solve", "node_id": 56, "title": "Step 87: Solve Node 56 (x<sub>3</sub>=1)", "explanation": "With x<sub>3</sub> (Zucchini) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 22.0</b> \u2014 all integer! Will update incumbent.", "incumbent": 26}, {"step": 88, "type": "incumbent", "node_id": 30, "title": "Step 88: New Incumbent at Node 30!", "explanation": "Node 30 yields a <b>fully integer solution</b> with <b>Z = 22.7</b>! This becomes the new <b>best incumbent</b> z* = 22.7. Toppings selected: <b>Ricotta, Salame, Fried eggplant, Buffalo mozzarella</b> (cost: 7.0 ww). We continue to verify no better solution exists.", "incumbent": 30}, {"step": 89, "type": "incumbent", "node_id": 31, "title": "Step 89: New Incumbent at Node 31!", "explanation": "Node 31 yields a <b>fully integer solution</b> with <b>Z = 26.0</b>! This becomes the new <b>best incumbent</b> z* = 26.0. Toppings selected: <b>'Nduja, Ricotta, Salame, Zucchini, Fried eggplant</b> (cost: 6.5 ww). We continue to verify no better solution exists.", "incumbent": 31}, {"step": 90, "type": "prune", "node_id": 32, "title": "Step 90: Fathom Node 32 by Bound", "explanation": "Node 32 has upper bound <b>Z = 23.75</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 91, "type": "prune", "node_id": 33, "title": "Step 91: Fathom Node 33 by Bound", "explanation": "Node 33 has upper bound <b>Z = 25.47</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 92, "type": "prune", "node_id": 34, "title": "Step 92: Fathom Node 34 by Bound", "explanation": "Node 34 has upper bound <b>Z = 25.6</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 93, "type": "prune", "node_id": 35, "title": "Step 93: Fathom Node 35 by Bound", "explanation": "Node 35 has upper bound <b>Z = 25.78</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 94, "type": "prune", "node_id": 36, "title": "Step 94: Fathom Node 36 by Bound", "explanation": "Node 36 has upper bound <b>Z = 24.6</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 95, "type": "prune", "node_id": 37, "title": "Step 95: Fathom Node 37 by Bound", "explanation": "Node 37 has upper bound <b>Z = 22.93</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 96, "type": "prune", "node_id": 38, "title": "Step 96: Fathom Node 38 by Bound", "explanation": "Node 38 has upper bound <b>Z = 24.6</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 97, "type": "prune", "node_id": 39, "title": "Step 97: Fathom Node 39 by Bound", "explanation": "Node 39 has upper bound <b>Z = 25.53</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 98, "type": "prune", "node_id": 40, "title": "Step 98: Fathom Node 40 by Bound", "explanation": "Node 40 has upper bound <b>Z = 22.48</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 99, "type": "prune", "node_id": 41, "title": "Step 99: Fathom Node 41 by Bound", "explanation": "Node 41 has upper bound <b>Z = 22.45</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 100, "type": "prune", "node_id": 42, "title": "Step 100: Fathom Node 42 by Bound", "explanation": "Node 42 has upper bound <b>Z = 20.7</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 101, "type": "prune", "node_id": 43, "title": "Step 101: Fathom Node 43 by Bound", "explanation": "Node 43 has upper bound <b>Z = 22.85</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 102, "type": "prune", "node_id": 44, "title": "Step 102: Fathom Node 44 by Bound", "explanation": "Node 44 has upper bound <b>Z = 22.8</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 103, "type": "prune", "node_id": 45, "title": "Step 103: Fathom Node 45 by Bound", "explanation": "Node 45 has upper bound <b>Z = 25.1</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 104, "type": "prune", "node_id": 46, "title": "Step 104: Fathom Node 46 by Bound", "explanation": "Node 46 has upper bound <b>Z = 23.2</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 105, "type": "branch", "node_id": 47, "title": "Step 105: Branch on x<sub>9</sub> \u2014 Burrata", "explanation": "Node 47 has Z = 26.58 but x<sub>9</sub> (<i>Burrata</i>) = <b>0.167</b> is fractional. We create two child nodes:<br>\u2022 <b>Left branch:</b> x<sub>9</sub> = 0 (exclude Burrata)<br>\u2022 <b>Right branch:</b> x<sub>9</sub> = 1 (include Burrata)", "incumbent": 31}, {"step": 106, "type": "solve", "node_id": 57, "title": "Step 106: Solve Node 57 (x<sub>9</sub>=0)", "explanation": "With x<sub>9</sub> (Burrata) <b>excluded</b> (fixed to 0), solve LP relaxation. Result: <b>Z = 25.8</b> \u2014 all integer! Will update incumbent.", "incumbent": 31}, {"step": 107, "type": "solve", "node_id": 58, "title": "Step 107: Solve Node 58 (x<sub>9</sub>=1)", "explanation": "With x<sub>9</sub> (Burrata) <b>included</b> (fixed to 1), solve LP relaxation. Result: <b>Z = 20.77</b>. x<sub>2</sub> (Salame) = 0.25 is fractional \u2014 may branch further.", "incumbent": 31}, {"step": 108, "type": "prune", "node_id": 48, "title": "Step 108: Fathom Node 48 by Bound", "explanation": "Node 48 has upper bound <b>Z = 25.4</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 109, "type": "prune", "node_id": 49, "title": "Step 109: Fathom Node 49 by Bound", "explanation": "Node 49 has upper bound <b>Z = 22.73</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 110, "type": "prune", "node_id": 50, "title": "Step 110: Fathom Node 50 by Bound", "explanation": "Node 50 has upper bound <b>Z = 24.4</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 111, "type": "prune", "node_id": 51, "title": "Step 111: Fathom Node 51 by Bound", "explanation": "Node 51 has upper bound <b>Z = 22.25</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 112, "type": "prune", "node_id": 52, "title": "Step 112: Fathom Node 52 by Bound", "explanation": "Node 52 has upper bound <b>Z = 22.6</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 113, "type": "prune", "node_id": 53, "title": "Step 113: Fathom Node 53 by Bound", "explanation": "Node 53 has upper bound <b>Z = 23.73</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 114, "type": "prune", "node_id": 54, "title": "Step 114: Fathom Node 54 by Bound", "explanation": "Node 54 has upper bound <b>Z = 21.3</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 115, "type": "prune", "node_id": 55, "title": "Step 115: Fathom Node 55 by Bound", "explanation": "Node 55 has upper bound <b>Z = 24.5</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 116, "type": "prune", "node_id": 56, "title": "Step 116: Fathom Node 56 by Bound", "explanation": "Node 56 has upper bound <b>Z = 22.0</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 117, "type": "prune", "node_id": 57, "title": "Step 117: Fathom Node 57 by Bound", "explanation": "Node 57 has upper bound <b>Z = 25.8</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 118, "type": "prune", "node_id": 58, "title": "Step 118: Fathom Node 58 by Bound", "explanation": "Node 58 has upper bound <b>Z = 20.77</b>, which is \u2264 current best integer solution <b>z* = 26.0</b>. This branch <b>cannot improve</b> the solution \u2014 we fathom (prune) it. \u2702", "incumbent": 31}, {"step": 119, "type": "final", "node_id": 31, "title": "B&B Complete \u2014 Optimal Solution Found!", "explanation": "All nodes have been explored, fathomed, or pruned. The <b>optimal solution</b> is <b>Z* = 26.0 ww satisfaction</b>. Selected toppings: <b>'Nduja, Ricotta, Salame, Zucchini, Fried eggplant</b>. Total cost: <b>6.5 ww</b> (budget: 7.00 ww). The integrality gap = 1.25.", "incumbent": 31}];
+const S = [{"name": "'Nduja", "cost": 0.5, "sat": 4.8, "eff": 9.6}, {"name": "Ricotta", "cost": 1.0, "sat": 4.2, "eff": 4.2}, {"name": "Salame", "cost": 2.0, "sat": 8.3, "eff": 4.15}, {"name": "Zucchini", "cost": 1.0, "sat": 3.5, "eff": 3.5}, {"name": "Fried eggplant", "cost": 2.0, "sat": 5.2, "eff": 2.6}, {"name": "Buffalo mozzarella", "cost": 2.0, "sat": 5.0, "eff": 2.5}, {"name": "Parma ham", "cost": 3.0, "sat": 7.2, "eff": 2.4}, {"name": "Pancetta", "cost": 2.0, "sat": 4.2, "eff": 2.1}, {"name": "Gorgonzola", "cost": 1.5, "sat": 3.1, "eff": 2.066666666666667}, {"name": "Burrata", "cost": 3.0, "sat": 4.7, "eff": 1.5666666666666667}];
+const BUDGET = 7.00;
+const N = S.length;
 
-const tbody=document.getElementById('tableBody');
+let currentStep = 0; // 0-based index into STEPS
 
-for(const t of toppings){
-const ratio=(t.sat/t.cost).toFixed(2);
-tbody.innerHTML += `
-<tr>
-<td>${t.name}</td>
-<td>${t.cost}</td>
-<td>${t.sat}</td>
-<td>${ratio}</td>
-</tr>`;
+// ── Render data table ──
+function renderDataTable(incNode){
+  const inc = incNode!=null ? NODES[incNode] : null;
+  const incX = inc ? inc.sol.x : null;
+  const tbl = document.getElementById('data-tbl');
+  let h = '<tr><th>Rank</th><th>Topping</th><th>Cost</th><th>Sat</th><th>Eff</th></tr>';
+  S.forEach((t,i)=>{
+    const maxE = Math.max(...S.map(x=>x.eff));
+    const pct = (t.eff/maxE*100).toFixed(0);
+    const hl = incX && incX[i]>0.5;
+    h+=`<tr class="${hl?'hl':''}"><td style="color:#999">${i}</td>
+      <td style="font-weight:${hl?'600':'400'};color:${hl?'var(--accent)':'inherit'}">${t.name}</td>
+      <td>${t.cost.toFixed(2)}</td>
+      <td style="font-weight:600">${t.sat.toFixed(1)}</td>
+      <td><div style="min-width:50px">${t.eff.toFixed(1)}<div class="eff-bar"><div class="eff-fill" style="width:${pct}%"></div></div></div></td>
+    </tr>`;
+  });
+  tbl.innerHTML = h;
 }
 
-const stepTitle=document.getElementById('stepTitle');
-const stepDesc=document.getElementById('stepDesc');
-const treeSvg=document.getElementById('treeSvg');
+// ── Update left panel ──
+function renderStep(si){
+  const s = STEPS[si];
+  document.getElementById('step-badge').textContent = 'Step '+s.step;
+  document.getElementById('step-title').innerHTML = s.title;
+  document.getElementById('step-explanation').innerHTML = s.explanation;
+  document.getElementById('step-counter').textContent = (si+1)+' / '+STEPS.length;
 
-const nodes=[];
-let currentStep=0;
-let autoInterval=null;
+  const typeMap = {solve:'Solve LP',branch:'Branch',incumbent:'New Incumbent!',prune:'Fathom ✂',final:'Optimal!'};
+  const classMap = {solve:'banner-solve',branch:'banner-branch',incumbent:'banner-incumbent',prune:'banner-prune',final:'banner-final'};
+  const tb = document.getElementById('type-banner');
+  tb.textContent = typeMap[s.type]||s.type;
+  tb.className = 'type-banner '+(classMap[s.type]||'banner-solve');
 
-function buildTree(){
-let id=0;
-
-function dfs(level,x,y,spacing,cost,sat,path,choices){
-if(level>10) return;
-
-const feasible=cost<=7;
-
-nodes.push({
-id:id++,
-level,
-x,
-y,
-cost,
-sat,
-path:[...path],
-feasible,
-choices:[...choices],
-upperBound:(sat + Math.max(0,(7-cost))*2.5).toFixed(2),
-parent:path.length===0?null:path[path.length-1].nodeId
-});
-
-const currentNodeId=id-1;
-
-if(level===10) return;
-
-const leftPath=[...path,{nodeId:currentNodeId,decision:`x${level+1}=0`}];
-const leftChoices=[...choices,0];
-dfs(level+1,x-spacing,y+140,spacing/2,cost,sat,leftPath,leftChoices);
-
-const newCost=cost+toppings[level].cost;
-const newSat=sat+toppings[level].sat;
-
-const rightPath=[...path,{nodeId:currentNodeId,decision:`x${level+1}=1`}];
-const rightChoices=[...choices,1];
-dfs(level+1,x+spacing,y+140,spacing/2,newCost,newSat,rightPath,rightChoices);
+  renderDataTable(s.incumbent);
+  renderTree(si);
 }
 
-dfs(0,6000,50,3000,0,0,[],[]);
+// ── Tree layout ──
+const NW=140, NH=68, HGAP=18, VGAP=52;
+
+function subtreeLeaves(nid, visibleIds){
+  const children = NODES.filter(n=>n.parent===nid && visibleIds.has(n.id));
+  if(!children.length) return 1;
+  return children.reduce((a,c)=>a+subtreeLeaves(c.id,visibleIds),0);
 }
 
-buildTree();
-
-function clearSvg(){
-while(treeSvg.firstChild){
-treeSvg.removeChild(treeSvg.firstChild);
-}
-}
-
-function drawLine(x1,y1,x2,y2){
-const line=document.createElementNS('http://www.w3.org/2000/svg','line');
-line.setAttribute('x1',x1);
-line.setAttribute('y1',y1);
-line.setAttribute('x2',x2);
-line.setAttribute('y2',y2);
-line.setAttribute('stroke','#64748b');
-line.setAttribute('stroke-width','2');
-treeSvg.appendChild(line);
+function assignPos(nid, x, depth, visibleIds, posMap){
+  const children = NODES.filter(n=>n.parent===nid && visibleIds.has(n.id));
+  posMap[nid] = {x, y: depth*(NH+VGAP)+10};
+  if(!children.length) return;
+  const totW = children.reduce((a,c)=>a+subtreeLeaves(c.id,visibleIds),0);
+  let cx = x - (totW-1)*(NW+HGAP)/2;
+  for(const c of children){
+    const sw = subtreeLeaves(c.id,visibleIds);
+    assignPos(c.id, cx+(sw-1)*(NW+HGAP)/2, depth+1, visibleIds, posMap);
+    cx += sw*(NW+HGAP);
+  }
 }
 
-function drawNode(node){
-const group=document.createElementNS('http://www.w3.org/2000/svg','g');
-
-const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
-rect.setAttribute('x',node.x);
-rect.setAttribute('y',node.y);
-rect.setAttribute('width','120');
-rect.setAttribute('height','60');
-rect.setAttribute('rx','10');
-rect.setAttribute('fill','#111827');
-rect.setAttribute('stroke',node.feasible ? '#22c55e' : '#ef4444');
-rect.setAttribute('stroke-width','3');
-
-group.appendChild(rect);
-
-const text=document.createElementNS('http://www.w3.org/2000/svg','text');
-text.setAttribute('x',node.x+10);
-text.setAttribute('y',node.y+25);
-text.setAttribute('fill','white');
-text.setAttribute('font-size','12');
-text.textContent=`N${node.id} | Level ${node.level}`;
-
-group.appendChild(text);
-
-const costText=document.createElementNS('http://www.w3.org/2000/svg','text');
-costText.setAttribute('x',node.x+10);
-costText.setAttribute('y',node.y+45);
-costText.setAttribute('fill','#cbd5e1');
-costText.setAttribute('font-size','10');
-costText.textContent=`Cost:${node.cost.toFixed(1)} Sat:${node.sat.toFixed(1)} UB:${node.upperBound}`;
-
-group.appendChild(costText);
-
-treeSvg.appendChild(group);
+function nodeColor(n, currentNodeId, incNodeId){
+  if(!n.sol) return {fill:'#fff0f0',stroke:'#c1121f',textColor:'#c1121f'};
+  if(n.id===currentNodeId){
+    const s = STEPS[currentStep];
+    if(s.type==='prune') return {fill:'#ffe5e5',stroke:'#c1121f',textColor:'#c1121f'};
+    if(s.type==='incumbent') return {fill:'#d8f3dc',stroke:'#2d6a4f',textColor:'#2d6a4f'};
+    if(s.type==='branch') return {fill:'#fff8e1',stroke:'#b5860d',textColor:'#b5860d'};
+    if(s.type==='final') return {fill:'#f3e5ff',stroke:'#6a0dad',textColor:'#6a0dad'};
+    return {fill:'#e3f0ff',stroke:'#1565c0',textColor:'#1565c0'};
+  }
+  if(n.id===incNodeId) return {fill:'#d8f3dc',stroke:'#2d6a4f',textColor:'#2d6a4f'};
+  if(n.pruned) return {fill:'#fff5f5',stroke:'#e07070',textColor:'#c1121f'};
+  if(n.id===0) return {fill:'#fff8e1',stroke:'#e85d04',textColor:'#e85d04'};
+  if(n.sol && !isInt(n.sol.x)) return {fill:'#fff8e1',stroke:'#b5860d',textColor:'#7a5800'};
+  if(n.sol && isInt(n.sol.x)) return {fill:'#d8f3dc',stroke:'#2d6a4f',textColor:'#2d6a4f'};
+  return {fill:'#e3f0ff',stroke:'#1565c0',textColor:'#1565c0'};
 }
 
-function renderTree(){
-clearSvg();
+function isInt(x){ return x.every(v=>v<1e-9||v>1-1e-9); }
 
-for(let i=0;i<=currentStep && i<nodes.length;i++){
-const node=nodes[i];
+function renderTree(si){
+  const s = STEPS[si];
+  // Determine which nodes are visible: nodes mentioned in steps[0..si]
+  const visSet = new Set();
+  for(let i=0;i<=si;i++) visSet.add(STEPS[i].node_id);
+  // Also add all ancestors of visible nodes
+  visSet.forEach(nid=>{
+    let n = NODES[nid];
+    while(n && n.parent>=0){ visSet.add(n.parent); n=NODES[n.parent]; }
+  });
 
-if(node.parent!==null){
-const parent=nodes[node.parent];
-drawLine(parent.x+60,parent.y+60,node.x+60,node.y);
+  const posMap = {};
+  assignPos(0,0,0,visSet,posMap);
+
+  const xs = Object.values(posMap).map(p=>p.x);
+  const ys = Object.values(posMap).map(p=>p.y);
+  const minX = Math.min(...xs)-NW/2-20;
+  const maxX = Math.max(...xs)+NW/2+20;
+  const maxY = Math.max(...ys)+NH+30;
+  const W = maxX-minX;
+  const H = Math.max(maxY, 300);
+
+  const svg = document.getElementById('tree-svg');
+  svg.setAttribute('viewBox',`${minX} 0 ${W} ${H}`);
+  svg.setAttribute('width', Math.max(W,600));
+  svg.setAttribute('height', H);
+
+  let out = '';
+
+  // Edges
+  NODES.filter(n=>visSet.has(n.id)&&n.parent>=0).forEach(n=>{
+    const pp = posMap[n.parent], cp = posMap[n.id];
+    if(!pp||!cp) return;
+    const px=pp.x, py=pp.y+NH, cx2=cp.x, cy=cp.y;
+    const mx=(px+cx2)/2, my=(py+cy)/2-4;
+    const edgeCol = n.side==='1'?'#2d6a4f':'#c1121f';
+    out+=`<path class="edge-line" d="M${px},${py} C${px},${py+VGAP*0.6} ${cx2},${cy-VGAP*0.6} ${cx2},${cy}" stroke="${edgeCol}"/>`;
+    out+=`<text x="${mx+4}" y="${my}" class="edge-lbl" fill="${edgeCol}" text-anchor="middle">x${NODES[n.parent].bvar}=${n.side}</text>`;
+  });
+
+  // Nodes
+  NODES.filter(n=>visSet.has(n.id)).forEach(n=>{
+    const p = posMap[n.id];
+    if(!p) return;
+    const {fill,stroke,textColor} = nodeColor(n, s.node_id, s.incumbent);
+    const x=p.x-NW/2, y=p.y;
+    const isCurrent = n.id===s.node_id;
+    const sw = isCurrent?3:2;
+
+    // Shadow for current
+    if(isCurrent) out+=`<rect x="${x+3}" y="${y+3}" width="${NW}" height="${NH}" rx="7" ry="7" fill="rgba(0,0,0,.12)"/>`;
+
+    out+=`<rect x="${x}" y="${y}" width="${NW}" height="${NH}" rx="6" ry="6" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
+
+    // Node id & depth
+    out+=`<text x="${p.x}" y="${y+12}" text-anchor="middle" font-size="9" fill="#aaa" font-family="Inter,sans-serif">N${n.id} · depth ${n.depth}</text>`;
+
+    // Z value
+    const zTxt = n.sol ? 'Z = '+n.sol.obj.toFixed(2) : 'Infeasible';
+    out+=`<text x="${p.x}" y="${y+30}" text-anchor="middle" font-size="13" font-weight="700" fill="${textColor}" font-family="Inter,sans-serif">${zTxt}</text>`;
+
+    // Status tag
+    let tag='';
+    if(!n.sol) tag='Fathomed';
+    else if(n.id===s.incumbent) tag='Best Incumbent';
+    else if(n.pruned) tag='Fathomed';
+    else if(n.id===0) tag='Root Best Bound';
+    else if(n.sol && !isInt(n.sol.x)) tag='Fractional';
+    else if(n.sol && isInt(n.sol.x)) tag='Integer';
+    else tag='Bound';
+
+    const tagBg = n.id===s.incumbent?'#2d6a4f':n.pruned||!n.sol?'#c1121f':n.id===0?'#e85d04':(!n.sol||!isInt(n.sol.x))?'#b5860d':'#2d6a4f';
+    if(tag){
+      const tw = tag.length*5.8+10;
+      out+=`<rect x="${p.x-tw/2}" y="${y+38}" width="${tw}" height="16" rx="4" fill="${tagBg}"/>`;
+      out+=`<text x="${p.x}" y="${y+50}" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="Inter,sans-serif">${tag}</text>`;
+    }
+  });
+
+  svg.innerHTML = out;
 }
 
-drawNode(node);
-}
-
-const currentNode=nodes[Math.min(currentStep,nodes.length-1)];
-
-stepTitle.innerText=`Step ${currentStep+1} / ${nodes.length}`;
-stepDesc.innerText=`Currently exploring Level ${currentNode.level} | Decisions: ${currentNode.choices.map((v,i)=>`x${i+1}=${v}`).join(', ')} | Cost = ${currentNode.cost.toFixed(1)} | Satisfaction = ${currentNode.sat.toFixed(1)} | Upper Bound = ${currentNode.upperBound} | ${currentNode.feasible ? 'Feasible Node' : 'Pruned Node'}`;
-}
-
+// ── Navigation ──
 function nextStep(){
-if(currentStep < nodes.length-1){
-currentStep++;
-renderTree();
+  if(currentStep<STEPS.length-1){ currentStep++; renderStep(currentStep); }
 }
-}
-
 function prevStep(){
-if(currentStep>0){
-currentStep--;
-renderTree();
+  if(currentStep>0){ currentStep--; renderStep(currentStep); }
 }
-}
+function resetBB(){ currentStep=0; renderStep(0); }
 
-function resetTree(){
-currentStep=0;
-renderTree();
-}
-
-function autoPlay(){
-if(autoInterval){
-clearInterval(autoInterval);
-}
-
-autoInterval=setInterval(()=>{
-if(currentStep < nodes.length-1){
-nextStep();
-}else{
-clearInterval(autoInterval);
-}
-},300);
-}
-
-renderTree();
-
-const ctx=document.getElementById('chart');
-
-new Chart(ctx,{
-type:'bar',
-data:{
-labels:toppings.map(t=>t.name),
-datasets:[{
-label:'Satisfaction',
-data:toppings.map(t=>t.sat)
-}]
-},
-options:{
-plugins:{
-legend:{labels:{color:'white'}}
-},
-scales:{
-x:{ticks:{color:'white'}},
-y:{ticks:{color:'white'}}
-}
-}
+// Keyboard nav
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') nextStep();
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') prevStep();
 });
-</script>
 
+// Boot
+renderStep(0);
+</script>
 </body>
 </html>
